@@ -45,8 +45,8 @@ public class ProfileVibrationTest {
         Path levelPath=new File(dir,LevelStore.FILE_NAME).toPath(); Files.write(levelPath,legacyLevels);
         byte[] output=ConfigurationFiles.open(OutputPreferenceStore.encode(new OutputPreferenceStore.Snapshot(9,OutputPreferences.defaults())),8192);
         ByteArrayOutputStream gapBytes=new ByteArrayOutputStream(); try(DataOutputStream data=new DataOutputStream(gapBytes)) { GapSettings.defaults().write(data); }
-        ByteArrayOutputStream betaTail=new ByteArrayOutputStream(); try(DataOutputStream data=new DataOutputStream(betaTail)) { data.writeUTF("de"); data.writeUTF(TrendSpeech.defaults().words.get(5)); data.writeUTF(TrendSpeech.defaults().words.get(6)); data.writeUTF(""); }
-        output=Arrays.copyOf(output,output.length-1-gapBytes.size()-betaTail.size()); output[2+"XCAM_OUTPUT".length()+3]=5; byte[] legacyOutput=ConfigurationFiles.seal(output);
+        ByteArrayOutputStream betaTail=new ByteArrayOutputStream(); try(DataOutputStream data=new DataOutputStream(betaTail)) { data.writeUTF("de"); data.writeUTF(TrendSpeech.defaults().words.get(5)); data.writeUTF(TrendSpeech.defaults().words.get(6)); data.writeUTF(""); data.writeUTF("CAMAPS"); data.writeUTF("CAMAPS"); }
+        output=Arrays.copyOf(output,output.length-6-7-1-gapBytes.size()-betaTail.size()); output[2+"XCAM_OUTPUT".length()+3]=5; byte[] legacyOutput=ConfigurationFiles.seal(output);
         Path outputPath=new File(dir,OutputPreferenceStore.FILE_NAME).toPath(); Files.write(outputPath,legacyOutput);
         assertNull(new LevelStore(dir).load().levels.get(0).vibrationPattern); assertFalse(new OutputPreferenceStore(dir).load().preferences.vibrationEnabled);
         assertArrayEquals(legacyLevels,Files.readAllBytes(levelPath)); assertArrayEquals(legacyOutput,Files.readAllBytes(outputPath));

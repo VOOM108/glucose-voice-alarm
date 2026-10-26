@@ -24,7 +24,7 @@ public final class GapSettingsActivity extends UiActivity {
     private boolean ready;
     private ArrayList<String> initial;
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved); LinearLayout body=LevelUi.screen(this);
+        super.onCreate(saved); if(!SafetyConsent.ready(this))return; LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück"),v -> onBackPressed()); LevelUi.text(body,AppText.tr("Datenlücken"),28);
         LevelUi.text(body,AppText.tr("Warnt bei fehlenden Werten und nennt den zuletzt bekannten Verlauf. Keine Schätzung des aktuellen Werts."),16);
         status=LevelUi.text(body,"",15); audio=new PreviewAudio(this,text -> status.setText(text));

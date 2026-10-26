@@ -7,12 +7,14 @@ import java.io.IOException;
 /** On-device settings snapshots, always loaded with live output disarmed. */
 final class ProfileController {
     static ConfigurationSnapshot capture(Context c) throws IOException {
+        if(!SafetyConsent.ready(c))throw new IOException("Safety acknowledgement required");
         synchronized(ConfigurationFiles.LOCK) {
             SettingsTransaction.requireComplete(c.getFilesDir());
             return new ConfigurationSnapshot(new LevelStore(c.getFilesDir()).load(),new OutputPreferenceStore(c.getFilesDir()).load(),AppAppearance.mode(c).name(),SoundDefaults.preferredSet(c),LivePreferences.nativeDisplay(c),LivePreferences.publicValue(c));
         }
     }
     static void apply(Context c,ConfigurationSnapshot desired) throws IOException {
+        if(!SafetyConsent.ready(c))throw new IOException("Safety acknowledgement required");
         synchronized(ConfigurationFiles.LOCK) {
             // Revalidate all fields and outputs before disarming or touching the live configuration.
             desired=ConfigurationSnapshot.decode(desired.encode());
@@ -26,6 +28,7 @@ final class ProfileController {
         PreviewAudio.configurationChanged(); LiveAlarmService.configurationReplaced();
     }
     static void recover(Context c) throws IOException {
+        if(!SafetyConsent.ready(c))return;
         synchronized(ConfigurationFiles.LOCK) {
             if(!SettingsTransaction.pending(c.getFilesDir())) return;
             disarm(c);

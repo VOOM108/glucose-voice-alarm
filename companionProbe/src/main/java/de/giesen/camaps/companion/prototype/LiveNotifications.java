@@ -27,10 +27,10 @@ final class LiveNotifications {
     private PendingIntent open(Class<?> screen,int code) {
         return PendingIntent.getActivity(context,code,new Intent(context,screen),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
     }
-    Notification status(Integer value,NotificationParser.Trend trend,long received,boolean fresh,String detail) {
+    Notification status(Number value,NotificationParser.Trend trend,long received,boolean fresh,String detail) {
         String clock=received>0?new java.text.SimpleDateFormat("HH:mm",java.util.Locale.GERMANY).format(new java.util.Date(received)):AppText.tr("Warte auf einen neuen Wert");
         Notification.Builder builder=new Notification.Builder(context,STATUS_CHANNEL).setSmallIcon(R.drawable.ic_xcam_status)
-                .setContentTitle(value!=null && fresh?value+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol):AppText.tr("Kein aktueller Wert"))
+                .setContentTitle(value!=null && fresh?UnitPreferences.display(context).number(value.doubleValue(),java.util.Locale.getDefault())+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol):AppText.tr("Kein aktueller Wert"))
                 .setContentText(!fresh && detail.startsWith(AppText.tr("Datenlücke"))?clock+AppText.tr(" · Datenlücke"):clock).setOngoing(true).setOnlyAlertOnce(true).setCategory(Notification.CATEGORY_STATUS)
                 .setContentIntent(open(ProbeActivity.class,1)).setVisibility(LivePreferences.publicValue(context)?Notification.VISIBILITY_PUBLIC:Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Einstellungen"),open(ReadinessActivity.class,2)).build())
@@ -38,20 +38,20 @@ final class LiveNotifications {
         if (Build.VERSION.SDK_INT>=31) builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE);
         if (received>0 && value!=null && fresh) {
             builder.setWhen(received).setShowWhen(false).setUsesChronometer(false);
-            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value,trend,received);
+            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value.doubleValue(),trend,received,UnitPreferences.display(context));
         } else builder.setShowWhen(false);
         return builder.build();
     }
-    void update(Integer value,NotificationParser.Trend trend,long received,boolean fresh,String detail) { manager.notify(STATUS_ID,status(value,trend,received,fresh,detail)); }
-    void alarm(AlarmLevel level,int value,NotificationParser.Trend trend) {
+    void update(Number value,NotificationParser.Trend trend,long received,boolean fresh,String detail) { manager.notify(STATUS_ID,status(value,trend,received,fresh,detail)); }
+    void alarm(AlarmLevel level,double value,NotificationParser.Trend trend) {
         alarm(level,value,trend,null);
     }
-    void alarm(AlarmLevel level,int value,NotificationParser.Trend trend,String additional) {
+    void alarm(AlarmLevel level,double value,NotificationParser.Trend trend,String additional) {
         alarm(level,value,trend,additional,false);
     }
-    void alarm(AlarmLevel level,int value,NotificationParser.Trend trend,String additional,boolean refresh) {
+    void alarm(AlarmLevel level,double value,NotificationParser.Trend trend,String additional,boolean refresh) {
         Notification.Builder builder=new Notification.Builder(context,ALARM_CHANNEL).setSmallIcon(R.drawable.ic_xcam_status)
-                .setContentTitle(level.name+(additional==null?"":" · "+additional)).setContentText("Aktuell: "+value+" mg/dl"+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol))
+                .setContentTitle(level.name+(additional==null?"":" · "+additional)).setContentText(AppText.tr("Aktuell: ")+UnitPreferences.display(context).number(value,java.util.Locale.getDefault())+" "+UnitPreferences.display(context).label+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol))
                 .setContentIntent(open(ReadinessActivity.class,4)).setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setOnlyAlertOnce(refresh)
                 .setVisibility(LivePreferences.publicValue(context)?Notification.VISIBILITY_PUBLIC:Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Quittieren"),action(LiveAlarmService.ACK,level.rule.id,5)).build());

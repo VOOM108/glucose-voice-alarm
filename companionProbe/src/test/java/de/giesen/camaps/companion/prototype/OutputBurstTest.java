@@ -48,7 +48,7 @@ public class OutputBurstTest {
         assertEquals(ReceiptWindow.Intake.ACCEPTED,window.receive("live",b+1000,124,clock(1000)));
         assertEquals(ReceiptWindow.Intake.OLD_NOTIFICATION,window.receive("another",b+500,122,clock(1500)));
         assertEquals(ReceiptWindow.Intake.INVALID,window.receive("live",b+1000,125,clock(1600)));
-        assertEquals(2,window.points().size()); assertEquals(124,window.points().get(1).mgdl);
+        assertEquals(2,window.points().size()); assertEquals(124,window.points().get(1).mgdl,0);
         assertEquals(ReceiptWindow.Intake.ACCEPTED,window.receive("live",b+2000,124,clock(2000)));
     }
     @Test public void refreshingPendingSpeechKeepsTheChosenTextVariant() throws Exception {

@@ -41,7 +41,7 @@ public class TrendReferenceTest {
     @Test public void referenceCannotCreateMissingValueOrChangeIt() {
         assertNull(TrendReference.combine(parsed("Insulin abgegeben"),FLAT).mgdl);
         NotificationParser.Result combined=TrendReference.combine(parsed("123 mg/dl"),FLAT);
-        assertEquals(Integer.valueOf(123),combined.mgdl); assertEquals(FLAT,combined.trend);
+        assertEquals(Double.valueOf(123),combined.mgdl); assertEquals(FLAT,combined.trend);
         assertEquals("CamAPS-Trend aus bestätigter Grafikreferenz",combined.reason);
     }
     @Test public void knownAndUnknownTextHaveConservativeFallbacks() {
@@ -59,7 +59,7 @@ public class TrendReferenceTest {
         String key=TrendReference.fingerprint("source",new int[64*64]); stored.put(key,FLAT.name());
         assertEquals(FLAT,TrendReference.combine(parsed("123"),TrendReference.lookup(stored,key)).trend);
         NotificationParser.Result noArrow=TrendReference.combine(parsed("123"),TrendReference.lookup(stored,null));
-        assertEquals(UNKNOWN,noArrow.trend); assertEquals(Integer.valueOf(123),noArrow.mgdl);
+        assertEquals(UNKNOWN,noArrow.trend); assertEquals(Double.valueOf(123),noArrow.mgdl);
         assertEquals(FLAT,TrendReference.combine(parsed("123"),TrendReference.lookup(stored,key)).trend);
     }
     @Test(expected=IllegalArgumentException.class) public void invalidRenderingIsRejected() {

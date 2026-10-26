@@ -3,7 +3,7 @@ package de.giesen.camaps.companion.prototype;
 
 import java.util.List;
 
-/** Analysis of an explicitly selected mg/dl window. Not connected to live notifications yet. */
+/** Analysis of canonical mg/dl points with explicit receipt or measurement time basis. */
 public final class HistoryAnalysis {
     public enum TimeBasis { MEASUREMENT, RECEIPT }
     public enum Quality {
@@ -11,19 +11,19 @@ public final class HistoryAnalysis {
         OUT_OF_ORDER, CONFLICTING_MEASUREMENT, MIXED_TIME_BASIS, DATA_GAP, STALE, TOO_SHORT, VALID
     }
     public static final class Point {
-        public final int mgdl;
+        public final double mgdl;
         /** Null for notification/receipt timestamps: neither proves a measurement time. */
         public final Long confirmedMeasurementMs;
         public final Long timestampMs;
         public final TimeBasis timeBasis;
-        public Point(int mgdl, Long confirmedMeasurementMs) {
+        public Point(double mgdl, Long confirmedMeasurementMs) {
             this(mgdl,confirmedMeasurementMs,TimeBasis.MEASUREMENT);
         }
-        private Point(int mgdl,Long time,TimeBasis basis) {
+        private Point(double mgdl,Long time,TimeBasis basis) {
             this.mgdl=mgdl; timestampMs=time; timeBasis=basis;
             confirmedMeasurementMs=basis==TimeBasis.MEASUREMENT?time:null;
         }
-        public static Point received(int mgdl,long receivedMs) { return new Point(mgdl,receivedMs,TimeBasis.RECEIPT); }
+        public static Point received(double mgdl,long receivedMs) { return new Point(mgdl,receivedMs,TimeBasis.RECEIPT); }
     }
     /** Technical caller-supplied bounds, not medical thresholds or built-in alarm defaults. */
     public static final class Limits {
@@ -40,10 +40,10 @@ public final class HistoryAnalysis {
         public final int uniquePoints;
         public final TimeBasis timeBasis;
         /** Only present for VALID, over the actual reported span; no five-minute extrapolation. */
-        public final Integer deltaMgdl;
+        public final Double deltaMgdl;
         public final Long spanMs;
         public final Double rateMgdlPerMinute;
-        private Result(Quality quality, int count, Integer delta, Long span, Double rate,TimeBasis basis) {
+        private Result(Quality quality, int count, Double delta, Long span, Double rate,TimeBasis basis) {
             this.quality=quality; uniquePoints=count; timeBasis=basis; uniqueMeasurements=basis==TimeBasis.RECEIPT?0:count;
             deltaMgdl=delta; spanMs=span; rateMgdlPerMinute=rate;
         }
@@ -68,7 +68,7 @@ public final class HistoryAnalysis {
         int count=0;
         boolean gap=false;
         for (Point point:window) {
-            if (point==null || point.mgdl<=0) return rejected(Quality.INVALID_POINT,count);
+            if (point==null || !Double.isFinite(point.mgdl) || point.mgdl<=0) return rejected(Quality.INVALID_POINT,count);
             if (point.timestampMs==null) return rejected(Quality.UNCONFIRMED_MEASUREMENT_TIME,count);
             if (point.timeBasis!=acceptedBasis) return rejected(acceptedBasis==TimeBasis.MEASUREMENT?Quality.UNCONFIRMED_MEASUREMENT_TIME:Quality.MIXED_TIME_BASIS,count);
             long time=point.timestampMs;
@@ -90,7 +90,7 @@ public final class HistoryAnalysis {
         if (gap) return rejected(Quality.DATA_GAP,count);
         long span=previous.timestampMs-first.timestampMs;
         if (count<2 || span<limits.minimumSpanMs) return rejected(Quality.TOO_SHORT,count);
-        int delta=previous.mgdl-first.mgdl;
+        double delta=previous.mgdl-first.mgdl;
         return new Result(Quality.VALID,count,delta,span,delta*60000.0/span,acceptedBasis);
     }
     private HistoryAnalysis() {}

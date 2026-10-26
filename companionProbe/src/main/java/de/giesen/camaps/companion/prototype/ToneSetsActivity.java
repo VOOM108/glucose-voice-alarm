@@ -12,7 +12,7 @@ public final class ToneSetsActivity extends UiActivity {
     private PreviewAudio audio;
     private TextView status,selected;
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved); LinearLayout body=LevelUi.screen(this);
+        super.onCreate(saved); if(!SafetyConsent.ready(this))return; LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Kurze Glockentöne"),27);
         selected=LevelUi.text(body,AppText.tr("Standard: ")+ToneCatalog.setName(SoundDefaults.preferredSet(this)),18);
         LevelUi.text(body,AppText.tr("Hoch: hoher Einzelton. Dauerhoch: derselbe Ton länger. Niedrig: tiefer Einzelton. Schnell sinkend: hoch–tief. Schnell steigend: tief–hoch."),16);

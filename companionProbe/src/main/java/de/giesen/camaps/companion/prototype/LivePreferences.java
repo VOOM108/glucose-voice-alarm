@@ -5,10 +5,10 @@ import android.content.*;
 
 final class LivePreferences {
     private static final String FILE="live_controls_v1";
-    static boolean monitor(Context c) { return c.getSharedPreferences(FILE,Context.MODE_PRIVATE).getBoolean("monitor",false); }
+    static boolean monitor(Context c) { return SafetyConsent.ready(c) && c.getSharedPreferences(FILE,Context.MODE_PRIVATE).getBoolean("monitor",false); }
     static boolean alarms(Context c) {
         android.content.SharedPreferences prefs=c.getSharedPreferences(FILE,Context.MODE_PRIVATE);
-        return prefs.getBoolean("alarms",false) && prefs.getInt("consent_version",-1)==BuildConfig.VERSION_CODE;
+        return SafetyConsent.ready(c) && prefs.getBoolean("alarms",false) && prefs.getInt("consent_version",-1)==BuildConfig.VERSION_CODE;
     }
     static boolean publicValue(Context c) { return c.getSharedPreferences(FILE,Context.MODE_PRIVATE).getBoolean("lockscreen_value",true); }
     static boolean nativeDisplay(Context c) { return c.getSharedPreferences(FILE,Context.MODE_PRIVATE).getBoolean("native_display",true); }
@@ -26,6 +26,7 @@ final class LivePreferences {
         return now.wallMs<wall?Long.MAX_VALUE:until;
     }
     static void set(Context c,boolean monitor,boolean alarms) {
+        if(!SafetyConsent.ready(c)){monitor=false;alarms=false;}
         c.getSharedPreferences(FILE,Context.MODE_PRIVATE).edit().putBoolean("monitor",monitor).putBoolean("alarms",monitor && alarms)
                 .putInt("consent_version",alarms?BuildConfig.VERSION_CODE:-1).commit();
     }

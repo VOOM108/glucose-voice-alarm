@@ -11,8 +11,8 @@ public final class LevelForm {
             case HIGH: return AppText.tr("Hoch");
             case LOW: return AppText.tr("Niedrig");
             case PERSISTENT_HIGH: return AppText.tr("Dauerhaft hoch");
-            case RISING: return AppText.tr("Schnell steigend");
-            case FALLING: return AppText.tr("Schnell sinkend");
+            case RISING: return AppText.tr("Kritische Anstiegsrate");
+            case FALLING: return AppText.tr("Kritische Fallrate");
             default: throw new IllegalArgumentException(AppText.tr("Unbekannte Alarmart"));
         }
     }
@@ -44,9 +44,19 @@ public final class LevelForm {
     public static AlarmLevel parse(String id,AlarmEngine.Kind kind,String name,String threshold,
                                    String duration,String repeat,String snooze,boolean enabled,boolean tone,boolean speech,
                                    String toneUri,boolean allDay,int startMinute,int endMinute) {
-        if (!allDay && (startMinute<0 || endMinute<0 || startMinute==endMinute))
-            throw new IllegalArgumentException(AppText.tr("Bitte Beginn und Ende wählen. Für den ganzen Tag „Ganztägig“ einschalten."));
-        double value=threshold(threshold,isRate(kind));
+        return canonicalLevel(id,kind,name,threshold(threshold,isRate(kind)),duration,repeat,snooze,enabled,tone,speech,toneUri,allDay,startMinute,endMinute);
+    }
+    public static AlarmLevel parseWithUnit(String id,AlarmEngine.Kind kind,String name,String threshold,
+                                   String duration,String repeat,String snooze,boolean enabled,boolean tone,boolean speech,
+                                   String toneUri,boolean allDay,int startMinute,int endMinute,de.giesen.camaps.companion.prototype.GlucoseUnit unit,Double unchanged) {
+        double value=unchanged==null?unit.parse(threshold):unchanged;
+        if(!Double.isFinite(value) || value<=0 || value>Integer.MAX_VALUE)throw new IllegalArgumentException(AppText.tr("Grenzwert ist nicht als positive Zahl speicherbar"));
+        return canonicalLevel(id,kind,name,value,duration,repeat,snooze,enabled,tone,speech,toneUri,allDay,startMinute,endMinute);
+    }
+    private static AlarmLevel canonicalLevel(String id,AlarmEngine.Kind kind,String name,double value,
+                                   String duration,String repeat,String snooze,boolean enabled,boolean tone,boolean speech,
+                                   String toneUri,boolean allDay,int startMinute,int endMinute) {
+        if(!allDay && (startMinute<0 || endMinute<0 || startMinute==endMinute)) throw new IllegalArgumentException(AppText.tr("Bitte Beginn und Ende wählen. Für den ganzen Tag „Ganztägig“ einschalten."));
         int span=kind==AlarmEngine.Kind.PERSISTENT_HIGH?minutes(duration,"Dauer",true):0;
         int repeatMinutes=hasRepeat(kind)?minutes(repeat,AppText.tr("Wiederholung"),false):0;
         int snoozeMinutes=hasSnooze(kind)?minutes(snooze,"Snooze",false):0;

@@ -8,13 +8,19 @@ Experimentelle Android-Begleitapp für gesprochene Glukosealarme, kurze Töne, V
 
 Das Repository enthält Quellcode. Es gibt keine gepackten APK-Releases und keinen automatischen Release-Upload. [So kompilierst Du die App selbst](docs/BUILDING.de.md).
 
+## Bestätigung beim ersten Start
+
+Vor der ersten Nutzung verlangt die App zwei getrennte Bestätigungen: zuerst den wichtigen Warnhinweis, danach die Nutzungsbedingungen mit „Ich verstehe“. Beide Checkboxen beginnen leer. Bis beide Schritte bestätigt sind, bleiben App-Funktionen, Benachrichtigungsempfang und eigene Ausgabe gesperrt. Das gilt auch für bestehende Installationen nach Einführung dieser Abfrage. Danach musst Du die aktive Ausgabe selbst einschalten.
+
+Die Bestätigungen bleiben auf dem Gerät und gehören nicht zu Einstellungsprofilen. Normale Updates fragen nicht erneut; inhaltlich geänderte Hinweise benötigen eine neue Bestätigung. Unter Darstellung → Sicherheit und Bedingungen kannst Du die Texte jederzeit erneut lesen, einschließlich der vollständigen GPLv3-Lizenz.
+
 ## Warum es die App gibt
 
 Wenn CamAPS bereits die Glukosedaten empfängt und die Therapie steuert, kann sich eine Begleitapp auf einstellbare Alarme und Sprachinformationen konzentrieren. Dieses Projekt untersucht diesen engeren Zweck, ohne eine zweite vollständige Sensor- und Datendrehscheibe auszuführen. Es übernimmt ausgewählte xDrip+-Alarmregeln und ergänzt eigene Android-Anbindung, Speicherung, Oberfläche und Ausgabe. Die Zuverlässigkeit oder der vollständige Funktionsumfang von xDrip+ werden damit nicht zugesagt.
 
 ## Funktionen
 
-- Hoch, niedrig, schnell steigend, schnell fallend und dauerhaft hoch, bei Bedarf mit mehreren Alarmstufen.
+- Hoch, niedrig, kritische Anstiegsrate, kritische Fallrate und dauerhaft hoch, bei Bedarf mit mehreren Alarmstufen.
 - Eigene Sprachvorlagen und Trendwörter, Wiederholung/Snooze sowie eine Pause für normale Wertansagen nach einem Alarm.
 - Getrennte Schalter für Ton, Alarm-Sprache, Wertansagen und Vibration. Vibration darf der einzige konfigurierte Alarmweg sein. Der Hauptschalter stoppt die eigenen Ausgaben.
 - Drei zusammenpassende Glockentonsets aus dem mitgelieferten Generator, Android-Tonauswahl und sechs Vibrationsmuster.
@@ -25,19 +31,38 @@ Wenn CamAPS bereits die Glukosedaten empfängt und die Therapie steuert, kann si
 
 ## Umfang und Grenzen
 
-Aktueller Stand ist 0.11.0 Beta. Entwicklung und Geräteprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl**. Andere CGM-Quellen, mmol/l-Auswertung, direkte Sensor-/Bluetooth-Anbindung, Pumpensteuerung, Uhr-App und Komplikationen sind nicht enthalten.
+Aktueller Stand ist 0.15.0 Beta. Entwicklung und Geräteprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl oder mmol/l**. Andere CGM-Quellen, direkte Sensor-/Bluetooth-Anbindung, Pumpensteuerung, Uhr-App und Komplikationen sind nicht enthalten.
 
 Die deklarierte Mindestversion ist Android 8.0 (API 26); daraus folgt keine Kompatibilitätsgarantie. Ohne die native große Anzeige wird eine normale Benachrichtigung verwendet. Dauerhafte AOD-Sichtbarkeit und Alarmzustellung sind nicht garantiert. Stromsparregeln, geänderte Benachrichtigungen, Datenlücken, Audioeinstellungen und das Betriebssystem können sie unterbrechen.
 
 Die angezeigte Zeit ist Empfangs-/Verarbeitungszeit, kein bestätigter Sensor-Messzeitpunkt. Lücken bleiben in der Kurve leer. Ein Trendpfeil allein löst keinen numerischen Ratenalarm aus. Herkunft und Anbindung der Regeln stehen in [UPSTREAM.md](docs/UPSTREAM.md).
 
+## Einheiten
+
+Unterstützte CamAPS-Paketvarianten liefern mg/dl oder mmol/l. Beim ersten eindeutigen gültigen Empfang wird die Quelleinheit aus dem bekannten Paket erkannt und gespeichert. Eine mitgelieferte Einheit muss dazu passen. Die Erkennung bleibt über App-Neustarts erhalten. Ein späterer Einheitenwiderspruch verwirft die Meldung und zeigt einen Hinweis; Zahlen werden nicht nach ihrer Größenordnung eingeordnet.
+
+Standardmäßig folgen Dashboard, Kurve, AOD, Ansagen und Grenzfelder dieser Einheit. Unter Darstellung → Entwickleroptionen kann eine feste Ausgabe in mg/dl oder mmol/l gewählt werden. Dafür ist eine Bestätigung nötig. Die Umrechnung ändert keine vorhandene Alarmgrenze. Unverändertes Speichern einer Stufe erhält deren ursprünglichen Grenzwert auch bei gerundeter Anzeige. Eigene Namen und fest ausgeschriebene Einheiten in Textvorlagen musst Du selbst prüfen; Variablen wie `{wert}` und `{einheit}` werden passend umgerechnet. Die kompakte AOD-Anzeige enthält weiterhin keine Einheit.
+
+„CamAPS-Einheit neu erkennen“ verlangt eine Bestätigung, schaltet Live-Ausgabe aus und leert das aktuelle Empfangsfenster. Danach legt die nächste gültige Meldung die Quelleinheit fest. Die feste Ausgabeauswahl gehört zu den Profilen; die erkannte Quelleinheit bleibt eine lokale Geräteeinstellung.
+
+Intern bleiben Werte und Alarmgrenzen in mg/dl mit erhaltenen Nachkommastellen. Verwendet wird derselbe Faktor 18,0182 wie im gepinnten xDrip-Stand. Erst die Ausgabe rundet: ganze mg/dl oder eine Nachkommastelle bei mmol/l. Die Ratenzeile verwendet eine beziehungsweise zwei Nachkommastellen pro Minute. mmol/l-Empfang ist synthetisch geprüft; eine reale Abnahme dieser Quellvariante steht aus.
+
+## Trend und Änderungsrate
+
+Pfeil und Trendwort stammen von CamAPS: im Dashboard, auf AOD/Sperrbildschirm und in Ansagen. Ein fehlender Pfeil wird nicht durch einen berechneten ersetzt. Die sieben gesprochenen Trendwörter sind anpassbar. Eine Checkbox je Wort bestimmt, ob es angesagt wird. Abgewählte Wörter werden wie ein fehlender Trend ausgelassen; ihr Text bleibt gespeichert. Die Auswahl gehört auch zu den Profilen und ändert weder sichtbare Pfeile noch Alarmbedingungen.
+
+Das Dashboard zeigt daneben die eigene Änderungsrate in einer separaten kleinen Zeile mit Vorzeichen und der gewählten Einheit pro Minute. Sie verwendet die letzten vier gültigen Empfangs-Minutenpunkte, jeweils den letzten Wert je Minute, und die tatsächliche Zeitspanne. Bei unzureichenden oder alten Daten bleibt die Zeile verborgen. Die Zeitbasis ist der Empfang; Lücken werden nicht aufgefüllt.
+
+„Kritische Fallrate“ und „Kritische Anstiegsrate“ prüfen ihre eingestellten Schwellen unabhängig von Pfeilen und vom Intervall normaler Wertansagen. Zusätzlich zur Gesamtrate muss das jüngste Intervall passen. Sie können bei fehlendem Pfeil auslösen, solange ausreichend frische Werte vorliegen. Fehlen neue Werte, bleibt die getrennt konfigurierbare Lückenwarnung. Standardtexte sind „Kritische Fallrate bei {wert}.“ und „Kritische Anstiegsrate bei {wert}.“ Gespeicherte eigene Texte und Stufennamen bleiben erhalten.
+
 ## Erste Einrichtung
 
 1. [Sicherheitshinweise](SAFETY.de.md) lesen und die [App selbst kompilieren](docs/BUILDING.de.md).
-2. Android-Benachrichtigungszugriff erteilen, Empfang in der App einschalten, eigene Benachrichtigungen erlauben und die angezeigten Akku-/Hintergrundeinstellungen prüfen.
-3. Alarmstufen und Ausgabewege konfigurieren. Synthetische Vorschauen verwenden und tatsächliche Hörbarkeit, Sprache und Vibration auf Deinem Gerät prüfen. App-Lautstärken sind relativ zur Android-Weckerlautstärke; System-stumm bleibt stumm.
-4. **Ausgabe aktiv** auf dem Dashboard einschalten. Bei fehlenden Voraussetzungen erscheint darunter ein roter Link. Nach einem Update muss der Schalter erneut eingeschaltet werden.
-5. Einen unbekannten Pfeil nur bestätigen, wenn die eingefrorene Vorschau dem Quellpfeil entspricht. Frühere Zuordnungen lassen sich über die Diagnose korrigieren.
+2. App öffnen und Warnhinweis sowie Nutzungsbedingungen ausdrücklich bestätigen. Das gilt nach dem Update auf 0.15 auch einmalig für bestehende Installationen.
+3. Android-Benachrichtigungszugriff erteilen, Empfang in der App einschalten, eigene Benachrichtigungen erlauben und die angezeigten Akku-/Hintergrundeinstellungen prüfen.
+4. Alarmstufen und Ausgabewege konfigurieren. Synthetische Vorschauen verwenden und tatsächliche Hörbarkeit, Sprache und Vibration auf Deinem Gerät prüfen. App-Lautstärken sind relativ zur Android-Weckerlautstärke; System-stumm bleibt stumm.
+5. **Ausgabe aktiv** auf dem Dashboard einschalten. Bei fehlenden Voraussetzungen erscheint darunter ein roter Link. Nach einem Update muss der Schalter erneut eingeschaltet werden.
+6. Einen unbekannten Pfeil nur bestätigen, wenn die eingefrorene Vorschau dem Quellpfeil entspricht. Frühere Zuordnungen lassen sich über die Diagnose korrigieren.
 
 Sprache benötigt eine installierte Offline-Stimme in der gewählten Ansagesprache. Eigene Texte bleiben erhalten und werden bei einem Sprachwechsel nicht übersetzt. Erholungsunterdrückung und Lückenwarnung sind optional und zunächst ausgeschaltet.
 

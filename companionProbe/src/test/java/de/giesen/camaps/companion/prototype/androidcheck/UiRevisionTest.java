@@ -24,6 +24,7 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(sdk=28,qualifiers="de-w411dp-h891dp-mdpi")
 @LooperMode(LooperMode.Mode.PAUSED)
 public class UiRevisionTest {
+    @org.junit.Before public void acknowledgeForExistingFeatureTests(){ConsentTestSupport.accept(org.robolectric.RuntimeEnvironment.getApplication());}
     private Context app;
     private final List<ActivityController<?>> opened=new ArrayList<>();
     @Before public void before() throws Exception {

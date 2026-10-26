@@ -19,7 +19,7 @@ public final class SyntheticAlarmActivity extends UiActivity {
     private long offset;
     private boolean condition=true;
     @Override public void onCreate(Bundle state) {
-        super.onCreate(state);
+        super.onCreate(state); if(!SafetyConsent.ready(this))return;
         LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Alarmtest mit synthetischen Daten"),26);
         LevelUi.text(body,AppText.tr("Nur feste Beispielregeln, eine virtuelle Uhr und getrennte Testdateien im Cache. Echte Alarmstufen, Pausen, Werte und CamAPS bleiben unberührt. Es läuft kein Test im Hintergrund weiter."),16);
@@ -32,7 +32,7 @@ public final class SyntheticAlarmActivity extends UiActivity {
         List<String> labels=new ArrayList<>(); for (AlarmEngine.Kind kind:AlarmEngine.Kind.values()) labels.add(LevelForm.kindLabel(kind));
         kinds.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,labels)); body.addView(kinds);
         LevelUi.button(body,AppText.tr("Beispiel neu beginnen"),v -> begin(AlarmEngine.Kind.values()[kinds.getSelectedItemPosition()]));
-        LevelUi.button(body,AppText.tr("Testdaten prüfen und Alarm versuchen"),v -> step(false));
+        LevelUi.button(body,AppText.tr("Testdaten prüfen und Alarm versuchen"),v -> step(false)).setTag("synthetic_alarm_try");
         LevelUi.button(body,AppText.tr("Eine Testminute weiter, dann prüfen"),v -> step(true));
         CheckBox met=LevelUi.check(body,AppText.tr("Testbedingung erfüllt"),true);
         met.setOnCheckedChangeListener((button,value) -> { if (flow!=null) flow.stop(); audio.stop(); condition=value; });
@@ -63,6 +63,7 @@ public final class SyntheticAlarmActivity extends UiActivity {
             LevelStore.Snapshot settings=new LevelStore(directory).load();
             OutputPreferences preferences=new OutputPreferenceStore(getFilesDir()).load().preferences;
             flow=new AlarmOutputFlow(new AlarmStateStore(directory),settings.levels,SyntheticAlarmScenario.limits(),preferences,audio);
+            flow.setOutputUnit(UnitPreferences.display(this,preferences));
         } catch (IOException e) { flow=null; status.setText(AppText.tr("Test-/Ausgabe-Einstellungen nicht lesbar; keine Ausgabe.")); }
     }
     private void step(boolean advance) {

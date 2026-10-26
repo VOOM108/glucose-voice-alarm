@@ -24,7 +24,7 @@ public final class LiveAlarmService extends Service {
     private PreviewAudio audio;
     private PowerManager.WakeLock outputLock;
     private AlarmOutputFlow flow;
-    private Integer value;
+    private Double value;
     private NotificationParser.Trend trend=NotificationParser.Trend.UNKNOWN;
     private AlarmStateStore.Clock received;
     private String audioStatus="",lastSummary="";
@@ -37,7 +37,7 @@ public final class LiveAlarmService extends Service {
     static boolean running() { return current!=null && current.foreground; }
     static boolean live() { LiveAlarmService service=current; return service!=null && service.foreground && service.flow!=null && LivePreferences.alarms(service); }
     static String audioState() { LiveAlarmService service=current; return service==null?AppText.tr("Audio: kein aktiver Hintergrunddienst"):service.audioStatus; }
-    static void receive(String key,long posted,int value,NotificationParser.Trend trend) {
+    static void receive(String key,long posted,double value,NotificationParser.Trend trend) {
         LiveAlarmService service=current;
         if (service!=null) service.handler.post(() -> service.received(key,posted,value,trend));
     }
@@ -88,12 +88,13 @@ public final class LiveAlarmService extends Service {
     }
     @Override public void onCreate() {
         AppText.configure(getResources().getConfiguration().getLocales().get(0));
-        super.onCreate(); try { ProfileController.recover(this); } catch(IOException e) { LivePreferences.set(this,LivePreferences.monitor(this),false); } current=this; notifications=new LiveNotifications(this);
+        super.onCreate(); if(!SafetyConsent.ready(this)){SafetyConsent.disarm(this);stopSelf();return;} try { ProfileController.recover(this); } catch(IOException e) { LivePreferences.set(this,LivePreferences.monitor(this),false); } current=this; notifications=new LiveNotifications(this);
         audio=new PreviewAudio(this,message -> audioStatus=message,() -> foreground && LivePreferences.alarms(this) && SystemReadiness.read(this).ready());
         outputLock=getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,getPackageName()+":alarm-output");
         outputLock.setReferenceCounted(false);
     }
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
+        if(!SafetyConsent.ready(this)){SafetyConsent.disarm(this);stopSelf();return START_NOT_STICKY;}
         if (intent!=null && STOP.equals(intent.getAction())) {
             LivePreferences.set(this,false,false); stopSelf(); return START_NOT_STICKY;
         }
@@ -112,7 +113,7 @@ public final class LiveAlarmService extends Service {
     }
     private void foreground(boolean playback) {
         if (foreground && playbackForeground==playback) return;
-        Notification notification=notifications.status(value,trend,received==null?0:received.wallMs,fresh(),status);
+        Notification notification=notifications.status(value,displayTrend(),received==null?0:received.wallMs,fresh(),status);
         if (Build.VERSION.SDK_INT>=34) startForeground(LiveNotifications.STATUS_ID,notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE|(playback?ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:0));
         else startForeground(LiveNotifications.STATUS_ID,notification);
@@ -168,7 +169,7 @@ public final class LiveAlarmService extends Service {
             audio.stop(); status=AppText.tr("Alarmzustand/Einstellungen nicht lesbar; Alarmausgabe gesperrt");
         }
     }
-    private void received(String key,long posted,int mgdl,NotificationParser.Trend sourceTrend) {
+    private void received(String key,long posted,double mgdl,NotificationParser.Trend sourceTrend) {
         if (!foreground || !LivePreferences.monitor(this)) return;
         AlarmStateStore.Clock now=RuntimeClock.read(this);
         ReceiptWindow.Intake intake=window.receive(key,posted,mgdl,now);
@@ -186,6 +187,7 @@ public final class LiveAlarmService extends Service {
         }
         if (flow!=null && LivePreferences.alarms(this)) {
             Calendar calendar=Calendar.getInstance();
+            flow.setOutputUnit(UnitPreferences.display(this,preferences));
             AlarmOutputFlow.Outcome result=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),now,
                     calendar.get(Calendar.HOUR_OF_DAY)*60+calendar.get(Calendar.MINUTE),window.sessionStart(),trend);
             if (result==AlarmOutputFlow.Outcome.STORAGE_BLOCKED) status=AppText.tr("Alarmzustand nicht verfügbar; keine Ausgabe");
@@ -265,12 +267,16 @@ public final class LiveAlarmService extends Service {
         AlarmOutputFlow.Outcome result=flow.snooze(id,level.rule.outputs.snoozeMinutes,RuntimeClock.read(this));
         status=result==AlarmOutputFlow.Outcome.ACCEPTED?AppText.tr("Alarm quittiert und gespeichert pausiert"):AppText.tr("Snooze konnte nicht gespeichert werden");
     }
+    private NotificationParser.Trend displayTrend() {
+        return trend;
+    }
     private void updateStatus() {
         if (notifications==null || !foreground) return;
         boolean fresh=fresh(); long age=received==null?-1:Math.max(0,(SystemClock.elapsedRealtime()-received.elapsedMs)/60000);
         String detail=status+(received!=null?AppText.tr(" · Empfang vor ")+age+" Min.":"");
-        String signature=detail+"|"+value+"|"+trend+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this);
-        if (!signature.equals(lastSummary)) { notifications.update(value,trend,received==null?0:received.wallMs,fresh,detail); lastSummary=signature;
+        NotificationParser.Trend shown=displayTrend();
+        String signature=detail+"|"+value+"|"+shown+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this)+"|"+UnitPreferences.display(this,preferences);
+        if (!signature.equals(lastSummary)) { notifications.update(value,shown,received==null?0:received.wallMs,fresh,detail); lastSummary=signature;
             handler.postDelayed(() -> DisplayDiagnostics.write(this),300); }
     }
     private void releaseOutputLock() { if (outputLock!=null && outputLock.isHeld()) outputLock.release(); }

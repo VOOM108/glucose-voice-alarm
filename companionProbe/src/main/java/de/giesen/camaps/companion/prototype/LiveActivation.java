@@ -12,6 +12,7 @@ final class LiveActivation {
         Problem(String text,Class<? extends Activity> target) { this.text=text; this.target=target; }
     }
     static Problem check(Activity activity) {
+        if(!SafetyConsent.ready(activity))return new Problem("de".equals(AppText.language())?"Sicherheitshinweise bestätigen":"Acknowledge safety notices",SafetyActivity.class);
         SystemReadiness ready=SystemReadiness.read(activity);
         if(!ready.ready()) return new Problem(ready.nextAction()+AppText.tr(" · Prüfen"),ReadinessActivity.class);
         try {

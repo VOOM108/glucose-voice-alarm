@@ -16,7 +16,7 @@ public final class DiagnosticHistoryActivity extends UiActivity {
     private boolean closed,loading;
     private final Runnable refresh=new Runnable() { @Override public void run() { load(); handler.postDelayed(this,60000); } };
     @Override public void onCreate(Bundle state) {
-        super.onCreate(state); store=new ObservationStore(this); LinearLayout body=LevelUi.screen(this);
+        super.onCreate(state); if(!SafetyConsent.ready(this))return; store=new ObservationStore(this); LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Verlauf"),28);
         LevelUi.help(body,AppText.tr("Zur Kurve"),AppText.tr("Empfangszeiten über sechs Stunden. Gestrichelte senkrechte Grenzen markieren Lücken über zwei Minuten. Horizontale Flächen zeigen eingestellte Hoch- und Niedrigbereiche. Die Zeichnung verändert keine Alarmberechnung."));
         chart=new HistoryChartView(this); body.addView(chart,new LinearLayout.LayoutParams(-1,LevelUi.dp(this,320)));
@@ -41,7 +41,7 @@ public final class DiagnosticHistoryActivity extends UiActivity {
             } catch (RuntimeException e) { handler.post(() -> { loading=false; if (!closed) summary.setText(AppText.tr("Diagnoseverlauf nicht lesbar. Vorhandene Daten bleiben erhalten.")); }); }
         });
     }
-    @Override public void onResume() { super.onResume(); handler.post(refresh); }
+    @Override public void onResume() { super.onResume(); if(!SafetyConsent.ready(this))return; handler.post(refresh); }
     @Override public void onPause() { handler.removeCallbacks(refresh); super.onPause(); }
     @Override public void onDestroy() { closed=true; handler.removeCallbacksAndMessages(null); worker.shutdownNow(); if (store!=null) store.close(); super.onDestroy(); }
 }

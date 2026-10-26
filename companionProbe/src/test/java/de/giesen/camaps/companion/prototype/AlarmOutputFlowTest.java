@@ -207,7 +207,7 @@ public class AlarmOutputFlowTest {
         Run r=run(Kind.HIGH); List<OutputGuard.Input> checked=new ArrayList<>();
         r.flow=new AlarmOutputFlow(r.store,r.levels,SyntheticAlarmScenario.limits(),SPOKEN,r.audio,input -> { checked.add(input); return OutputGuard.Reason.RECOVERING_TREND; });
         r.evaluate(0,true); assertEquals(Outcome.SUPPRESSED,r.alarm(0));
-        assertEquals(Kind.HIGH,checked.get(0).rule.kind); assertEquals(160,checked.get(0).mgdl);
+        assertEquals(Kind.HIGH,checked.get(0).rule.kind); assertEquals(160,checked.get(0).mgdl,0);
         assertEquals(NotificationParser.Trend.UP,checked.get(0).sourceTrend); assertFalse(checked.get(0).periodicValue);
     }
     @Test public void periodicValueSuppressionIsAnExplicitSeparatePolicyInput() throws Exception {

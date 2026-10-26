@@ -18,7 +18,7 @@ public final class ReadinessActivity extends UiActivity {
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final Runnable refresh=new Runnable() { @Override public void run() { render(); handler.postDelayed(this,2000); } };
     @Override public void onCreate(Bundle state) {
-        super.onCreate(state); LinearLayout body=LevelUi.screen(this);
+        super.onCreate(state); if(!SafetyConsent.ready(this))return; LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Betrieb"),28);
         status=LevelUi.text(body,"",21);
         enable=LevelUi.button(body,AppText.tr("Live-Alarme einschalten"),v -> next());
@@ -122,7 +122,7 @@ public final class ReadinessActivity extends UiActivity {
         details.setText(ready.summary()+"\n\n"+MetricNotification.capability(this)+"\n\n"+LiveAlarmService.audioState());
         nativeStatus.setText(DisplayDiagnostics.status(this)); DisplayDiagnostics.write(this);
     }
-    @Override public void onResume() { super.onResume(); handler.post(refresh); }
+    @Override public void onResume() { super.onResume(); if(!SafetyConsent.ready(this))return; handler.post(refresh); }
     @Override public void onPause() { handler.removeCallbacks(refresh); super.onPause(); }
     @Override public void onDestroy() { handler.removeCallbacksAndMessages(null); super.onDestroy(); }
 }

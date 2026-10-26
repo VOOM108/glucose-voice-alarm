@@ -60,7 +60,7 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
     }
     private void invalidate() { stop(); releaseSpeech(); revision=-1; preferences=null; }
     private boolean refresh() {
-        if (closed) return false;
+        if (closed || !SafetyConsent.ready(context)) {stop();return false;}
         try {
             OutputPreferenceStore.Snapshot snapshot=new OutputPreferenceStore(context.getFilesDir()).load();
             if (snapshot.revision!=revision) { stop(); releaseSpeech(); preferences=snapshot.preferences; revision=snapshot.revision; }
@@ -202,7 +202,7 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
         if (!tone(uri)) return false;
         afterTone=finished; return true;
     }
-    private void runAfterTone() { Runnable next=afterTone; afterTone=null; if (!closed && next!=null) next.run(); }
+    private void runAfterTone() { Runnable next=afterTone; afterTone=null; if (!closed && SafetyConsent.ready(context) && next!=null) next.run(); }
     private void timeoutBell() { stop(); status.show(AppText.tr("Tonwiedergabe hat nicht regulär geendet und wurde beendet.")); }
     private void stopTone() {
         handler.removeCallbacks(stopTone);
@@ -252,7 +252,7 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
         if(!tone(tones.get(index),preferences.toneVolumePercent,preferences.bellBoostDb,true)) return false;
         afterTone=index+1<tones.size()?() -> playTones(tones,index+1,finished):finished; return true;
     }
-    boolean vibrate(String pattern) { if(!takeOutput()) return false; stop(); boolean accepted=vibration.start(pattern); status.show(accepted?AppText.tr("Vibrationsvorschau gestartet."):AppText.tr("Keine Vibration verfügbar.")); return accepted; }
+    boolean vibrate(String pattern) { if(!SafetyConsent.ready(context) || !takeOutput()) return false; stop(); boolean accepted=vibration.start(pattern); status.show(accepted?AppText.tr("Vibrationsvorschau gestartet."):AppText.tr("Keine Vibration verfügbar.")); return accepted; }
     void pause() { stop(); releaseSpeech(); }
     boolean busy() { return vibration.busy() || bell!=null || busyUntil>SystemClock.elapsedRealtime() || afterTone!=null; }
     private void releaseSpeech() {

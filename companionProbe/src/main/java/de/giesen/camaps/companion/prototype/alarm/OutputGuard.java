@@ -8,10 +8,10 @@ public interface OutputGuard {
     enum Reason { NONE, GLOBAL_PAUSE, OWN_LOWER_CUTOFF, RECOVERING_TREND, POLICY_NOT_CONFIGURED }
     final class Input {
         public final AlarmEngine.Rule rule;
-        public final int mgdl;
+        public final double mgdl;
         public final NotificationParser.Trend sourceTrend;
         public final boolean recovering,periodicValue;
-        Input(AlarmEngine.Rule rule,int mgdl,NotificationParser.Trend trend,boolean recovering,boolean periodicValue) {
+        Input(AlarmEngine.Rule rule,double mgdl,NotificationParser.Trend trend,boolean recovering,boolean periodicValue) {
             this.rule=rule; this.mgdl=mgdl; sourceTrend=trend; this.recovering=recovering; this.periodicValue=periodicValue;
         }
     }

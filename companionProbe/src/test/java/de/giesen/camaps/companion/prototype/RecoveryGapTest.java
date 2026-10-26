@@ -55,7 +55,7 @@ public class RecoveryGapTest {
         AlarmLevel fall=new SyntheticAlarmScenario(Kind.FALLING).level; File file=folder.newFolder(); AlarmOutputFlow flow=flow(file,Arrays.asList(low(),fall));
         evaluate(flow,0,NotificationParser.Trend.DOWN,110,98,86,74);
         assertEquals(AlarmOutputFlow.Outcome.ACCEPTED,flow.alarm(low().rule.id,now(0))); AlarmOutputFlow.Plan plan=plans.get(0);
-        assertEquals(Arrays.asList(low().rule.id,fall.rule.id),plan.ruleIds); assertTrue(plan.speech.contains("Niedrig")); assertTrue(plan.speech.toLowerCase(Locale.ROOT).contains("schnell")); assertEquals(2,plan.toneUris.size());
+        assertEquals(Arrays.asList(low().rule.id,fall.rule.id),plan.ruleIds); assertTrue(plan.speech.contains("Niedrig")); assertTrue(plan.speech.contains("Kritische Fallrate bei 74.")); assertEquals(2,plan.toneUris.size());
         AlarmStateStore.Snapshot state=new AlarmStateStore(file).load(); assertTrue(state.entries.get(fall.rule.id).acceptedInEpisode); assertTrue(state.entries.get(low().rule.id).acceptedInEpisode);
         assertEquals(AlarmOutputFlow.Outcome.NOT_DUE,flow.alarm(fall.rule.id,now(1000)));
     }

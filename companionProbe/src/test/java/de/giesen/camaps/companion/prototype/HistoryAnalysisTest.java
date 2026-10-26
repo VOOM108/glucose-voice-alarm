@@ -28,15 +28,15 @@ public class HistoryAnalysisTest {
     }
     @Test public void risingAndFallingUseActualElapsedTime() {
         HistoryAnalysis.Result rising=analyze(90000,point(120,0),point(123,90000));
-        assertTrue(rising.usable()); assertEquals(Integer.valueOf(3),rising.deltaMgdl);
+        assertTrue(rising.usable()); assertEquals(Double.valueOf(3),rising.deltaMgdl);
         assertEquals(Long.valueOf(90000),rising.spanMs); assertEquals(2.0,rising.rateMgdlPerMinute,0.000001);
         HistoryAnalysis.Result falling=analyze(90000,point(123,0),point(120,90000));
-        assertEquals(Integer.valueOf(-3),falling.deltaMgdl); assertEquals(-2.0,falling.rateMgdlPerMinute,0.000001);
+        assertEquals(Double.valueOf(-3),falling.deltaMgdl); assertEquals(-2.0,falling.rateMgdlPerMinute,0.000001);
     }
     @Test public void unchangedRealMeasurementsHaveZeroRate() {
         HistoryAnalysis.Result result=analyze(MINUTE,point(123,0),point(123,MINUTE));
         assertTrue(result.usable()); assertEquals(2,result.uniqueMeasurements);
-        assertEquals(Integer.valueOf(0),result.deltaMgdl); assertEquals(0.0,result.rateMgdlPerMinute,0.0);
+        assertEquals(Double.valueOf(0),result.deltaMgdl); assertEquals(0.0,result.rateMgdlPerMinute,0.0);
     }
     @Test public void repeatedSameMeasurementDoesNotCreateTimeOrCount() {
         HistoryAnalysis.Result result=analyze(MINUTE,point(120,0),point(120,0),point(123,MINUTE),point(123,MINUTE));

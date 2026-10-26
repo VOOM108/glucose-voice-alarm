@@ -27,19 +27,21 @@ import java.util.Set;
 import java.io.IOException;
 import static de.giesen.camaps.companion.prototype.TrendDiagnostics.Source.*;
 
-/** Restricted to ongoing CamAPS mg/dl notifications. No upstream Application/collector starts. */
+/** Restricted to ongoing allowlisted CamAPS glucose notifications. No upstream Application/collector starts. */
 public final class CamApsListener extends NotificationListenerService {
     static final String PREFS = "probe", ENABLED = "receiver_enabled";
     private ObservationStore store;
+    private long unitEpoch=-1;
     private final ReceiptWindow receiptOrder=new ReceiptWindow();
 
     @Override public void onCreate() {
         AppText.configure(getResources().getConfiguration().getLocales().get(0));
-        super.onCreate(); store = new ObservationStore(this);
+        super.onCreate(); if(!SafetyConsent.ready(this))return; store = new ObservationStore(this);
         RuntimeStateBridge.refresh(getFilesDir(),RuntimeClock.read(this));
     }
-    @Override public void onDestroy() { store.close(); super.onDestroy(); }
+    @Override public void onDestroy() { if(store!=null)store.close(); super.onDestroy(); }
     @Override public void onListenerConnected() {
+        if(!SafetyConsent.ready(this)){requestUnbind();return;}
         receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
         ProbeState.latest = null;
         ProbeState.vectorCandidate = null;
@@ -52,6 +54,7 @@ public final class CamApsListener extends NotificationListenerService {
         // Never import getActiveNotifications() as new measurements.
     }
     @Override public void onListenerDisconnected() {
+        if(!SafetyConsent.ready(this))return;
         receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
         ProbeState.latest = null;
         ProbeState.vectorCandidate = null;
@@ -61,10 +64,11 @@ public final class CamApsListener extends NotificationListenerService {
         ProbeState.diagnostics = "Kein verbundener Benachrichtigungsempfang.";
         ProbeState.status = "Benachrichtigungsempfang nicht verbunden";
     }
-    private boolean enabled() { return getSharedPreferences(PREFS, MODE_PRIVATE).getBoolean(ENABLED, false); }
+    private boolean enabled() { return SafetyConsent.ready(this) && getSharedPreferences(PREFS, MODE_PRIVATE).getBoolean(ENABLED, false); }
 
     @Override public void onNotificationPosted(StatusBarNotification sbn) {
         if (!enabled() || !NotificationParser.acceptsPackage(sbn.getPackageName()) || !sbn.isOngoing()) return;
+        if(store==null)store=new ObservationStore(this);
         de.giesen.camaps.companion.prototype.alarm.AlarmStateStore.Clock receiptClock=RuntimeClock.read(this);
         if(receiptOrder.older(sbn.getPostTime(),receiptClock)) return;
         ProbeState.vectorCandidate = null;
@@ -112,10 +116,11 @@ public final class CamApsListener extends NotificationListenerService {
                 collect(remoteViews[i].apply(this,null),sources[i],i<2,values,trends,diagnostic,budget,0,vectors,profile,sbn.getKey());
             } catch (RuntimeException e) { diagnostic.remote(sources[i],true); vectors.block(); }
         }
-        NotificationParser.Result result=NotificationParser.parse(values,trends);
+        long epoch=UnitPreferences.epoch(this); if(unitEpoch!=epoch) { receiptOrder.clear(); unitEpoch=epoch; }
+        NotificationParser.Result result=NotificationParser.parse(values,trends,NotificationParser.packageUnit(sbn.getPackageName()));
         if (diagnostic.hasEmbeddedVector()) vectors.block(); // Unsupported ImageSpan transforms stay unknown.
         if (diagnostic.isLimited()) {
-            result=new NotificationParser.Result(result.mgdl,NotificationParser.Trend.UNKNOWN,"Trendprüfung unvollständig; Diagnose beachten");
+            result=result.withTrend(NotificationParser.Trend.UNKNOWN,"Trendprüfung unvollständig; Diagnose beachten");
         } else if (result.mgdl!=null) {
             ProbeState.vectorCandidate=vectors.candidate();
             if (ProbeState.vectorCandidate!=null) {
@@ -134,10 +139,15 @@ public final class CamApsListener extends NotificationListenerService {
                 diagnostic.shapeReference(candidate.shapeKey!=null,exact!=NotificationParser.Trend.UNKNOWN,shape!=NotificationParser.Trend.UNKNOWN,
                         conflict || (candidate.shapeKey!=null && ShapeReference.CONFLICT.equals(shapes.getAll().get(candidate.shapeKey))));
                 diagnostic.reference(true,reference!=NotificationParser.Trend.UNKNOWN);
-                result=conflict?new NotificationParser.Result(result.mgdl,NotificationParser.Trend.UNKNOWN,"Widersprüchliche Trendangaben"):
+                result=conflict?result.withTrend(NotificationParser.Trend.UNKNOWN,"Widersprüchliche Trendangaben"):
                         TrendReference.combine(result,reference);
             }
         }
+        if(result.mgdl!=null && UnitPreferences.source(this)!=null && UnitPreferences.source(this)!=result.sourceUnit) {
+            UnitPreferences.markConflict(this); receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
+            result=new NotificationParser.Result(null,NotificationParser.Trend.UNKNOWN,"CamAPS-Einheit geändert; neue Erkennung erforderlich",result.sourceUnit);
+        }
+        if(result.reason.equals("CamAPS-Einheiten widersprechen sich; Empfang verworfen"))UnitPreferences.markConflict(this);
         ProbeState.diagnostics=diagnostic.summary(result);
         if (profile!=null && result.mgdl!=null) ArrowCoverage.observe(this,profile,result.trend);
         ReferenceAuditStore.record(this,auditMatch,auditExact,auditShape);
@@ -163,14 +173,15 @@ public final class CamApsListener extends NotificationListenerService {
                 ProbeState.status = "Identisches Benachrichtigungsereignis ignoriert";
                 return;
             }
-            if (!enabled()) return;
+            if (!enabled() || !UnitPreferences.accept(this,result.sourceUnit)) return;
             java.util.Calendar calendar=java.util.Calendar.getInstance();
             AlarmProbe.receive(result.mgdl,System.currentTimeMillis(),calendar.get(java.util.Calendar.HOUR_OF_DAY)*60+calendar.get(java.util.Calendar.MINUTE));
             RuntimeStateBridge.unconfirmedInput();
+            ReceiptRate.Result rate=ReceiptRate.calculate(receiptOrder.points(),receiptClock.wallMs);
             LiveAlarmService.receive(sbn.getKey(),sbn.getPostTime(),result.mgdl,result.trend);
             coreReport();
             ProbeState.latest = new ProbeState.Observation(result.mgdl, result.trend,
-                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey());
+                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey(),rate);
             ProbeState.status = result.reason + "; Zeitbasis: Empfang";
         } catch (RuntimeException e) {
             AlarmProbe.clear(AlarmProbe.Ingress.NO_VALUE);
@@ -180,6 +191,7 @@ public final class CamApsListener extends NotificationListenerService {
         }
     }
     @Override public void onNotificationRemoved(StatusBarNotification sbn) {
+        if(!enabled())return;
         if(receiptOrder.older(sbn.getPostTime(),RuntimeClock.read(this))) return;
         VectorReference.Candidate candidate=ProbeState.vectorCandidate;
         if (candidate!=null && candidate.notificationKey.equals(sbn.getKey())) ProbeState.vectorCandidate=null;

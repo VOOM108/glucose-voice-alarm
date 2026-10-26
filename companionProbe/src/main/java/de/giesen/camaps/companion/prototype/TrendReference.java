@@ -34,9 +34,9 @@ public final class TrendReference {
         if (text.mgdl == null || graphic == NotificationParser.Trend.UNKNOWN) return text;
         if ("Widersprüchliche Trendangaben".equals(text.reason)) return text;
         if (text.trend != NotificationParser.Trend.UNKNOWN && text.trend != graphic)
-            return new NotificationParser.Result(text.mgdl,NotificationParser.Trend.UNKNOWN,"Widersprüchliche Trendangaben");
+            return text.withTrend(NotificationParser.Trend.UNKNOWN,"Widersprüchliche Trendangaben");
         if (text.trend != NotificationParser.Trend.UNKNOWN) return text;
-        return new NotificationParser.Result(text.mgdl,graphic,"CamAPS-Trend aus bestätigter Grafikreferenz");
+        return text.withTrend(graphic,"CamAPS-Trend aus bestätigter Grafikreferenz");
     }
     private TrendReference() {}
 }

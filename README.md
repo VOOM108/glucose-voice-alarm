@@ -8,13 +8,19 @@ Experimental Android companion for spoken glucose alarms, short sounds, vibratio
 
 This repository contains source code. There are no packaged APK releases or automatic release uploads. [Build the app yourself](docs/BUILDING.md).
 
+## First-start acknowledgement
+
+Before first use, the app requires two separate acknowledgements: the important warning, followed by the terms of use with “I understand”. Both checkboxes start unchecked. App features, notification reception and all own output remain blocked until both steps are acknowledged. Existing installations also see these steps when this check is introduced. Afterwards, you must enable active output yourself.
+
+Acknowledgements stay on the device and are excluded from settings profiles. Ordinary updates do not ask again; a change to the meaning of the notices requires a new acknowledgement. Appearance → Safety and terms lets you reread the notices and the complete GPLv3 license at any time.
+
 ## Why this exists
 
 With CamAPS already collecting glucose data and controlling therapy, a companion can concentrate on configurable alarms and spoken information. This project explores that narrower role without running a second full sensor/data-hub application. It reuses selected xDrip+ alarm rules and adds its own Android notification input, storage, interface and output handling. It does not claim the reliability or complete functionality of xDrip+.
 
 ## What it does
 
-- High, low, rising fast, falling fast and persistent-high alarm types, with multiple configurable levels where useful.
+- High, low, critical rise rate, critical fall rate and persistent-high alarm types, with multiple configurable levels where useful.
 - Configurable spoken templates, trend words, repeat/snooze behavior and a pause for routine reading announcements after an alarm.
 - Separate sound, alarm speech, reading speech and vibration controls. Vibration can be the sole configured alarm channel. The master switch stops the app's own output.
 - Three matching sets of short bell sounds, generated from source, plus Android sound selection and six vibration patterns.
@@ -25,19 +31,38 @@ With CamAPS already collecting glucose data and controlling therapy, a companion
 
 ## Scope and limitations
 
-The current version is 0.11.0 Beta. Development and device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl**. It does not offer arbitrary CGM inputs, mmol/l parsing, direct sensor/Bluetooth communication, pump control, a watch app or watch complications.
+The current version is 0.15.0 Beta. Development and device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor/Bluetooth communication, pump control, a watch app or watch complications.
 
 Android 8.0 (API 26) is the minimum declared version; that is not a compatibility guarantee. On systems without the native large display, the app uses a standard notification. Persistent AOD visibility and alarm delivery are not guaranteed. Battery restrictions, notification changes, missing data, audio settings and operating-system behavior can interrupt them.
 
 The time shown is receipt/processing time, not a verified sensor measurement timestamp. A gap stays empty in the chart. A trend arrow alone does not trigger a numeric rate alarm. The imported rules and surrounding integration are described in [UPSTREAM.md](docs/UPSTREAM.md).
 
+## Units
+
+Supported CamAPS package variants supply mg/dl or mmol/l. The first unambiguous valid receipt establishes the source unit from the known package and saves it. Any supplied unit label must agree. The source unit survives app restarts. A later unit conflict rejects the notification and shows a notice; the app never infers units from the size of a number.
+
+By default, the dashboard, chart, AOD, speech and threshold fields follow that unit. Appearance → Developer options can select a fixed mg/dl or mmol/l output after confirmation. Conversion does not change existing alarm thresholds. Saving an unchanged level preserves its original threshold even when the field shows a rounded value. Check custom names and literal units in speech templates yourself; placeholders such as `{value}` and `{unit}` are converted together. The compact AOD still omits the unit label.
+
+Detect CamAPS unit again requires confirmation, disables live output and clears the current receipt window. The next valid notification then establishes the source unit. Profiles include the fixed output choice; the detected source unit remains a local device setting.
+
+Values and alarm thresholds remain in canonical mg/dl with fractional precision. Conversion uses 18.0182, matching the pinned xDrip revision. Rounding happens only for output: whole mg/dl or one decimal place for mmol/l. Rates use one or two decimal places per minute respectively. mmol/l receipt has synthetic test coverage; real-device acceptance of that source variant remains outstanding.
+
+## Trend and rate of change
+
+The arrow and trend word come from CamAPS on the dashboard, AOD/lock screen and in speech. A missing arrow is not replaced with a calculated one. All seven spoken trend words can be edited. A checkbox beside each word controls whether it is spoken. Unchecked words are omitted like a missing trend while their text is preserved. Profiles include these switches; displayed arrows and alarm conditions are unchanged.
+
+The dashboard also shows the app's own signed rate in a separate smaller line, in the selected unit per minute. It uses the last four valid receipt-minute points, keeping the last reading in each minute, and the actual elapsed time. Insufficient or stale data hides the line. Times refer to receipt; gaps are not filled.
+
+Critical fall rate and Critical rise rate check their configured thresholds independently of arrows and the routine reading speech interval. The latest interval must also qualify. They can trigger without an arrow when enough fresh readings arrive. Missing readings are covered by the separately configured gap warning. Default speech is “Critical fall rate at {value}.” and “Critical rise rate at {value}.” Saved custom speech and level names are preserved.
+
 ## Initial setup
 
 1. Read [SAFETY.md](SAFETY.md) and [build the app](docs/BUILDING.md).
-2. Grant Android notification access, enable receipt in the app, allow its notifications and review the battery/background settings shown by the app.
-3. Configure alarm levels and output channels. Use synthetic previews and verify actual sound/speech/vibration on your device. App volume is relative to Android's alarm volume; system mute stays mute.
-4. Enable **Output enabled** on the dashboard. If a prerequisite is missing, a red link appears below it. Updates require this switch to be enabled again.
-5. Confirm an unknown arrow only when the frozen preview matches the source arrow. Use diagnostics to correct a prior assignment.
+2. Open the app and explicitly acknowledge both the warning and terms of use. Existing installations also need these acknowledgements once after updating to 0.15.
+3. Grant Android notification access, enable receipt in the app, allow its notifications and review the battery/background settings shown by the app.
+4. Configure alarm levels and output channels. Use synthetic previews and verify actual sound/speech/vibration on your device. App volume is relative to Android's alarm volume; system mute stays mute.
+5. Turn on **Output enabled** on the dashboard. If a prerequisite is missing, a red link appears below it. Updates require this switch to be enabled again.
+6. Confirm an unknown arrow only when the frozen preview matches the source arrow. Use diagnostics to correct a prior assignment.
 
 Speech uses an installed offline voice in the selected speech language. Existing custom text is preserved; changing language does not translate it. Recovery suppression and the data-gap warning are optional and initially disabled.
 

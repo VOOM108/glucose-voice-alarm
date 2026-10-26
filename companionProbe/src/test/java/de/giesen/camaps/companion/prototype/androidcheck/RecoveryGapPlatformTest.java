@@ -23,6 +23,7 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(qualifiers="de",sdk={28,34},instrumentedPackages={"de.giesen.camaps.companion.prototype.RuntimeClock"},shadows={AndroidUiTest.TestBellPlayer.class,RecoveryGapPlatformTest.TestClock.class})
 @LooperMode(LooperMode.Mode.PAUSED)
 public class RecoveryGapPlatformTest {
+    @org.junit.Before public void acknowledgeForExistingFeatureTests(){ConsentTestSupport.accept(org.robolectric.RuntimeEnvironment.getApplication());}
     private Context app;
     private NotificationManager notifications;
     private ServiceController<LiveAlarmService> service;
@@ -71,8 +72,8 @@ public class RecoveryGapPlatformTest {
         OutputPreferenceStore output=new OutputPreferenceStore(app.getFilesDir()); output.save(output.load().revision,OutputPreferences.defaults()); start(true);
         TextToSpeech tts=ShadowTextToSpeech.getLastTextToSpeechInstance(); assertNotNull(tts); shadowOf(tts).getOnInitListener().onInit(TextToSpeech.SUCCESS); shadowOf(Looper.getMainLooper()).idle();
         receive(110); advance(60); receive(98); advance(60); receive(86); advance(60); receive(74); advance(3);
-        String spoken=shadowOf(tts).getLastSpokenText(); assertNotNull(spoken); assertTrue(spoken.contains("Niedriggrenze")); assertTrue(spoken.contains("sinkt schnell"));
-        Notification alarm=shadowOf(notifications).getNotification(LiveNotifications.ALARM_ID); assertTrue(alarm.extras.getCharSequence(Notification.EXTRA_TITLE).toString().contains("Schnell sinkend"));
+        String spoken=shadowOf(tts).getLastSpokenText(); assertNotNull(spoken); assertTrue(spoken.contains("Niedriggrenze")); assertTrue(spoken.contains("Kritische Fallrate"));
+        Notification alarm=shadowOf(notifications).getNotification(LiveNotifications.ALARM_ID); assertTrue(alarm.extras.getCharSequence(Notification.EXTRA_TITLE).toString().contains("Kritische Fallrate"));
     }
     @Test public void gapEditorDraftSurvivesRotationAndDoesNotArmLive() throws Exception {
         ActivityController<GapSettingsActivity> first=Robolectric.buildActivity(GapSettingsActivity.class).create().start().resume().visible(); activities.add(first);
@@ -96,7 +97,7 @@ public class RecoveryGapPlatformTest {
         advance(1); receive(73); assertSame(first,AndroidUiTest.TestBellPlayer.latest); assertTrue(first.playing); assertNull(shadowOf(tts).getLastSpokenText());
         Notification n=shadowOf(notifications).getNotification(LiveNotifications.ALARM_ID); assertTrue(n.extras.getCharSequence(Notification.EXTRA_TEXT).toString().contains("73")); assertTrue((n.flags&Notification.FLAG_ONLY_ALERT_ONCE)!=0);
         advance(10); assertEquals(2,AndroidUiTest.TestBellPlayer.created); String spoken=shadowOf(tts).getLastSpokenText(); assertNotNull(spoken); assertTrue(spoken.contains("73")); assertFalse(spoken.contains("74"));
-        assertTrue(spoken.contains("Niedriggrenze")); assertTrue(spoken.contains("sinkt schnell")); advance(20); assertEquals(2,AndroidUiTest.TestBellPlayer.created);
+        assertTrue(spoken.contains("Niedriggrenze")); assertTrue(spoken.contains("Kritische Fallrate")); advance(20); assertEquals(2,AndroidUiTest.TestBellPlayer.created);
     }
     @Test public void oldAndConflictingReceiptsCannotChangeAlarmOrRestartSound() throws Exception {
         combinedLevels(); AndroidUiTest.TestBellPlayer.completionDelayMs=3000; fallingLow(); long posted=RuntimeClock.read(app).wallMs;
@@ -123,11 +124,11 @@ public class RecoveryGapPlatformTest {
         ServiceController<CamApsListener> listener=Robolectric.buildService(CamApsListener.class).create();
         try {
             listener.get().onNotificationPosted(posted(RuntimeClock.read(app).wallMs,"123 mg/dl →")); advance(1); long current=RuntimeClock.read(app).wallMs;
-            listener.get().onNotificationPosted(posted(current,"124 mg/dl →")); assertEquals(124,ProbeState.latest.value);
-            listener.get().onNotificationPosted(posted(current-500,"122 mg/dl ↓")); assertEquals(124,ProbeState.latest.value);
-            listener.get().onNotificationRemoved(posted(current-500,"122 mg/dl ↓")); assertEquals(124,ProbeState.latest.value);
-            listener.get().onNotificationPosted(posted(current,"125 mg/dl ↑")); assertEquals(124,ProbeState.latest.value);
-            advance(1); listener.get().onNotificationPosted(posted(RuntimeClock.read(app).wallMs,"124 mg/dl →")); assertEquals(124,ProbeState.latest.value);
+            listener.get().onNotificationPosted(posted(current,"124 mg/dl →")); assertEquals(124,ProbeState.latest.value,0);
+            listener.get().onNotificationPosted(posted(current-500,"122 mg/dl ↓")); assertEquals(124,ProbeState.latest.value,0);
+            listener.get().onNotificationRemoved(posted(current-500,"122 mg/dl ↓")); assertEquals(124,ProbeState.latest.value,0);
+            listener.get().onNotificationPosted(posted(current,"125 mg/dl ↑")); assertEquals(124,ProbeState.latest.value,0);
+            advance(1); listener.get().onNotificationPosted(posted(RuntimeClock.read(app).wallMs,"124 mg/dl →")); assertEquals(124,ProbeState.latest.value,0);
         } finally { listener.destroy(); }
     }
     @Test public void lastGlobalRouteCannotBeDisabledWhenTheGapWouldBecomeSilent() throws Exception {
@@ -148,7 +149,7 @@ public class RecoveryGapPlatformTest {
         for(int i=0;i<6;i++) { advance(1); receive(123); } advance(20);
         assertEquals(1,AndroidUiTest.TestBellPlayer.created); assertNull(shadowOf(notifications).getNotification(LiveNotifications.ALARM_ID));
         advance(60); receive(130); advance(60); receive(137); advance(60); receive(144); advance(3); assertEquals(2,AndroidUiTest.TestBellPlayer.created);
-        assertTrue(shadowOf(notifications).getNotification(LiveNotifications.ALARM_ID).extras.getCharSequence(Notification.EXTRA_TITLE).toString().contains("steigend"));
+        assertTrue(shadowOf(notifications).getNotification(LiveNotifications.ALARM_ID).extras.getCharSequence(Notification.EXTRA_TITLE).toString().contains("Kritische Anstiegsrate"));
     }
     @Test public void returningLowDuringGapToneCancelsGapSpeechWithoutFalseRateToneTrain() throws Exception {
         TextToSpeech tts=gapWithBothRates(true); AndroidUiTest.TestBellPlayer.completionDelayMs=3000; receive(123); advance(240);

@@ -19,8 +19,8 @@ public final class SpeechTemplate {
             case HIGH:return "The value is above your high threshold. Current value {value} {unit}.";
             case LOW:return "The value is below your low threshold. Current value {value} {unit}.";
             case PERSISTENT_HIGH:return "The value has been above your high threshold for {duration_minutes} minutes. Current value {value} {unit}.";
-            case RISING:return "The value is rising fast. Current value {value} {unit}.";
-            case FALLING:return "The value is falling fast. Current value {value} {unit}.";
+            case RISING:return "Critical rise rate at {value}.";
+            case FALLING:return "Critical fall rate at {value}.";
             default:throw new IllegalArgumentException();
         }
     }
@@ -32,8 +32,8 @@ public final class SpeechTemplate {
             case HIGH: return "Der Wert liegt über Deiner Hochgrenze. Aktuell {wert} {einheit}.";
             case LOW: return "Der Wert liegt unter Deiner Niedriggrenze. Aktuell {wert} {einheit}.";
             case PERSISTENT_HIGH: return "Der Wert liegt seit {dauer_minuten} Minuten über Deiner Hochgrenze. Aktuell {wert} {einheit}.";
-            case RISING: return "Der Wert steigt schnell. Aktuell {wert} {einheit}.";
-            case FALLING: return "Der Wert sinkt schnell. Aktuell {wert} {einheit}.";
+            case RISING: return "Kritische Anstiegsrate bei {wert}.";
+            case FALLING: return "Kritische Fallrate bei {wert}.";
             default: throw new IllegalArgumentException();
         }
     }
@@ -58,19 +58,24 @@ public final class SpeechTemplate {
         return Collections.unmodifiableList(result);
     }
     public static final class Values {
-        public final int mgdl;
+        public final double mgdl;
         public final long ageSeconds,durationMinutes;
         public final NotificationParser.Trend trend;
         public final TrendSpeech words;
         public final String language;
-        public Values(int mgdl,NotificationParser.Trend trend,long ageSeconds,long durationMinutes) {
+        public final de.giesen.camaps.companion.prototype.GlucoseUnit unit;
+        public Values(double mgdl,NotificationParser.Trend trend,long ageSeconds,long durationMinutes) {
             this(mgdl,trend,ageSeconds,durationMinutes,TrendSpeech.defaults());
         }
-        public Values(int mgdl,NotificationParser.Trend trend,long ageSeconds,long durationMinutes,TrendSpeech words) {
+        public Values(double mgdl,NotificationParser.Trend trend,long ageSeconds,long durationMinutes,TrendSpeech words) {
             this(mgdl,trend,ageSeconds,durationMinutes,words,"de");
         }
-        public Values(int mgdl,NotificationParser.Trend trend,long ageSeconds,long durationMinutes,TrendSpeech words,String language) {
-            if (mgdl<=0 || trend==null || ageSeconds<0 || durationMinutes<0) throw new IllegalArgumentException("Invalid speech data");
+        public Values(double mgdl,NotificationParser.Trend trend,long ageSeconds,long durationMinutes,TrendSpeech words,String language) {
+            this(mgdl,trend,ageSeconds,durationMinutes,words,language,de.giesen.camaps.companion.prototype.GlucoseUnit.MGDL);
+        }
+        public Values(double mgdl,NotificationParser.Trend trend,long ageSeconds,long durationMinutes,TrendSpeech words,String language,de.giesen.camaps.companion.prototype.GlucoseUnit unit) {
+            this.unit=java.util.Objects.requireNonNull(unit);
+            if (!Double.isFinite(mgdl) || mgdl<=0 || trend==null || ageSeconds<0 || durationMinutes<0) throw new IllegalArgumentException("Invalid speech data");
             this.mgdl=mgdl; this.trend=trend; this.ageSeconds=ageSeconds; this.durationMinutes=durationMinutes;
             this.words=Objects.requireNonNull(words);
             if(!"de".equals(language) && !"en".equals(language)) throw new IllegalArgumentException("Unsupported speech language"); this.language=language;
@@ -78,14 +83,15 @@ public final class SpeechTemplate {
     }
     public static String render(String text,AlarmLevel level,Values values,boolean valueOnly,boolean synthetic) {
         validate(text,level==null?null:level.rule.kind,valueOnly);
-        if (values.trend==NotificationParser.Trend.UNKNOWN) {
+        if (values.words.word(values.trend).isEmpty()) {
             text=text.replaceAll("(?i)(?:[,;]\\s*)?\\b(?:der\\s+)?(?:CamAPS-)?(?:Trend|Trendrichtung|Richtung|Entwicklung)\\s*(?::|ist|=)?\\s*\\{trend\\}\\s*[.,;!?]?","");
+            text=text.replaceAll("(?:(?<=[.!?])\\s*|^)\\{trend\\}\\s*[.,;!?]?","");
         }
         Map<String,String> replacements=new HashMap<>();
-        replacements.put("wert",Integer.toString(values.mgdl)); replacements.put("einheit","en".equals(values.language)?"milligrams per deciliter":"Milligramm pro Deziliter");
+        replacements.put("wert",values.unit.number(values.mgdl,"en".equals(values.language)?Locale.ENGLISH:Locale.GERMAN)); replacements.put("einheit",values.unit.spokenUnit(values.language));
         replacements.put("trend",values.words.word(values.trend)); replacements.put("alter_sekunden",Long.toString(values.ageSeconds));
         replacements.put("dauer_minuten",Long.toString(values.durationMinutes));
-        if (level!=null) { replacements.put("stufe",level.name); replacements.put("grenze",LevelForm.number(level.rule.threshold)); }
+        if (level!=null) { replacements.put("stufe",level.name); replacements.put("grenze",values.unit.threshold(level.rule.threshold,LevelForm.isRate(level.rule.kind),"en".equals(values.language)?Locale.ENGLISH:Locale.GERMAN)); }
         Matcher matcher=TOKEN.matcher(text); StringBuffer result=new StringBuffer();
         while (matcher.find()) {
             String replacement=replacements.get(canonical(matcher.group(1))); if (replacement==null) throw new IllegalArgumentException("Missing speech value");

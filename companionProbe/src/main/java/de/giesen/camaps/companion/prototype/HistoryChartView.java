@@ -11,11 +11,12 @@ import de.giesen.camaps.companion.prototype.alarm.*;
 final class HistoryChartView extends View {
     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
     private DiagnosticSeries series;
+    private GlucoseUnit unit;
     private ChartBands bands=ChartBands.from(Collections.emptyList());
-    HistoryChartView(Context context) { super(context); setBackgroundColor(AppAppearance.colors(context).surface); }
+    HistoryChartView(Context context) { super(context); unit=UnitPreferences.display(context); setBackgroundColor(AppAppearance.colors(context).surface); }
     void setAlarmLevels(List<AlarmLevel> levels) { bands=ChartBands.from(levels); invalidate(); }
     void setSeries(DiagnosticSeries series) {
-        this.series=series; setContentDescription(AppText.tr("Diagnosekurve der letzten sechs Stunden, ")+series.rawPoints+AppText.tr(" empfangene Werte, ")+series.gaps.size()+AppText.tr(" Unterbrechungen. Keine Sensor-Messzeitachse.")); invalidate();
+        this.series=series; unit=UnitPreferences.display(getContext()); setContentDescription(AppText.tr("Diagnosekurve der letzten sechs Stunden, ")+series.rawPoints+AppText.tr(" empfangene Werte, ")+series.gaps.size()+AppText.tr(" Unterbrechungen. Keine Sensor-Messzeitachse.")); invalidate();
     }
     private float dp(float value) { return value*getResources().getDisplayMetrics().density; }
     @Override protected void onMeasure(int width,int height) { setMeasuredDimension(MeasureSpec.getSize(width),resolveSize((int)dp(320),height)); }
@@ -33,7 +34,7 @@ final class HistoryChartView extends View {
         double padding=Math.max(10,(high-low)*0.12); low=Math.max(0,Math.floor((low-padding)/10)*10); high=Math.ceil((high+padding)/10)*10;
         if (high<=low) high=low+20;
         AppAppearance.Colors colors=AppAppearance.colors(getContext());
-        paint.setStyle(Paint.Style.FILL); paint.setTextSize(dp(10)); paint.setColor(colors.muted); paint.setTextAlign(Paint.Align.RIGHT); canvas.drawText("mg/dl",left-dp(7),dp(12),paint);
+        paint.setStyle(Paint.Style.FILL); paint.setTextSize(dp(10)); paint.setColor(colors.muted); paint.setTextAlign(Paint.Align.RIGHT); canvas.drawText(unit.label,left-dp(7),dp(12),paint);
         if(!bands.lows.isEmpty()) {
             float limit=y(bands.lows.get(bands.lows.size()-1),low,high,top,bottom); paint.setColor(AppAppearance.dark(getContext())?0x28e78e9d:0x16d85b72); canvas.drawRect(left,Math.max(top,limit),right,bottom,paint);
         }
@@ -43,7 +44,7 @@ final class HistoryChartView extends View {
         for (int i=0;i<=4;i++) {
             float y=bottom-(bottom-top)*i/4;
             paint.setColor(colors.line); paint.setStrokeWidth(dp(.7f)); canvas.drawLine(left,y,right,y,paint);
-            paint.setColor(colors.muted); canvas.drawText(Integer.toString((int)Math.round(low+(high-low)*i/4)),left-dp(7),y+dp(3),paint);
+            paint.setColor(colors.muted); canvas.drawText(unit.number(low+(high-low)*i/4,Locale.getDefault()),left-dp(7),y+dp(3),paint);
         }
         long span=series.to-series.from; if (span<=0) return;
         SimpleDateFormat format=new SimpleDateFormat("HH:mm",Locale.GERMANY); paint.setTextAlign(Paint.Align.CENTER);

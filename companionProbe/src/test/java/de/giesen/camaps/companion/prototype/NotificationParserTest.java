@@ -13,7 +13,7 @@ public class NotificationParserTest {
         NotificationParser.Trend[] expected = {DOUBLE_UP, UP, UP_RIGHT, FLAT, DOWN_RIGHT, DOWN, DOUBLE_DOWN};
         for (int i=0;i<symbols.length;i++) {
             NotificationParser.Result result = parse("123 mg/dl " + symbols[i]);
-            assertEquals(Integer.valueOf(123), result.mgdl);
+            assertEquals(Double.valueOf(123), result.mgdl);
             assertEquals(expected[i], result.trend);
         }
     }
@@ -24,22 +24,22 @@ public class NotificationParserTest {
         assertEquals(UNKNOWN, parse("123").trend);
         assertEquals(UNKNOWN, parse("123 ↑", "↓").trend);
     }
-    @Test public void duplicateFieldsAreNotMultipleValues() { assertEquals(Integer.valueOf(123),parse("123", "123 mg/dl").mgdl); }
+    @Test public void duplicateFieldsAreNotMultipleValues() { assertEquals(Double.valueOf(123),parse("123", "123 mg/dl").mgdl); }
     @Test public void rejectsAmbiguousNumbers() { assertNull(parse("123", "145").mgdl); }
     @Test public void rejectsMmolDosesTimesAndComparisons() {
         for(String input:new String[]{"6.8 mmol/L", "12:34", "2 U", "≥123 mg/dl", "≤40", "LOW", "HIGH", "0", "-123", "1234"}) assertNull(input, parse(input).mgdl);
     }
-    @Test public void noMedicalBoundsFromUpstream() { assertEquals(Integer.valueOf(33),parse("33 mg/dl").mgdl); assertEquals(Integer.valueOf(450),parse("450 mg/dl").mgdl); }
-    @Test public void onlyKnownMgdlCamApsPackages() {
+    @Test public void noMedicalBoundsFromUpstream() { assertEquals(Double.valueOf(33),parse("33 mg/dl").mgdl); assertEquals(Double.valueOf(450),parse("450 mg/dl").mgdl); }
+    @Test public void onlyKnownUnitSpecificCamApsPackages() {
         assertTrue(NotificationParser.acceptsPackage("com.camdiab.fx_alert.mgdl"));
         assertTrue(NotificationParser.acceptsPackage("com.camdiab.fx_alert.hx.mgdl"));
-        assertFalse(NotificationParser.acceptsPackage("com.camdiab.fx_alert.mmoll"));
+        assertTrue(NotificationParser.acceptsPackage("com.camdiab.fx_alert.mmoll"));
         assertFalse(NotificationParser.acceptsPackage("another.app"));
     }
     @Test public void exactDescriptionsDoNotMatchArbitraryText() { assertEquals(DOUBLE_UP,parse("123", "rapidly rising").trend); assertEquals(UNKNOWN,parse("123", "not rapidly rising").trend); }
     @Test public void trendOnlyFieldsCannotChangeWorkingValue() {
         NotificationParser.Result result=NotificationParser.parse(Arrays.asList("123 mg/dl"),Arrays.asList("123 mg/dl","4","↘"));
-        assertEquals(Integer.valueOf(123),result.mgdl);
+        assertEquals(Double.valueOf(123),result.mgdl);
         assertEquals(DOWN_RIGHT,result.trend);
     }
     @Test public void trendOnlyFieldsDoNotCreateAMeasurement() {
@@ -51,10 +51,10 @@ public class NotificationParserTest {
     @Test public void deliveryStatusDoesNotDisplaceExpandedGlucoseFields() {
         // Synthetic collapsed status plus expanded value/description, as collected from both views.
         NotificationParser.Result result=parse("Insulin abgegeben", "2 U", "123 mg/dl", "→");
-        assertEquals(Integer.valueOf(123),result.mgdl); assertEquals(FLAT,result.trend);
+        assertEquals(Double.valueOf(123),result.mgdl); assertEquals(FLAT,result.trend);
     }
     @Test public void statusOnlyEventCannotReuseAnEarlierValue() {
-        assertEquals(Integer.valueOf(123),parse("123 mg/dl", "→").mgdl);
+        assertEquals(Double.valueOf(123),parse("123 mg/dl", "→").mgdl);
         NotificationParser.Result status=parse("Insulin abgegeben", "2 U", "12:34");
         assertNull(status.mgdl); assertEquals(UNKNOWN,status.trend);
     }

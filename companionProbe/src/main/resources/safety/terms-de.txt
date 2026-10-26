@@ -1,0 +1,9 @@
+Du entscheidest selbst, ob Du dieses experimentelle Forschungswerkzeug verwendest, und trägst die Verantwortung für die Verwendung und Bewertung seiner Ausgaben. Es richtet sich an Erwachsene, die diese Grenzen selbst beurteilen können.
+
+Die Software wird im vorliegenden Zustand ohne Gewährleistung bereitgestellt, soweit das geltende Recht dies zulässt. Das Risiko hinsichtlich Qualität und Leistung liegt bei Dir. Es gibt keine Zusage für Verfügbarkeit, Fehlerbehebung, Unterstützung oder Eignung für einen bestimmten Zweck. Die Haftungs- und Gewährleistungsregelungen der GNU GPLv3, insbesondere Abschnitte 15 bis 17, gelten im dort beschriebenen Umfang. Zwingende gesetzliche Rechte bleiben unberührt.
+
+Glucose Voice Alarm ist freie Software unter GNU GPL Version 3 oder neuer. Diese Hinweise schränken Deine Lizenzrechte nicht zusätzlich ein. Du kannst den vollständigen GPLv3-Text über „GPLv3-Lizenz lesen“ öffnen.
+
+Das Projekt ist unabhängig von CamAPS, xDrip+ und deren Herstellern bzw. Projektteams. Übernommener xDrip-Code und die an dessen Warnhinweise angelehnten Texte bedeuten keine Empfehlung oder Freigabe durch diese Projekte.
+
+Mit „Ich verstehe“ bestätigst Du diese Bedingungen zusätzlich zum zuvor gelesenen Warnhinweis. Die Bestätigung wird nur auf diesem Gerät gespeichert. Empfangs- und Ausgabefunktionen werden erst danach zugänglich. Die aktive Ausgabe musst Du anschließend selbst einschalten.

@@ -8,11 +8,16 @@ final class ProbeState {
     static volatile String status = "Empfang noch nicht verbunden";
     static volatile String diagnostics = "Noch kein CamAPS-Update für die Trenddiagnose vorhanden.";
     static final class Observation {
-        final int value;
+        final double value;
         final NotificationParser.Trend trend;
+        final ReceiptRate.Result receiptRate;
         final long receivedElapsed, postedWall,receivedWall;
         final String notificationKey;
-        Observation(int value, NotificationParser.Trend trend, long receivedElapsed, long postedWall, String key) {
+        Observation(double value, NotificationParser.Trend trend, long receivedElapsed, long postedWall, String key) {
+            this(value,trend,receivedElapsed,postedWall,key,ReceiptRate.unavailable());
+        }
+        Observation(double value, NotificationParser.Trend trend, long receivedElapsed, long postedWall, String key,ReceiptRate.Result receiptRate) {
+            this.receiptRate=receiptRate;
             this.value = value; this.trend = trend; this.receivedElapsed = receivedElapsed;
             this.receivedWall=System.currentTimeMillis();
             this.notificationKey = key;

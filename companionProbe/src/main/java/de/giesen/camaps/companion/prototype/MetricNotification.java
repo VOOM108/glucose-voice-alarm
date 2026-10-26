@@ -26,13 +26,16 @@ final class MetricNotification {
         }
     }
     static boolean apply(Notification.Builder builder,int value,NotificationParser.Trend trend,long receivedWall) {
+        return apply(builder,value,trend,receivedWall,GlucoseUnit.MGDL);
+    }
+    static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit) {
         if (Build.VERSION.SDK_INT<37) return false;
         try {
             Class<?> metric=Class.forName("android.app.Notification$Metric");
             Class<?> metricValue=Class.forName("android.app.Notification$Metric$MetricValue");
             Class<?> fixedText=Class.forName("android.app.Notification$Metric$FixedText");
             Class<?> style=Class.forName("android.app.Notification$MetricStyle");
-            String display=value+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol);
+            String display=unit.number(value,Locale.getDefault())+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol);
             Object rendered=fixedText.getConstructor(CharSequence.class).newInstance(display);
             String time=label(receivedWall);
             Object entry=metric.getConstructor(metricValue,CharSequence.class).newInstance(rendered,time);

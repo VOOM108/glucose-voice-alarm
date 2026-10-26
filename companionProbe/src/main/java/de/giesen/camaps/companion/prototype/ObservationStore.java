@@ -10,14 +10,18 @@ import java.util.*;
 
 /** Private diagnostic observations, not yet verified measurement history. No raw notification text. */
 final class ObservationStore extends SQLiteOpenHelper {
-    ObservationStore(Context context) { super(context, "probe-observations.db", null, 1); }
+    ObservationStore(Context context) { super(context, "probe-observations.db", null, 2); }
     @Override public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE observation (id INTEGER PRIMARY KEY, notification_key TEXT NOT NULL, "
-                + "posted_ms INTEGER NOT NULL, received_ms INTEGER NOT NULL, mgdl INTEGER NOT NULL, trend TEXT NOT NULL, "
+                + "posted_ms INTEGER NOT NULL, received_ms INTEGER NOT NULL, mgdl REAL NOT NULL, trend TEXT NOT NULL, "
                 + "UNIQUE(notification_key, posted_ms, mgdl, trend))");
     }
     @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        throw new IllegalStateException("No migration defined");
+        if(oldVersion!=1 || newVersion!=2) throw new IllegalStateException("No migration defined");
+        db.execSQL("ALTER TABLE observation RENAME TO observation_v1");
+        onCreate(db);
+        db.execSQL("INSERT INTO observation (id,notification_key,posted_ms,received_ms,mgdl,trend) SELECT id,notification_key,posted_ms,received_ms,CAST(mgdl AS REAL),trend FROM observation_v1");
+        db.execSQL("DROP TABLE observation_v1");
     }
     boolean insert(String key, long posted, long received, NotificationParser.Result reading) {
         SQLiteDatabase db = getWritableDatabase();
@@ -42,7 +46,7 @@ final class ObservationStore extends SQLiteOpenHelper {
                 +"AND posted_ms > 0 AND posted_ms <= received_ms AND received_ms-posted_ms <= ? "
                 +"GROUP BY notification_key,posted_ms,mgdl ORDER BY t ASC LIMIT 5000";
         try (Cursor cursor=db.rawQuery(sql,new String[]{Long.toString(from),Long.toString(now),Long.toString(ReceiptWindow.MAX_AGE_MS)})) {
-            while (cursor.moveToNext()) result.add(new DiagnosticSeries.Sample(cursor.getLong(0),cursor.getInt(1)));
+            while (cursor.moveToNext()) result.add(new DiagnosticSeries.Sample(cursor.getLong(0),cursor.getDouble(1)));
         }
         return result;
     }

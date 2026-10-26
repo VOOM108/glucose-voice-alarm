@@ -23,49 +23,45 @@ public final class NotificationParser {
     }
 
     public static final class Result {
-        public final Integer mgdl;
+        public final Double mgdl;
+        public final GlucoseUnit sourceUnit;
         public final Trend trend;
         public final String reason;
-        Result(Integer mgdl, Trend trend, String reason) {
-            this.mgdl = mgdl; this.trend = trend; this.reason = reason;
-        }
+        Result(Number mgdl,Trend trend,String reason) { this(mgdl==null?null:mgdl.doubleValue(),trend,reason,GlucoseUnit.MGDL); }
+        Result(Double mgdl,Trend trend,String reason,GlucoseUnit unit) { this.mgdl=mgdl;this.trend=trend;this.reason=reason;this.sourceUnit=unit; }
+        Result withTrend(Trend trend,String reason) { return new Result(mgdl,trend,reason,sourceUnit); }
     }
-
-    private static final Pattern VALUE = Pattern.compile("^([0-9]{1,3})\\s*(?:mg\\s*/\\s*dl)?$", Pattern.CASE_INSENSITIVE);
-
-    public static boolean acceptsPackage(String name) {
-        return "com.camdiab.fx_alert.mgdl".equals(name)
-                || "com.camdiab.fx_alert.hx.mgdl".equals(name);
+    private static final Pattern VALUE=Pattern.compile("^([0-9]{1,3}(?:[.,][0-9]{1,2})?)\\s*(?:(mg\\s*/\\s*dl|mmol\\s*/\\s*l))?$",Pattern.CASE_INSENSITIVE);
+    private static final Pattern UNIT=Pattern.compile("(mg\\s*/\\s*dl|mmol\\s*/\\s*l)",Pattern.CASE_INSENSITIVE);
+    public static GlucoseUnit packageUnit(String name) {
+        if("com.camdiab.fx_alert.mgdl".equals(name) || "com.camdiab.fx_alert.hx.mgdl".equals(name))return GlucoseUnit.MGDL;
+        if("com.camdiab.fx_alert.mmoll".equals(name) || "com.camdiab.fx_alert.hx.mmoll".equals(name) || "com.camdiab.fx_alert.mmoll.ca".equals(name))return GlucoseUnit.MMOL;
+        return null;
     }
-
-    public static Result parse(List<String> texts) {
-        return parse(texts, texts);
-    }
-
-    /** Extra trend fields must never introduce additional glucose candidates. */
-    public static Result parse(List<String> valueTexts, List<String> trendTexts) {
-        Set<Integer> values = new LinkedHashSet<>();
-        Set<Trend> trends = new LinkedHashSet<>();
-        for (String raw : trendTexts) {
-            if (raw != null) readTrends(normalize(raw), trends);
-        }
-        for (String raw : valueTexts) {
-            if (raw == null) continue;
-            String s = normalize(raw);
-            // Remove only understood arrow symbols, never comparison signs or units.
-            String number = s.replaceAll("[↑↓↗↘→⇈⇊⬆⬇➡⬈⬊]", "").trim();
-            Matcher m = VALUE.matcher(number);
-            if (m.matches()) {
-                int n = Integer.parseInt(m.group(1));
-                if (n > 0) values.add(n);
+    public static boolean acceptsPackage(String name) { return packageUnit(name)!=null; }
+    public static Result parse(List<String> texts) { return parse(texts,texts); }
+    public static Result parse(List<String> values,List<String> trends) { return parse(values,trends,GlucoseUnit.MGDL); }
+    /** The allowlisted package declares the source unit; decimal magnitude never guesses it. */
+    public static Result parse(List<String> valueTexts,List<String> trendTexts,GlucoseUnit source) {
+        if(source==null)return new Result(null,Trend.UNKNOWN,"CamAPS-Einheit nicht erkannt",null);
+        Set<Double> values=new LinkedHashSet<>();Set<Trend> trends=new LinkedHashSet<>();boolean conflict=false;
+        for(String raw:trendTexts)if(raw!=null)readTrends(normalize(raw),trends);
+        for(String raw:valueTexts) {
+            if(raw==null)continue;
+            String text=normalize(raw);Matcher units=UNIT.matcher(text);
+            while(units.find())if((units.group(1).toLowerCase(Locale.ROOT).startsWith("mmol")?GlucoseUnit.MMOL:GlucoseUnit.MGDL)!=source)conflict=true;
+            String number=text.replaceAll("[↑↓↗↘→⇈⇊⬆⬇➡⬈⬊]","").trim();Matcher m=VALUE.matcher(number);
+            if(m.matches()) {
+                String lexical=m.group(1);
+                if(source==GlucoseUnit.MGDL && (lexical.contains(".") || lexical.contains(",")))continue;
+                double n=new java.math.BigDecimal(lexical.replace(',','.')).doubleValue();
+                if(n>0 && (source==GlucoseUnit.MGDL || n<100))values.add(source.canonical(n));
             }
         }
-        Trend trend = trends.size() == 1 ? trends.iterator().next() : Trend.UNKNOWN;
-        if (values.size() != 1) return new Result(null, trend,
-                values.isEmpty() ? "Kein eindeutiger mg/dl-Wert lesbar" : "Mehrere unterschiedliche Zahlen; Empfang verworfen");
-        return new Result(values.iterator().next(), trend,
-                trends.size() > 1 ? "Widersprüchliche Trendangaben" :
-                trend == Trend.UNKNOWN ? "CamAPS-Trend nicht lesbar" : "CamAPS-Trend aus Text/Beschreibung");
+        Trend trend=trends.size()==1?trends.iterator().next():Trend.UNKNOWN;
+        if(conflict)return new Result(null,trend,"CamAPS-Einheiten widersprechen sich; Empfang verworfen",source);
+        if(values.size()!=1)return new Result(null,trend,values.isEmpty()?"Kein eindeutiger Glukosewert lesbar":"Mehrere unterschiedliche Zahlen; Empfang verworfen",source);
+        return new Result(values.iterator().next(),trend,trends.size()>1?"Widersprüchliche Trendangaben":trend==Trend.UNKNOWN?"CamAPS-Trend nicht lesbar":"CamAPS-Trend aus Text/Beschreibung",source);
     }
 
     private static String normalize(String raw) {

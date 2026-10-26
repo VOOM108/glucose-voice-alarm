@@ -11,7 +11,8 @@ public class SyntheticSpeechTest {
             String text=SyntheticSpeech.alarm(kind,"Teststufe","",0);
             assertTrue(kind.name(),text.startsWith("Dies ist eine Testansage mit synthetischen Daten."));
             assertFalse(text.contains("{"));
-            assertTrue(text.contains("Milligramm pro Deziliter"));
+            if(LevelForm.isRate(kind)) assertTrue(text.contains(kind==AlarmEngine.Kind.FALLING?"Kritische Fallrate bei 65.":"Kritische Anstiegsrate bei 230."));
+            else assertTrue(text.contains("Milligramm pro Deziliter"));
         }
     }
     @Test public void previewVariantsCycleWithoutOverflowAndRetainLiteralNames() {

@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @LooperMode(LooperMode.Mode.PAUSED)
 public class AppearanceRenderTest {
+    @org.junit.Before public void acknowledgeForExistingFeatureTests(){ConsentTestSupport.accept(org.robolectric.RuntimeEnvironment.getApplication());}
     private List<View> views(View v) { List<View> result=new ArrayList<>(); result.add(v); if(v instanceof ViewGroup) for(int i=0;i<((ViewGroup)v).getChildCount();i++) result.addAll(views(((ViewGroup)v).getChildAt(i))); return result; }
     @Test public void renderGapWarningEditorWithSyntheticDefaultsInBothThemes() throws Exception {
         Context app=RuntimeEnvironment.getApplication();

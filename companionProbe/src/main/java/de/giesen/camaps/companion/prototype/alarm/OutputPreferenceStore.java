@@ -32,7 +32,7 @@ public final class OutputPreferenceStore {
             byte[] body=ConfigurationFiles.open(encoded,8192);
             try (DataInputStream in=new DataInputStream(new ByteArrayInputStream(body))) {
                 if (!"XCAM_OUTPUT".equals(in.readUTF())) throw new IOException(AppText.tr("Unbekannte Ausgabe-Einstellungen"));
-                int schema=in.readInt(); if (schema<1 || schema>8) throw new IOException(AppText.tr("Unbekannte Ausgabe-Einstellungen"));
+                int schema=in.readInt(); if (schema<1 || schema>11) throw new IOException(AppText.tr("Unbekannte Ausgabe-Einstellungen"));
                 long revision=in.readLong(); if (revision<1) throw new IOException(AppText.tr("Ungültige Ausgabe-Revision"));
                 AlarmEngine.OutputMode mode=AlarmEngine.OutputMode.valueOf(in.readUTF()); int minutes=in.readInt(); String template=in.readUTF();
                 int tone=schema>=2?in.readInt():100,speech=schema>=2?in.readInt():100,quiet=schema>=2?in.readInt():5,boost=schema>=3?in.readInt():0;
@@ -44,9 +44,19 @@ public final class OutputPreferenceStore {
                     String language=in.readUTF(); List<String> all=new ArrayList<>(words.words.subList(0,5)); all.add(in.readUTF()); all.add(in.readUTF());
                     preferences=new OutputPreferences(mode,minutes,template,tone,speech,quiet,boost,new TrendSpeech(all),preferences.tonesEnabled,preferences.alarmSpeechEnabled,preferences.valueSpeechEnabled,preferences.vibrationEnabled,preferences.gap.withTemplate(in.readUTF()),language);
                 }
+                if(schema>=9) { readRetiredSource(in); readRetiredSource(in); }
+                if(schema>=10) {
+                    List<Boolean> enabled=new ArrayList<>(); for(int i=0;i<TrendSpeech.COUNT;i++) enabled.add(in.readBoolean());
+                    preferences=preferences.withTrendSpeech(new TrendSpeech(preferences.trendSpeech.words,enabled));
+                }
+                if(schema>=11) preferences=preferences.withUnitMode(de.giesen.camaps.companion.prototype.GlucoseUnit.Mode.valueOf(in.readUTF()));
                 if (in.read()!=-1) throw new IOException(AppText.tr("Zusätzliche Ausgabe-Einstellungen"));
                 return new Snapshot(revision,preferences);
             } catch (IllegalArgumentException e) { throw new IOException(AppText.tr("Ungültige Ausgabe-Einstellungen"),e); }
+    }
+    private static void readRetiredSource(DataInputStream in) throws IOException {
+        String value=in.readUTF();
+        if(!"CAMAPS".equals(value) && !"CALCULATED".equals(value)) throw new IOException("Invalid retired trend source");
     }
     public Snapshot save(long revision,OutputPreferences preferences) throws IOException {
         synchronized(LOCK) {
@@ -63,7 +73,7 @@ public final class OutputPreferenceStore {
             OutputPreferences preferences=snapshot.preferences;
             ByteArrayOutputStream buffer=new ByteArrayOutputStream();
             try (DataOutputStream out=new DataOutputStream(buffer)) {
-                out.writeUTF("XCAM_OUTPUT"); out.writeInt(8); out.writeLong(snapshot.revision); out.writeUTF(preferences.mode.name());
+                out.writeUTF("XCAM_OUTPUT"); out.writeInt(11); out.writeLong(snapshot.revision); out.writeUTF(preferences.mode.name());
                 out.writeInt(preferences.valueIntervalMinutes); out.writeUTF(preferences.valueTemplate);
                 out.writeInt(preferences.toneVolumePercent); out.writeInt(preferences.speechVolumePercent);
                 out.writeInt(preferences.valueQuietMinutes);
@@ -72,6 +82,10 @@ public final class OutputPreferenceStore {
                 out.writeBoolean(preferences.tonesEnabled); out.writeBoolean(preferences.alarmSpeechEnabled); out.writeBoolean(preferences.valueSpeechEnabled); out.writeBoolean(preferences.vibrationEnabled); preferences.gap.write(out);
                 out.writeUTF(preferences.speechLanguage); out.writeUTF(preferences.trendSpeech.words.get(5)); out.writeUTF(preferences.trendSpeech.words.get(6));
                 out.writeUTF(preferences.gap.speechTemplate);
+                // Retired schema-9 fields: retain wire compatibility, always CamAPS.
+                out.writeUTF("CAMAPS"); out.writeUTF("CAMAPS");
+                for(boolean enabled:preferences.trendSpeech.enabled) out.writeBoolean(enabled);
+                out.writeUTF(preferences.unitMode.name());
             }
             byte[] encoded=ConfigurationFiles.seal(buffer.toByteArray()); if(encoded.length>8192) throw new IOException(AppText.tr("Ausgabe-Einstellungen zu groß")); return encoded;
     }

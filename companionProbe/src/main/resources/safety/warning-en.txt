@@ -1,0 +1,9 @@
+Glucose Voice Alarm is an experimental beta. Not for medical use – research tool only. The app is not a certified medical device and has no medical regulatory approval.
+
+Do not use readings, trends or alarms for diagnosis, treatment or dosing decisions. They do not replace medical advice or the prescribed functions of your sensor, pump or other medical devices.
+
+Readings, arrows, sounds, speech and vibration may be missing, wrong, delayed or repeated. The app may fail without a visible error. Silence does not mean safety. Do not rely on this app for emergencies or time-critical situations.
+
+GVA reads CamAPS notifications. Their structure and availability may change. Receipt time is not a verified measurement time. Missing readings are not replaced with estimates; the last trend does not establish continuation or acceleration.
+
+CamAPS remains responsible for the sensor and pump. Keep using your prescribed devices, checks and medical procedures. GVA does not validate or replace them.

@@ -22,6 +22,7 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(sdk={28,34},qualifiers="en",shadows={AndroidUiTest.TestBellPlayer.class})
 @LooperMode(LooperMode.Mode.PAUSED)
 public class BetaEnglishPlatformTest {
+    @org.junit.Before public void acknowledgeForExistingFeatureTests(){ConsentTestSupport.accept(org.robolectric.RuntimeEnvironment.getApplication());}
     private Context app; private final List<ActivityController<?>> activities=new ArrayList<>(); private final List<PreviewAudio> owners=new ArrayList<>();
     @Before public void before() {
         app=RuntimeEnvironment.getApplication(); AppText.configure(Locale.ENGLISH);
@@ -41,7 +42,7 @@ public class BetaEnglishPlatformTest {
     }
     @Test public void languageChangePreservesUserTextAndSurvivesRotation() throws Exception {
         OutputPreferenceStore store=new OutputPreferenceStore(app.getFilesDir()); store.save(0,new OutputPreferences(AlarmEngine.OutputMode.SPOKEN_ALARMS,0,"Eigener Text {wert}"));
-        ActivityController<OutputSettingsActivity> first=open(OutputSettingsActivity.class,null); Spinner spinner=null; for(View v:views(first.get().getWindow().getDecorView()))if(v instanceof Spinner)spinner=(Spinner)v;
+        ActivityController<OutputSettingsActivity> first=open(OutputSettingsActivity.class,null); Spinner spinner=first.get().getWindow().getDecorView().findViewWithTag("speech_language");
         assertNotNull(spinner); spinner.setSelection(1); shadowOf(Looper.getMainLooper()).idle(); assertNotNull(action(first.get(),"Eigener Text {wert}"));
         Bundle state=new Bundle(); first.saveInstanceState(state).pause().stop().destroy(); activities.remove(first); OutputSettingsActivity second=open(OutputSettingsActivity.class,state).get();
         action(second,"Save output settings").performClick(); OutputPreferences saved=store.load().preferences; assertEquals("en",saved.speechLanguage); assertEquals("Eigener Text {wert}",saved.valueTemplate); assertEquals("stabil",saved.trendSpeech.words.get(2));

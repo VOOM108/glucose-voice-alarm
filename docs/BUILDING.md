@@ -66,7 +66,7 @@ python tools/check_upstream_rules.py
 
 Use a short writable test-temp path on Windows if sqlite4java has trouble with long WAL paths. The optional `probeTestTmp` property selects that directory. By default the test directory is `../t` relative to the repository. Gradle and Robolectric download dependencies on the first test run; this can be large. Test XML/HTML reports and native synthetic UI previews remain under the ignored module `build/` directory.
 
-`-PprobeFastCheck` runs only the pure Java subset. It is useful during development and does not replace the full suite. The Beta baseline has 419 complete synthetic checks, including old storage schemas, profiles, English UI/speech and native light/dark renders. These checks do not establish real-device reliability, audibility or clinical safety.
+`-PprobeFastCheck` runs only the pure Java subset. It is useful during development and does not replace the full suite. The Beta baseline has 524 complete synthetic checks, including legacy storage schemas, profiles, German/English UI and speech, glucose-unit conversion and the two-step first-start gate. Native synthetic renders cover both languages and themes, including large text. These checks do not establish real-device reliability, audibility or clinical safety.
 
 ## Install your own build
 
@@ -76,7 +76,7 @@ Installation is a separate action. With a compatible signing identity and your o
 adb install -r companionProbe/build/outputs/apk/debug/companionProbe-debug.apk
 ```
 
-This updates only a matching application ID/signature and retains that app's data. Grant the required Android permissions, configure the app and enable output manually. No build task installs the app, starts live output, creates a GitHub release or uploads an APK.
+This updates only a matching application ID/signature and retains that app's data. Open the app and acknowledge the warning and terms of use yourself. Existing installations also see these steps once when updating to 0.15. Then grant the required Android permissions, configure the app and enable output manually. Do not automate the acknowledgements. No build task installs the app, starts live output, creates a GitHub release or uploads an APK.
 
 ## Dependency and license review
 

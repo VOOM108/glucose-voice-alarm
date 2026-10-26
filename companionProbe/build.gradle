@@ -7,8 +7,8 @@ android {
         applicationId 'de.giesen.camaps.companion.prototype'
         minSdk 26
         targetSdk 34
-        versionCode 22
-        versionName '0.11.0-beta'
+        versionCode 27
+        versionName '0.15.0-beta'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

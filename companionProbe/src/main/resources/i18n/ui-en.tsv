@@ -140,7 +140,6 @@ App-Töne aktualisiert. Eigene Android-Töne bleiben erhalten.	App sounds update
 Audio noch nicht bereit. Bitte Offline-Stimme prüfen/vorbereiten und den Test erneut starten; kein späteres automatisches Abspielen.	Audio is not ready. Check or prepare the offline voice, then restart the test. It will not play later automatically.
 Audio-Hintergrundstart abgelehnt	Background audio start rejected
 Audio: kein aktiver Hintergrunddienst	Audio: no active background service
-Aus vier Empfangsminuten berechnet. Mehrfachmeldungen innerhalb einer Minute zählen einmal. Ein Pfeil allein löst keinen Alarm aus.	Calculated from four receipt minutes. Multiple notifications within a minute count once. An arrow alone does not trigger an alarm.
 Aus: auch bei zuvor stabilem oder unbekanntem Verlauf warnen.	Off: also warn after a steady or unknown trend.
 Ausgabe aktiv	Output enabled
 Ausgabe dieser Stufe	Output for this level
@@ -629,3 +628,43 @@ CamAPS-Empfang: 	CamAPS reception:
 \nAkku-Optimierung: 	\nBattery optimization: 
 Akku-Ausnahme	Battery exemption
 XCam-Anzeigepruefung	Glucose Voice Alarm display test
+Berechnet	Calculated
+Nicht berechenbar	Not computable
+Kritische Anstiegsrate	Critical rise rate
+Kritische Fallrate	Critical fall rate
+Änderungsrate	Rate of change
+Trend und Ratenalarme	Trend and rate alarms
+Pfeil und Trendwort stammen von CamAPS. Die kritische Fall- oder Anstiegsrate prüft die empfangenen Werte gegen Deine eigene Schwelle, auch ohne Pfeil. Die Änderungsrate im Dashboard ist ein Mittel aus vier Empfangs-Minutenpunkten; der Ratenalarm prüft zusätzlich das letzte Intervall. Ohne neue Werte bleibt nur die Lückenwarnung.	The arrow and trend word come from CamAPS. Critical rise or fall rate checks received readings against your own threshold, even without an arrow. The dashboard rate averages four receipt-minute points; the rate alarm also checks the latest interval. Without new readings, only the gap warning remains.
+Eigene Schwelle für die empfangenen Werte, unabhängig vom CamAPS-Pfeil und vom Abstand der Wertansagen. Vier Minutenpunkte und das letzte Intervall müssen passen. Ohne neue Werte kein Ratenalarm.	Your own threshold for received readings, independent of the CamAPS arrow and reading speech interval. Four minute points and the latest interval must qualify. No new readings means no rate alarm.
+ansagen	speak
+Haken aus: dieses Trendwort nicht ansagen. Pfeil und Alarmprüfung bleiben unverändert.	Unchecked: omit this trend word from speech. The arrow and alarm evaluation stay unchanged.
+ pro Minute	 per minute
+ pro Minute (positiv eingeben)	 per minute (enter positive)
+ · Einheitenkonflikt: neu erkennen	 · Unit conflict: detect again
+. CamAPS selbst bleibt unverändert. Zahlen und Grenzfelder werden umgerechnet; gespeicherte Alarmgrenzen werden nicht verschoben. Eigene Namen und fest ausgeschriebene Einheiten bleiben unverändert. AOD zeigt weiterhin keine Einheit. Bitte bestätige die gewählte Einheit bewusst.	. CamAPS itself stays unchanged. Numbers and threshold fields are converted; saved alarm thresholds keep their meaning. Custom names and literal units in speech text stay unchanged. AOD still shows no unit. Please confirm your chosen unit.
+Abnahme in 	Fall in 
+Abweichende Einheit verwenden?	Use a different unit?
+Aktuell: 	Current: 
+Android vergibt Benachrichtigungszugriff für alle Apps. Verarbeitet werden nur laufende unterstützte CamAPS-Meldungen; vollständige Meldungstexte werden nicht gespeichert.	Android notification access covers all apps. Only ongoing supported CamAPS notifications are processed; complete notification text is not stored.
+Anstieg in 	Rise in 
+Anzeige und Ansagen verwenden künftig 	Display and speech will use 
+Automatisch (CamAPS)	Automatic (CamAPS)
+Automatisch folgt der gespeicherten CamAPS-Einheit. Eine feste Auswahl rechnet Dashboard, AOD, Ansagen und Grenzfelder um. Vorhandene Alarmgrenzen behalten ihre Bedeutung.	Automatic follows the saved CamAPS unit. A fixed choice converts the dashboard, AOD, speech and threshold fields. Existing alarm thresholds keep their meaning.
+Bestätigen	Confirm
+Bitte eine positive Zahl eingeben (Komma oder Punkt möglich)	Enter a positive number (comma or point allowed)
+CamAPS-Einheit neu erkennen	Detect CamAPS unit again
+CamAPS-Einheit noch nicht erkannt	CamAPS unit not detected yet
+Einheit für Anzeige und Ansagen	Unit for display and speech
+Einheit für Anzeige und Ansagen: 	Unit for display and speech: 
+Einheit konnte nicht zurückgesetzt werden	Could not reset the unit
+Einheit neu erkennen?	Detect unit again?
+Einheit übernehmen	Apply unit
+Einheitenkonflikt · Entwickleroptionen öffnen	Unit conflict · Open developer options
+Einmal erkannt, bleibt die CamAPS-Einheit gespeichert. Eine andere Einheit im Empfang wird nicht automatisch übernommen.	Once detected, the CamAPS unit stays saved. A different unit in later notifications is not adopted automatically.
+Einstellungen inzwischen geändert oder nicht speicherbar. Bitte neu öffnen.	Settings changed or could not be saved. Please reopen.
+Entwickleroptionen	Developer options
+Grenze: 	Threshold: 
+Grenzwert in 	Threshold in 
+Neu erkennen	Detect again
+Schaltet die Live-Ausgabe aus und verwirft das aktuelle Empfangsfenster. Die nächste gültige CamAPS-Meldung legt die Quelleinheit neu fest. Gespeicherte Alarmgrenzen bleiben unverändert.	Turns off live output and discards the current receipt window. The next valid CamAPS notification establishes the source unit again. Saved alarm thresholds stay unchanged.
+Warte auf einen neuen gültigen CamAPS-Wert	Waiting for a new valid CamAPS reading

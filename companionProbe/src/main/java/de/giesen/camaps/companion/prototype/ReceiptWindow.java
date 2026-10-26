@@ -18,8 +18,8 @@ public final class ReceiptWindow {
         long elapsed=now.elapsedMs-previous.elapsedMs,wall=now.wallMs-previous.wallMs;
         return elapsed>=0 && Math.abs(wall-elapsed)<=1000 && postedMs<lastPosted;
     }
-    public Intake receive(String key,long postedMs,int mgdl,Clock now) {
-        if (key==null || key.length()>4096 || mgdl<=0 || postedMs<=0 || now==null) return Intake.INVALID;
+    public Intake receive(String key,long postedMs,double mgdl,Clock now) {
+        if (key==null || key.length()>4096 || (!Double.isFinite(mgdl) || mgdl<=0) || postedMs<=0 || now==null) return Intake.INVALID;
         if (postedMs>now.wallMs || now.wallMs-postedMs>MAX_AGE_MS) return Intake.OLD_NOTIFICATION;
         if(older(postedMs,now)) return Intake.OLD_NOTIFICATION;
         if(previous!=null && postedMs==lastPosted && !identities.contains(key+"\u0000"+postedMs+"\u0000"+mgdl)) return Intake.INVALID;

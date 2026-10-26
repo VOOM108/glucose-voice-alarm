@@ -13,6 +13,7 @@ public final class OutputPreferences {
     public final TrendSpeech trendSpeech;
     public final GapSettings gap;
     public final String speechLanguage;
+    public final de.giesen.camaps.companion.prototype.GlucoseUnit.Mode unitMode;
     public final boolean tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled;
     public OutputPreferences(AlarmEngine.OutputMode mode,int valueIntervalMinutes,String valueTemplate) {
         this(mode,valueIntervalMinutes,valueTemplate,100,100);
@@ -39,6 +40,10 @@ public final class OutputPreferences {
         this(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,"de");
     }
     public OutputPreferences(AlarmEngine.OutputMode mode,int valueIntervalMinutes,String valueTemplate,int toneVolumePercent,int speechVolumePercent,int valueQuietMinutes,int bellBoostDb,TrendSpeech trendSpeech,boolean tonesEnabled,boolean alarmSpeechEnabled,boolean valueSpeechEnabled,boolean vibrationEnabled,GapSettings gap,String speechLanguage) {
+        this(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,speechLanguage,de.giesen.camaps.companion.prototype.GlucoseUnit.Mode.AUTO);
+    }
+    public OutputPreferences(AlarmEngine.OutputMode mode,int valueIntervalMinutes,String valueTemplate,int toneVolumePercent,int speechVolumePercent,int valueQuietMinutes,int bellBoostDb,TrendSpeech trendSpeech,boolean tonesEnabled,boolean alarmSpeechEnabled,boolean valueSpeechEnabled,boolean vibrationEnabled,GapSettings gap,String speechLanguage,de.giesen.camaps.companion.prototype.GlucoseUnit.Mode unitMode) {
+        this.unitMode=java.util.Objects.requireNonNull(unitMode);
         if(!"de".equals(speechLanguage) && !"en".equals(speechLanguage)) throw new IllegalArgumentException("Unsupported speech language");
         this.speechLanguage=speechLanguage;
         this.gap=java.util.Objects.requireNonNull(gap);
@@ -73,10 +78,12 @@ public final class OutputPreferences {
     }
     public OutputPreferences withChannels(boolean tones,boolean alarms,boolean values,boolean vibration) {
         AlarmEngine.OutputMode mode=values?AlarmEngine.OutputMode.SPOKEN_ALARMS_AND_VALUES:alarms?AlarmEngine.OutputMode.SPOKEN_ALARMS:AlarmEngine.OutputMode.TONES_ONLY;
-        return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tones,alarms,values,vibration,gap,speechLanguage);
+        return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tones,alarms,values,vibration,gap,speechLanguage,unitMode);
     }
-    public OutputPreferences withGap(GapSettings gap) { return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,speechLanguage); }
-    public OutputPreferences withSpeechLanguage(String language) { return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,language); }
+    public OutputPreferences withGap(GapSettings gap) { return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,speechLanguage,unitMode); }
+    public OutputPreferences withTrendSpeech(TrendSpeech words) { return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,words,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,speechLanguage,unitMode); }
+    public OutputPreferences withSpeechLanguage(String language) { return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,language,unitMode); }
+    public OutputPreferences withUnitMode(de.giesen.camaps.companion.prototype.GlucoseUnit.Mode unit) { return new OutputPreferences(mode,valueIntervalMinutes,valueTemplate,toneVolumePercent,speechVolumePercent,valueQuietMinutes,bellBoostDb,trendSpeech,tonesEnabled,alarmSpeechEnabled,valueSpeechEnabled,vibrationEnabled,gap,speechLanguage,unit); }
     public static String modeLabel(AlarmEngine.OutputMode mode) {
         switch(mode) {
             case TONES_ONLY: return AppText.tr("Nur Töne");

@@ -33,9 +33,12 @@ public final class AlarmLevelActivity extends UiActivity {
     private ArrayList<String> initial;
     private PreviewAudio audio;
     private long speechVariant;
+    private GlucoseUnit editingUnit;
+    private String initialThreshold;
+    private Double existingThreshold;
 
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved); store=new LevelStore(getFilesDir());
+        super.onCreate(saved); if(!SafetyConsent.ready(this))return; store=new LevelStore(getFilesDir());
         LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück zur Liste"),v -> onBackPressed());
         try {
@@ -46,6 +49,8 @@ public final class AlarmLevelActivity extends UiActivity {
             kind=existing?original.rule.kind:AlarmEngine.Kind.valueOf(getIntent().getStringExtra("kind"));
             expectedRevision=saved!=null?saved.getLong("revision"):snapshot.revision;
             AlarmEngine.Rule r=original==null?null:original.rule;
+            editingUnit=saved!=null && saved.containsKey("editing_unit")?GlucoseUnit.valueOf(saved.getString("editing_unit")):UnitPreferences.display(this);
+            existingThreshold=r==null?null:r.threshold; initialThreshold=r==null?"":editingUnit.threshold(r.threshold,LevelForm.isRate(kind));
             if (r!=null && (!r.allDay || r.startMinute!=0 || r.endMinute!=1440)) { startMinute=r.startMinute; endMinute=r.endMinute; }
             toneUri=original==null?SoundDefaults.uri(this,kind):original.toneUri;
             LevelUi.text(body,existing?AppText.tr("Stufe bearbeiten"):AppText.tr("Neue Alarmstufe"),28);
@@ -54,9 +59,8 @@ public final class AlarmLevelActivity extends UiActivity {
             name=LevelUi.field(body,AppText.tr("Name der Stufe"),original==null?LevelForm.kindLabel(kind):original.name,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
             name.setFilters(new InputFilter[]{new InputFilter.LengthFilter(80)});
             enabled=LevelUi.check(body,AppText.tr("Alarmstufe einschalten"),r!=null && r.enabled);
-            String limitLabel=LevelForm.isRate(kind)?(kind==AlarmEngine.Kind.FALLING?AppText.tr("Abnahme in mg/dl pro Minute (positiv eingeben)"):AppText.tr("Anstieg in mg/dl pro Minute")):
-                    AppText.tr("Grenzwert in mg/dl");
-            threshold=LevelUi.field(body,limitLabel,r==null?"":LevelForm.number(r.threshold),InputType.TYPE_CLASS_NUMBER|(LevelForm.isRate(kind)?InputType.TYPE_NUMBER_FLAG_DECIMAL:0));
+            String limitLabel=LevelForm.isRate(kind)?(kind==AlarmEngine.Kind.FALLING?AppText.tr("Abnahme in "):AppText.tr("Anstieg in "))+editingUnit.label+AppText.tr(" pro Minute (positiv eingeben)"):AppText.tr("Grenzwert in ")+editingUnit.label;
+            threshold=LevelUi.field(body,limitLabel,initialThreshold,InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
             threshold.setFilters(new InputFilter[]{new InputFilter.LengthFilter(24)});
             if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) {
                 duration=LevelUi.field(body,AppText.tr("Länger als … Minuten (xDrip-Regel)"),r==null?"":Integer.toString(r.durationMinutes),InputType.TYPE_CLASS_NUMBER);
@@ -89,7 +93,7 @@ public final class AlarmLevelActivity extends UiActivity {
             LevelUi.text(body,AppText.tr("Anhören mit Testwert"),14);
             LinearLayout samples=new LinearLayout(this); samples.setGravity(android.view.Gravity.CENTER_VERTICAL); body.addView(samples);
             previewSpeech=LevelUi.button(samples,AppText.tr("Sprachtext mit Testdaten anhören"),v -> {
-                try { OutputPreferences p=new OutputPreferenceStore(getFilesDir()).load().preferences; if (speech.isChecked() && audio.speak(SyntheticSpeech.alarm(kind,name.getText().toString(),speechTexts.getText().toString(),speechVariant,p.trendSpeech,p.speechLanguage))) speechVariant++; }
+                try { OutputPreferences p=new OutputPreferenceStore(getFilesDir()).load().preferences; if (speech.isChecked() && audio.speak(SyntheticSpeech.alarm(kind,name.getText().toString(),speechTexts.getText().toString(),speechVariant,p.trendSpeech,p.speechLanguage,editingUnit))) speechVariant++; }
                 catch (IllegalArgumentException | IOException e) { error.setText(e.getMessage()); }
             });
             LevelUi.button(samples,AppText.tr("Vorschau stoppen"),v -> stopTone());
@@ -98,7 +102,7 @@ public final class AlarmLevelActivity extends UiActivity {
             if (LevelForm.hasRepeat(kind)) repeat=LevelUi.field(body,AppText.tr("Wiederholung in Minuten"),r==null?"":Integer.toString(r.outputs.repeatMinutes),InputType.TYPE_CLASS_NUMBER);
             if (LevelForm.hasSnooze(kind)) snooze=LevelUi.field(body,AppText.tr("Snooze nach Quittierung in Minuten"),r==null?"":Integer.toString(r.outputs.snoozeMinutes),InputType.TYPE_CLASS_NUMBER);
             if (LevelForm.isRate(kind)) {
-                LevelUi.text(body,AppText.tr("Aus vier Empfangsminuten berechnet. Mehrfachmeldungen innerhalb einer Minute zählen einmal. Ein Pfeil allein löst keinen Alarm aus."),14);
+                LevelUi.text(body,AppText.tr("Eigene Schwelle für die empfangenen Werte, unabhängig vom CamAPS-Pfeil und vom Abstand der Wertansagen. Vier Minutenpunkte und das letzte Intervall müssen passen. Ohne neue Werte kein Ratenalarm."),14);
                 LevelUi.help(body,AppText.tr("Erneutes Auslösen"),AppText.tr("Ereignisregel nach xDrip: grundsätzlich einmal pro erkannter Phase. Nach Ende der Bedingung kann eine neue Phase erneut melden; bei durchgehendem Zustand ist technisch nach knapp sechs Stunden eine erneute Meldung möglich. Keine einstellbare Wiederholungs- oder Snoozezeit."));
             }
             else if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) LevelUi.text(body,AppText.tr("Eigener Wiederholungsabstand nach xDrip; kein Stufen-Snooze in diesem Alarmweg."),14);
@@ -199,10 +203,10 @@ public final class AlarmLevelActivity extends UiActivity {
     private void save() {
         if (!ready) return;
         try {
-            AlarmLevel level=LevelForm.parse(id,kind,name.getText().toString(),threshold.getText().toString(),
+            AlarmLevel level=LevelForm.parseWithUnit(id,kind,name.getText().toString(),threshold.getText().toString(),
                     duration==null?"":duration.getText().toString(),repeat==null?"":repeat.getText().toString(),snooze==null?"":snooze.getText().toString(),
                     enabled.isChecked(),tone.isChecked(),speech.isChecked(),toneUri,allDay.isChecked(),
-                    allDay.isChecked() && startMinute<0?0:startMinute,allDay.isChecked() && endMinute<0?1440:endMinute);
+                    allDay.isChecked() && startMinute<0?0:startMinute,allDay.isChecked() && endMinute<0?1440:endMinute,editingUnit,threshold.getText().toString().equals(initialThreshold)?existingThreshold:null);
             level=new AlarmLevel(level.rule,level.name,level.toneUri,SpeechTemplate.variants(speechTexts.getText().toString(),kind),vibration.isChecked()?selectedVibration():null,recovery!=null && recovery.isChecked());
             List<AlarmLevel> desired=new ArrayList<>(); boolean replaced=false;
             for (AlarmLevel current:snapshot.levels) {
@@ -237,7 +241,7 @@ public final class AlarmLevelActivity extends UiActivity {
     @Override public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
         if (!ready) return;
-        state.putString("draftId",id); state.putLong("revision",expectedRevision); state.putStringArrayList("fields",values()); state.putStringArrayList("initial",initial);
+        state.putString("editing_unit",editingUnit.name()); state.putString("draftId",id); state.putLong("revision",expectedRevision); state.putStringArrayList("fields",values()); state.putStringArrayList("initial",initial);
     }
     @Override public void onBackPressed() {
         stopTone();

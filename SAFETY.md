@@ -19,3 +19,9 @@ To the extent permitted by applicable law, the software and materials are provid
 The project is independent of the xDrip+/Nightscout projects, CamAPS and equipment manufacturers. Reuse credits do not imply endorsement, certification or support. Trademarks belong to their respective owners.
 
 These points adapt the xDrip+ research warning and warranty notice to this companion. The complete original wording and pinned source are retained in [xdrip-safety-notices.txt](docs/upstream/xdrip-safety-notices.txt). Those historical upstream notices do not add extra restrictions to this project's GPL license.
+
+## First-start acknowledgement
+
+Before first use, the app requires two separate acknowledgements: the important warning, followed by the terms of use with “I understand”. Both checkboxes start unchecked. App features, notification reception and all own output remain blocked until both steps are acknowledged. Existing installations also see these steps when this check is introduced. Afterwards, you must enable active output yourself.
+
+Acknowledgements stay on the device and are excluded from settings profiles. Ordinary updates do not ask again; a change to the meaning of the notices requires a new acknowledgement. Appearance → Safety and terms lets you reread the notices and the complete GPLv3 license at any time.

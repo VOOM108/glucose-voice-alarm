@@ -53,6 +53,8 @@ public final class AlarmOutputFlow {
     private long valueQuietUntil;
     public void deferValuesUntil(long elapsed) { valueQuietUntil=Math.max(valueQuietUntil,elapsed); }
     private boolean paused;
+    private de.giesen.camaps.companion.prototype.GlucoseUnit outputUnit;
+    public void setOutputUnit(de.giesen.camaps.companion.prototype.GlucoseUnit unit) { outputUnit=java.util.Objects.requireNonNull(unit); }
     public AlarmOutputFlow(AlarmStateStore store,List<AlarmLevel> levels,HistoryAnalysis.Limits limits,OutputPreferences preferences,Port port) {
         this(store,levels,limits,preferences,port,OutputGuard.disabled());
     }
@@ -131,7 +133,7 @@ public final class AlarmOutputFlow {
             AlarmStateStore.Entry state=session.view(now).entries.get(id);
             if (state!=null && state.highSince>0) duration=(now.wallMs-state.highSince)/60000;
             String spoken=speech?SpeechTemplate.render(level.speechText(variant,preferences.speechLanguage),level,
-                    new SpeechTemplate.Values(latest.mgdl,trend,(now.wallMs-latest.timestampMs)/1000,duration,preferences.trendSpeech,preferences.speechLanguage),false,allowedOrigin==Origin.SYNTHETIC):null;
+                    new SpeechTemplate.Values(latest.mgdl,trend,(now.wallMs-latest.timestampMs)/1000,duration,preferences.trendSpeech,preferences.speechLanguage,outputUnit==null?preferences.unitMode.resolve(null):outputUnit),false,allowedOrigin==Origin.SYNTHETIC):null;
             Plan plan=new Plan(id,level.rule.kind,tone?level.toneUri:null,spoken,allowedOrigin==Origin.SYNTHETIC,vibration?level.vibrationPattern:null);
             List<AlarmLevel> group=new ArrayList<>(); group.add(level);
             if(LevelForm.hasSnooze(level.rule.kind)) {
@@ -214,7 +216,7 @@ public final class AlarmOutputFlow {
             int variant=variants.getOrDefault(level.rule.id,0);
             if(refreshing) variant=variant==0?Integer.MAX_VALUE:variant-1;
             if(preferences.alarmSpeechAllowed(level)) words.add(SpeechTemplate.render(level.speechText(variant,preferences.speechLanguage),level,
-                    new SpeechTemplate.Values(latest.mgdl,trend,(now.wallMs-latest.timestampMs)/1000,duration,preferences.trendSpeech,preferences.speechLanguage),false,allowedOrigin==Origin.SYNTHETIC));
+                    new SpeechTemplate.Values(latest.mgdl,trend,(now.wallMs-latest.timestampMs)/1000,duration,preferences.trendSpeech,preferences.speechLanguage,outputUnit==null?preferences.unitMode.resolve(null):outputUnit),false,allowedOrigin==Origin.SYNTHETIC));
         }
         AlarmLevel first=group.get(0); String speech=words.isEmpty()?null:String.join(". ",words);
         return new Plan(first.rule.id,first.rule.kind,tones.isEmpty()?null:tones.get(0),speech,allowedOrigin==Origin.SYNTHETIC,vibrations.isEmpty()?null:vibrations.get(0),ids,tones,vibrations);
@@ -227,7 +229,7 @@ public final class AlarmOutputFlow {
         if (nextValueElapsed<0 || now.elapsedMs<nextValueElapsed) return Outcome.NOT_DUE;
         if (!allowed(null,false,true)) return Outcome.SUPPRESSED;
         Plan plan=new Plan(null,null,null,SpeechTemplate.render(preferences.valueTemplate,null,
-                new SpeechTemplate.Values(latest.mgdl,trend,(now.wallMs-latest.timestampMs)/1000,0,preferences.trendSpeech,preferences.speechLanguage),true,allowedOrigin==Origin.SYNTHETIC),allowedOrigin==Origin.SYNTHETIC);
+                new SpeechTemplate.Values(latest.mgdl,trend,(now.wallMs-latest.timestampMs)/1000,0,preferences.trendSpeech,preferences.speechLanguage,outputUnit==null?preferences.unitMode.resolve(null):outputUnit),true,allowedOrigin==Origin.SYNTHETIC),allowedOrigin==Origin.SYNTHETIC);
         try {
             if (!port.available(plan)) return Outcome.OUTPUT_UNAVAILABLE;
             // No catch-up loop; a single explicit request can start at most one announcement.

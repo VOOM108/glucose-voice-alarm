@@ -66,7 +66,7 @@ python tools/check_upstream_rules.py
 
 Wenn sqlite4java unter Windows mit langen WAL-Pfaden scheitert, wähle einen kurzen beschreibbaren Testordner. `probeTestTmp` legt ihn fest; der Standard ist `../t` relativ zum Repository. Gradle und Robolectric laden beim ersten Test Abhängigkeiten herunter, was viel Speicher benötigen kann. XML-/HTML-Berichte und synthetische native UI-Bilder bleiben im ignorierten `build/` des Moduls.
 
-`-PprobeFastCheck` führt nur den reinen Java-Teil aus und ersetzt nicht die vollständige Prüfung. Der Beta-Ausgangsstand hat 419 vollständige synthetische Prüfungen, unter anderem für alte Speicherformate, Profile, englische Oberfläche/Sprache und native Hell-/Dunkel-Darstellungen. Das belegt keine Zuverlässigkeit, Hörbarkeit oder klinische Sicherheit am echten Gerät.
+`-PprobeFastCheck` führt nur den reinen Java-Teil aus und ersetzt nicht die vollständige Prüfung. Der Beta-Ausgangsstand hat 524 vollständige synthetische Prüfungen, unter anderem für alte Speicherformate, Profile, deutsche/englische Oberfläche und Sprache, Einheitenumrechnung und die beiden Erststart-Bestätigungen. Native synthetische Darstellungen decken beide Sprachen und Themen sowie große Schrift ab. Das belegt keine Zuverlässigkeit, Hörbarkeit oder klinische Sicherheit am echten Gerät.
 
 ## Eigenen Build installieren
 
@@ -76,7 +76,7 @@ Die Installation ist ein eigener Schritt. Bei passender App-ID/Signatur und Dein
 adb install -r companionProbe/build/outputs/apk/debug/companionProbe-debug.apk
 ```
 
-Der Befehl aktualisiert nur eine passende Installation mit Datenerhalt. Danach Android-Freigaben erteilen, App konfigurieren und Ausgabe selbst einschalten. Kein Build-Task installiert die App, startet Live-Ausgabe, legt GitHub-Releases an oder lädt APKs hoch.
+Der Befehl aktualisiert nur eine passende Installation mit Datenerhalt. Öffne danach die App und bestätige Warnhinweis und Nutzungsbedingungen selbst. Nach dem Update auf 0.15 gilt das auch einmalig für bestehende Installationen. Erst danach stehen Empfang und Ausgabe zur Verfügung. Erteile die Android-Freigaben, konfiguriere die App und schalte die aktive Ausgabe selbst ein. Bestätigungen dürfen nicht automatisiert werden. Kein Build-Task installiert die App, startet Live-Ausgabe, legt GitHub-Releases an oder lädt APKs hoch.
 
 ## Abhängigkeiten und Lizenzen
 

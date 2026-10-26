@@ -14,14 +14,14 @@ public final class ProfilesActivity extends UiActivity {
     private ProfileStore store;
     private ProfileStore.Snapshot snapshot;
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved); store=new ProfileStore(getFilesDir()); LinearLayout body=LevelUi.screen(this);
+        super.onCreate(saved); if(!SafetyConsent.ready(this))return; store=new ProfileStore(getFilesDir()); LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Profile"),28);
         LevelUi.text(body,AppText.tr("Fünf Speicherplätze für Deine Einstellungen."),16);
         LevelUi.help(body,AppText.tr("Was wird gespeichert?"),AppText.tr("Alarmstufen, Erholungsregeln, Lückenwarnung, Ausgabewege, Töne, Vibrationsmuster, Lautstärken, Texte, Darstellung und AOD-Einstellungen. Beim Laden wird die Live-Ausgabe ausgeschaltet. Aktuelle Werte, Pfeilzuordnungen, laufende Snooze-Fristen und Systemfreigaben gehören nicht zum Profil."));
         status=LevelUi.text(body,"",15); status.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
         list=new LinearLayout(this); list.setOrientation(LinearLayout.VERTICAL); body.addView(list);
     }
-    @Override public void onResume() { super.onResume(); render(); }
+    @Override public void onResume() { super.onResume(); if(!SafetyConsent.ready(this))return; render(); }
     private void render() {
         list.removeAllViews();
         try { snapshot=store.load(); }
@@ -33,7 +33,7 @@ public final class ProfilesActivity extends UiActivity {
             if(entry==null) LevelUi.button(card,AppText.tr("Speichern"),v -> save(index,revision,null));
             else {
                 LevelUi.button(card,AppText.tr("Laden"),v -> new AlertDialog.Builder(this).setTitle("„"+entry.name+"“ laden?")
-                        .setMessage(AppText.tr("Ersetzt Deine aktuellen Einstellungen. Die Live-Ausgabe wird ausgeschaltet; danach bitte im Dashboard wieder einschalten. Laufende Snooze-Fristen bleiben erhalten, soweit die Alarmbedingung unverändert ist."))
+                        .setMessage(AppText.tr("Einheit für Anzeige und Ansagen: ")+entry.settings.output.preferences.unitMode.title()+"\n\n"+AppText.tr("Ersetzt Deine aktuellen Einstellungen. Die Live-Ausgabe wird ausgeschaltet; danach bitte im Dashboard wieder einschalten. Laufende Snooze-Fristen bleiben erhalten, soweit die Alarmbedingung unverändert ist."))
                         .setNegativeButton(AppText.tr("Abbrechen"),null).setPositiveButton(AppText.tr("Laden"),(d,w) -> load(index,revision)).show());
                 LinearLayout row=new LinearLayout(this); card.addView(row);
                 Button replace=LevelUi.button(row,AppText.tr("Ersetzen"),v -> save(index,revision,entry.name));

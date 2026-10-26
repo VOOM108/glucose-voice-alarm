@@ -19,3 +19,9 @@ Soweit geltendes Recht es zulässt, werden Software und Unterlagen im vorliegend
 Das Projekt ist unabhängig von xDrip+/Nightscout, CamAPS und Geräteherstellern. Credits bedeuten keine Unterstützung, Zertifizierung oder Betreuung durch diese Projekte oder Hersteller. Marken gehören ihren jeweiligen Inhabern.
 
 Die Hinweise übertragen die xDrip+-Forschungswarnung und den Gewährleistungshinweis auf diese Begleitapp. Vollständiger Originalwortlaut und festgelegte Quelle stehen in [xdrip-safety-notices.txt](docs/upstream/xdrip-safety-notices.txt). Diese historischen Originalhinweise ergänzen die GPL-Lizenz dieses Projekts nicht um weitere Einschränkungen.
+
+## Bestätigung beim ersten Start
+
+Vor der ersten Nutzung verlangt die App zwei getrennte Bestätigungen: zuerst den wichtigen Warnhinweis, danach die Nutzungsbedingungen mit „Ich verstehe“. Beide Checkboxen beginnen leer. Bis beide Schritte bestätigt sind, bleiben App-Funktionen, Benachrichtigungsempfang und eigene Ausgabe gesperrt. Das gilt auch für bestehende Installationen nach Einführung dieser Abfrage. Danach musst Du die aktive Ausgabe selbst einschalten.
+
+Die Bestätigungen bleiben auf dem Gerät und gehören nicht zu Einstellungsprofilen. Normale Updates fragen nicht erneut; inhaltlich geänderte Hinweise benötigen eine neue Bestätigung. Unter Darstellung → Sicherheit und Bedingungen kannst Du die Texte jederzeit erneut lesen, einschließlich der vollständigen GPLv3-Lizenz.

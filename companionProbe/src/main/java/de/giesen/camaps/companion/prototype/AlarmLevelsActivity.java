@@ -17,7 +17,7 @@ public final class AlarmLevelsActivity extends UiActivity {
     private LevelStore store;
     private LevelStore.Snapshot snapshot;
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved); store=new LevelStore(getFilesDir());
+        super.onCreate(saved); if(!SafetyConsent.ready(this))return; store=new LevelStore(getFilesDir());
         LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück zum Empfang"),v -> finish());
         LevelUi.text(body,AppText.tr("Alarmstufen"),28);
@@ -27,7 +27,7 @@ public final class AlarmLevelsActivity extends UiActivity {
         list=new LinearLayout(this); list.setOrientation(LinearLayout.VERTICAL); body.addView(list);
         LevelUi.button(body,AppText.tr("Liste neu laden"),v -> refresh());
     }
-    @Override public void onResume() { super.onResume(); refresh(); }
+    @Override public void onResume() { super.onResume(); if(!SafetyConsent.ready(this))return; refresh(); }
     private void refresh() {
         list.removeAllViews();
         try { snapshot=store.load(); }
@@ -52,8 +52,9 @@ public final class AlarmLevelsActivity extends UiActivity {
         LinearLayout card=DashboardUi.card(this,list);
         LevelUi.text(card,level.name,19);
         AlarmEngine.Rule r=level.rule;
-        String summary=(LevelForm.isRate(r.kind)?AppText.tr("Änderungsrate: "):"Grenze: ")+LevelForm.number(r.threshold)
-                +(LevelForm.isRate(r.kind)?AppText.tr(" mg/dl pro Minute"):" mg/dl")
+        GlucoseUnit unit=UnitPreferences.display(this);
+        String summary=(LevelForm.isRate(r.kind)?AppText.tr("Änderungsrate: "):AppText.tr("Grenze: "))+unit.threshold(r.threshold,LevelForm.isRate(r.kind))
+                +" "+unit.label+(LevelForm.isRate(r.kind)?AppText.tr(" pro Minute"):"")
                 +(r.kind==AlarmEngine.Kind.PERSISTENT_HIGH?AppText.tr(" · länger als ")+r.durationMinutes+" Minuten":"")
                 +"\nTon "+(r.outputs.tone?AppText.tr("ein"):AppText.tr("aus"))+" · Sprache "+(r.outputs.speech?AppText.tr("ein"):AppText.tr("aus"))
                 +" · Vibration "+(level.vibrationPattern==null?AppText.tr("aus"):AppText.tr(VibrationCatalog.valueOf(level.vibrationPattern).label))

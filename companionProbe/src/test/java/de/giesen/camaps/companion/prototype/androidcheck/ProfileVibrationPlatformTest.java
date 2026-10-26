@@ -25,6 +25,7 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(qualifiers="de",sdk={28,34},shadows={AndroidUiTest.TestBellPlayer.class})
 @LooperMode(LooperMode.Mode.PAUSED)
 public class ProfileVibrationPlatformTest {
+    @org.junit.Before public void acknowledgeForExistingFeatureTests(){ConsentTestSupport.accept(org.robolectric.RuntimeEnvironment.getApplication());}
     private Context app;
     private Vibrator vibrator;
     private final List<PreviewAudio> owners=new ArrayList<>();

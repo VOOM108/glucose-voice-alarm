@@ -13,10 +13,10 @@ public final class AlarmProbe {
     private static final AlarmEngine LIVE=AlarmEngine.inactive();
     public static volatile Ingress ingress=Ingress.WAITING;
     public static volatile int selfTestPassed=-1;
-    public static void receive(Integer mgdl,long nowWall,int minuteOfDay) {
+    public static void receive(Number mgdl,long nowWall,int minuteOfDay) {
         if (mgdl==null) { ingress=Ingress.NO_VALUE; LIVE.reset(); return; }
         // Neither posted nor received time may be renamed to a verified measurement time.
-        LIVE.evaluate(Arrays.asList(new HistoryAnalysis.Point(mgdl,null)),nowWall,minuteOfDay,null,
+        LIVE.evaluate(Arrays.asList(new HistoryAnalysis.Point(mgdl.doubleValue(),null)),nowWall,minuteOfDay,null,
                 result -> ingress=Ingress.INACTIVE);
     }
     public static void clear(Ingress state) { LIVE.reset(); ingress=state; }

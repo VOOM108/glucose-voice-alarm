@@ -9,8 +9,10 @@ import de.giesen.camaps.companion.prototype.alarm.VibrationCatalog;
 final class PreviewVibration {
     private static PreviewVibration active;
     private final Vibrator vibrator;
+    private final Context context;
     private long until;
     PreviewVibration(Context context) {
+        this.context=context.getApplicationContext();
         Vibrator found=null;
         try {
             if(Build.VERSION.SDK_INT>=31) { VibratorManager manager=context.getSystemService(VibratorManager.class); if(manager!=null) found=manager.getDefaultVibrator(); }
@@ -18,7 +20,7 @@ final class PreviewVibration {
         } catch(RuntimeException ignored) { }
         vibrator=found;
     }
-    boolean available() { try { return vibrator!=null && vibrator.hasVibrator(); } catch(RuntimeException e) { return false; } }
+    boolean available() { try { return SafetyConsent.ready(context) && vibrator!=null && vibrator.hasVibrator(); } catch(RuntimeException e) { return false; } }
     boolean start(String pattern) {
         return startPatterns(pattern==null?java.util.Collections.emptyList():java.util.Collections.singletonList(pattern));
     }

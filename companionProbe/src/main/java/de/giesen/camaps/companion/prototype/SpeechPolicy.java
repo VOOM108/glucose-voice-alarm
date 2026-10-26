@@ -11,17 +11,21 @@ public final class SpeechPolicy {
                 && notificationPosted > 0 && nowWall >= notificationPosted
                 && nowWall - notificationPosted <= MAX_RECEIPT_AGE_MS;
     }
-    public static String observationText(int value, NotificationParser.Trend trend, long seconds) {
+    public static String observationText(double value, NotificationParser.Trend trend, long seconds) {
         return observationText(value,trend,seconds,de.giesen.camaps.companion.prototype.alarm.TrendSpeech.defaults());
     }
-    public static String observationText(int value, NotificationParser.Trend trend, long seconds,de.giesen.camaps.companion.prototype.alarm.TrendSpeech words) {
+    public static String observationText(double value, NotificationParser.Trend trend, long seconds,de.giesen.camaps.companion.prototype.alarm.TrendSpeech words) {
         return observationText(value,trend,seconds,words,"de");
     }
-    public static String observationText(int value, NotificationParser.Trend trend, long seconds,de.giesen.camaps.companion.prototype.alarm.TrendSpeech words,String language) {
-        if("en".equals(language)) return "Value received "+seconds+" seconds ago: "+value+" milligrams per deciliter."+(trend==null || trend==NotificationParser.Trend.UNKNOWN?"":" Trend: "+words.word(trend)+".");
-        return "Vor " + seconds + " Sekunden empfangener Wert: " + value
-                + " Milligramm pro Deziliter."
-                +(trend==null || trend==NotificationParser.Trend.UNKNOWN?"":" Trend: "+words.word(trend)+".");
+    public static String observationText(double value, NotificationParser.Trend trend, long seconds,de.giesen.camaps.companion.prototype.alarm.TrendSpeech words,String language) {
+        return observationText(value,trend,seconds,words,language,GlucoseUnit.MGDL);
+    }
+    public static String observationText(double value,NotificationParser.Trend trend,long seconds,de.giesen.camaps.companion.prototype.alarm.TrendSpeech words,String language,GlucoseUnit unit) {
+        String phrase=words.word(trend),number=unit.number(value,"en".equals(language)?java.util.Locale.ENGLISH:java.util.Locale.GERMAN);
+        if("en".equals(language)) return "Value received "+seconds+" seconds ago: "+number+" "+unit.spokenUnit(language)+"."+(phrase.isEmpty()?"":" Trend: "+phrase+".");
+        return "Vor " + seconds + " Sekunden empfangener Wert: " + number
+                + " "+unit.spokenUnit(language)+"."
+                +(phrase.isEmpty()?"":" Trend: "+phrase+".");
     }
     private SpeechPolicy() {}
 }

@@ -27,7 +27,7 @@ import java.io.IOException;
 public class ProbeActivity extends UiActivity {
     protected boolean diagnosticsPage() { return false; }
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private TextView status, value, trendValue, speechStatus, diagnostics;
+    private TextView status, value, trendValue, calculatedRate, speechStatus, diagnostics;
     private Button copyDiagnostics;
     private Button confirmVector;
     private AlertDialog vectorDialog;
@@ -38,8 +38,8 @@ public class ProbeActivity extends UiActivity {
     private TextView runtimeStatus;
     private TextView operationStatus;
     private Button operation;
-    private TextView readingTime;
-    private TextView activationHint;
+    private TextView readingTime,readingUnit;
+    private TextView activationHint,unitHint;
     private LiveActivation.Problem activationProblem;
     private long activationPendingUntil;
     private Switch liveSwitch;
@@ -53,7 +53,7 @@ public class ProbeActivity extends UiActivity {
     };
 
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved);
+        super.onCreate(saved); if(!SafetyConsent.ready(this))return;
         try { SoundDefaults.install(this); } catch (IOException e) { ProbeState.status=AppText.tr("App-Tonstandard noch nicht übernommen; gespeicherte Einstellungen bleiben erhalten"); }
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
@@ -72,10 +72,14 @@ public class ProbeActivity extends UiActivity {
         LinearLayout stamp=new LinearLayout(this); stamp.setOrientation(LinearLayout.VERTICAL); valueRow.addView(stamp);
         readingTime=text(stamp,"",18); readingTime.setTag("dashboard_time"); readingTime.setSingleLine(true); readingTime.setFontFeatureSettings("tnum");
         readingTime.setMinWidth((int)Math.ceil(readingTime.getPaint().measureText("00:00"))+LevelUi.dp(this,2));
-        readingTime.setLayoutParams(new LinearLayout.LayoutParams(-2,-2)); DashboardUi.type(readingTime,DashboardUi.muted(this),false); text(stamp,"mg/dl",13);
+        readingTime.setLayoutParams(new LinearLayout.LayoutParams(-2,-2)); DashboardUi.type(readingTime,DashboardUi.muted(this),false); readingUnit=text(stamp,"",13); readingUnit.setTag("dashboard_unit");
         trendValue=text(reading,AppText.tr("Warte auf CamAPS"),17);
+        trendValue.setTag("camaps_trend");
         confirmVector=button(reading,AppText.tr("Pfeilgrafik zuordnen …"),v -> labelVector());
         vectorStatus=text(reading,"",13);
+        calculatedRate=text(reading,"",14); calculatedRate.setTag("calculated_rate"); calculatedRate.setSingleLine(true);
+        DashboardUi.type(calculatedRate,DashboardUi.muted(this),false);
+        unitHint=text(reading,"",14); unitHint.setTag("unit_warning"); unitHint.setTextColor(AppAppearance.colors(this).error); unitHint.setOnClickListener(v -> startActivity(new Intent(this,DeveloperOptionsActivity.class)));
         history=new DashboardHistory(this,reading);
         LinearLayout controls=DashboardUi.card(this,panel);
         operationStatus=text(controls,"",18);
@@ -144,7 +148,7 @@ public class ProbeActivity extends UiActivity {
             render();
         });
         button(panel, AppText.tr("Benachrichtigungszugriff öffnen"), v -> startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)));
-        text(panel, AppText.tr("Android vergibt Benachrichtigungszugriff für alle Apps. Verarbeitet werden nur laufende CamAPS-mg/dl-Meldungen; vollständige Meldungstexte werden nicht gespeichert."), 14);
+        text(panel, AppText.tr("Android vergibt Benachrichtigungszugriff für alle Apps. Verarbeitet werden nur laufende unterstützte CamAPS-Meldungen; vollständige Meldungstexte werden nicht gespeichert."), 14);
         button(panel, AppText.tr("Sprachvorschau mit Testtext"), v -> {
             try { say(AppText.in(new de.giesen.camaps.companion.prototype.alarm.OutputPreferenceStore(getFilesDir()).load().preferences.speechLanguage,"Dies ist eine Sprachvorschau von Glucose Voice Alarm. Es wird kein Messwert angesagt.")); }
             catch(IOException e) { speechStatus.setText(AppText.tr("Ausgabe-Einstellungen nicht lesbar")); }
@@ -157,7 +161,7 @@ public class ProbeActivity extends UiActivity {
                 speechStatus.setText(AppText.tr("Keine Ansage: kein kürzlich empfangenes, zeitlich plausibles Ereignis vorhanden."));
                 return;
             }
-            try { de.giesen.camaps.companion.prototype.alarm.OutputPreferences p=new de.giesen.camaps.companion.prototype.alarm.OutputPreferenceStore(getFilesDir()).load().preferences; say(SpeechPolicy.observationText(current.value, current.trend, (now-current.receivedElapsed)/1000,p.trendSpeech,p.speechLanguage)); }
+            try { de.giesen.camaps.companion.prototype.alarm.OutputPreferences p=new de.giesen.camaps.companion.prototype.alarm.OutputPreferenceStore(getFilesDir()).load().preferences; say(SpeechPolicy.observationText(current.value, current.trend, (now-current.receivedElapsed)/1000,p.trendSpeech,p.speechLanguage,UnitPreferences.display(this,p))); }
             catch(IOException e) { speechStatus.setText(AppText.tr("Ausgabe-Einstellungen nicht lesbar")); }
         });
         button(panel, AppText.tr("Sprache stoppen"), v -> { if (audio != null) audio.stop(); });
@@ -242,11 +246,17 @@ public class ProbeActivity extends UiActivity {
         vectorStatus.setText(candidate!=null && candidate.current()
                 ? (known?AppText.tr("Diese Grafik ist bereits zugeordnet; keine erneute Bestätigung nötig."):AppText.tr("Noch nicht zugeordnete Grafik. Bitte nur einen klar erkennbaren Pfeil bestätigen."))
                 : AppText.tr("Keine aktuelle, eindeutige Vektorgrafik zum Zuordnen verfügbar."));
-        trendValue.setText(current==null?AppText.tr("Warte auf CamAPS"):current.trend!=NotificationParser.Trend.UNKNOWN
-                ?MetricNotification.trendTitle(current.trend):candidate!=null && candidate.current()?AppText.tr("Trend offen"):AppText.tr("Kein Trendpfeil"));
-        value.setText(current == null ? "—" : current.value+(current.trend==NotificationParser.Trend.UNKNOWN?"":" "+current.trend.symbol));
-        value.setContentDescription(current==null?AppText.tr("Noch kein Empfang"):current.value+" mg/dl");
+        GlucoseUnit unit=UnitPreferences.display(this); readingUnit.setText(unit.label);
+        unitHint.setText(AppText.tr("Einheitenkonflikt · Entwickleroptionen öffnen")); unitHint.setVisibility(UnitPreferences.conflict(this)?View.VISIBLE:View.GONE);
+        trendValue.setText("CamAPS  "+(current==null?AppText.tr("Warte auf CamAPS"):current.trend!=NotificationParser.Trend.UNKNOWN
+                ?MetricNotification.trendTitle(current.trend):candidate!=null && candidate.current()?AppText.tr("Trend offen"):AppText.tr("Kein Trendpfeil")));
+        value.setText(current == null ? "—" : unit.number(current.value,java.util.Locale.getDefault())+(current.trend==NotificationParser.Trend.UNKNOWN?"":" "+current.trend.symbol));
+        value.setContentDescription(current==null?AppText.tr("Noch kein Empfang"):unit.number(current.value,java.util.Locale.getDefault())+" "+unit.label);
         boolean currentFresh=current!=null && SpeechPolicy.canSpeak(enabled(),current.receivedElapsed,SystemClock.elapsedRealtime(),current.postedWall,System.currentTimeMillis());
+        Double rate=currentFresh?current.receiptRate.at(System.currentTimeMillis()):null;
+        calculatedRate.setText(rate==null?"":unit.rate(rate,java.util.Locale.getDefault()));
+        calculatedRate.setVisibility(rate==null?View.GONE:View.VISIBLE);
+        calculatedRate.setContentDescription(rate==null?"":AppText.tr("Änderungsrate")+" "+calculatedRate.getText());
         DashboardUi.type(value,currentFresh?DashboardUi.ink(this):DashboardUi.muted(this),true);
         readingTime.setText(current==null?"":new java.text.SimpleDateFormat("HH:mm",java.util.Locale.GERMANY).format(new java.util.Date(current.receivedWall)));
         DashboardUi.type(readingTime,current!=null && !currentFresh?AppAppearance.colors(this).error:DashboardUi.muted(this),false);
@@ -324,7 +334,7 @@ public class ProbeActivity extends UiActivity {
         return view;
     }
     @Override public void onResume() {
-        super.onResume(); RuntimeStateBridge.refresh(getFilesDir(),RuntimeClock.read(this)); handler.post(refresh);
+        super.onResume(); if(!SafetyConsent.ready(this))return; RuntimeStateBridge.refresh(getFilesDir(),RuntimeClock.read(this)); handler.post(refresh);
         if (history!=null && !diagnosticsPage()) history.resume(); if (modeToggles!=null) modeToggles.render();
     }
     @Override public void onPause() {

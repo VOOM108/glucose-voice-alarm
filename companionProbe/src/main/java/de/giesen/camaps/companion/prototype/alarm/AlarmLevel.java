@@ -34,7 +34,8 @@ public final class AlarmLevel {
                 || rule.outputs.snoozeMinutes<(LevelForm.hasSnooze(rule.kind)?1:0)
                 || rule.outputs.repeatMinutes>Integer.MAX_VALUE/60000 || rule.outputs.snoozeMinutes>Integer.MAX_VALUE/60000)
             throw new IllegalArgumentException(AppText.tr("Ungültige Wiederholungs- oder Snoozezeit"));
-        if ((!LevelForm.isRate(rule.kind) && (rule.threshold!=Math.rint(rule.threshold) || rule.threshold>Integer.MAX_VALUE))
+        // mmol/l conversion yields fractional canonical mg/dl thresholds; retain that precision.
+        if ((!LevelForm.isRate(rule.kind) && rule.threshold>Integer.MAX_VALUE)
                 || rule.durationMinutes>Integer.MAX_VALUE/60000 || (rule.kind!=AlarmEngine.Kind.PERSISTENT_HIGH && rule.durationMinutes!=0))
             throw new IllegalArgumentException(AppText.tr("Ungültige Grenz- oder Dauerangabe"));
         if (variants==null || variants.size()>4) throw new IllegalArgumentException(AppText.tr("Ungültige Sprachvarianten"));

@@ -26,6 +26,7 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(qualifiers="de",sdk={28,34},shadows={AndroidUiTest.TestRingtones.class,AndroidUiTest.TestRingtone.class,AndroidUiTest.TestBellPlayer.class})
 @LooperMode(LooperMode.Mode.PAUSED)
 public class LivePlatformTest {
+    @org.junit.Before public void acknowledgeForExistingFeatureTests(){ConsentTestSupport.accept(org.robolectric.RuntimeEnvironment.getApplication());}
     private Context app;
     private ServiceController<LiveAlarmService> service;
     private NotificationManager notifications;
@@ -122,7 +123,7 @@ public class LivePlatformTest {
             store.insert("synthetic",now,now,new NotificationParser.Result(123,NotificationParser.Trend.UNKNOWN,"synthetic"));
             store.insert("synthetic",now,now+1,new NotificationParser.Result(123,NotificationParser.Trend.UP,"synthetic"));
             store.insert("old-synthetic",now-7*3600000L,now-7*3600000L,new NotificationParser.Result(100,NotificationParser.Trend.FLAT,"synthetic"));
-            List<DiagnosticSeries.Sample> points=store.receipts(now+1); assertEquals(1,points.size()); assertEquals(123,points.get(0).value);
+            List<DiagnosticSeries.Sample> points=store.receipts(now+1); assertEquals(1,points.size()); assertEquals(123,points.get(0).value,0);
         }
     }
     @Test public void aggregateReferenceReportIsPersistedWithoutAnyHashOrValue() throws Exception {

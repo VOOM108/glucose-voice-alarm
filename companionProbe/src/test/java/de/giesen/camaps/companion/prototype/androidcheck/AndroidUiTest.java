@@ -28,6 +28,7 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(qualifiers="de",sdk=28,shadows={AndroidUiTest.TestRingtones.class,AndroidUiTest.TestRingtone.class,AndroidUiTest.TestBellPlayer.class})
 @LooperMode(LooperMode.Mode.PAUSED)
 public class AndroidUiTest {
+    @org.junit.Before public void acknowledgeForExistingFeatureTests(){ConsentTestSupport.accept(org.robolectric.RuntimeEnvironment.getApplication());}
     private Context app;
     private final List<PreviewAudio> audioOwners=new ArrayList<>();
     private final List<ActivityController<?>> activities=new ArrayList<>();
@@ -149,7 +150,8 @@ public class AndroidUiTest {
         app.getSharedPreferences(CamApsListener.PREFS,Context.MODE_PRIVATE).edit().putBoolean(CamApsListener.ENABLED,true).commit();
         ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.UNKNOWN,SystemClock.elapsedRealtime(),System.currentTimeMillis(),"synthetic");
         ProbeActivity activity=open(ProbeActivity.class).get(); shadowOf(Looper.getMainLooper()).idle();
-        View trend=text(activity,"Kein Trendpfeil");
+        View trend=activity.getWindow().getDecorView().findViewWithTag("camaps_trend");
+        assertEquals("CamAPS  Kein Trendpfeil",((TextView)trend).getText().toString());
         View button=text(activity,"Pfeilgrafik zuordnen …");
         ViewGroup parent=(ViewGroup)trend.getParent();
         assertSame(button,parent.getChildAt(parent.indexOfChild(trend)+1)); assertFalse(button.isEnabled());
