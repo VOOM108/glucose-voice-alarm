@@ -1,0 +1,3 @@
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/xcam_icon_foreground_v1"
+    android:gravity="fill" android:filter="true" />

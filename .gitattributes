@@ -1,0 +1,7 @@
+* text=auto eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jar binary
+# Preserve the upstream license document verbatim, including its whitespace.
+licenses/gradle/LICENSE whitespace=-blank-at-eol

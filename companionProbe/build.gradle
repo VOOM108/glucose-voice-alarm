@@ -1,0 +1,79 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'de.giesen.camaps.companion.prototype'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'de.giesen.camaps.companion.prototype'
+        minSdk 26
+        targetSdk 34
+        versionCode 22
+        versionName '0.11.0-beta'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    // Local development can retain its existing identity. A fresh clone uses
+    // Android's generated debug key; private signing material is never required.
+    if (project.hasProperty('probeKeystore')) {
+        signingConfigs {
+            debug { storeFile file(project.property('probeKeystore')) }
+        }
+    }
+    buildTypes {
+        debug { minifyEnabled false }
+    }
+    sourceSets.main.res.srcDir "$buildDir/generated/tone-res"
+    aaptOptions { noCompress 'wav' }
+    if (project.hasProperty('probeFastCheck')) {
+        sourceSets.test.java.exclude '**/androidcheck/**'
+    }
+    testOptions {
+        unitTests.includeAndroidResources = true
+        unitTests.all {
+            if (project.hasProperty('probeTestJava')) {
+                executable = project.property('probeTestJava')
+                jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED', '--add-opens=java.base/java.util=ALL-UNNAMED',
+                        '--add-opens=java.base/java.io=ALL-UNNAMED', '--add-opens=java.base/java.net=ALL-UNNAMED',
+                        '--add-opens=java.base/java.security=ALL-UNNAMED', '--add-opens=java.base/java.text=ALL-UNNAMED',
+                        '--add-opens=java.base/jdk.internal.access=ALL-UNNAMED', '--add-opens=java.desktop/java.awt.font=ALL-UNNAMED',
+                        '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
+            }
+            // sqlite4java's Windows WAL paths need a short external test root.
+            def testTmp = rootProject.file(project.findProperty('probeTestTmp') ?: '../t')
+            systemProperty 'java.io.tmpdir', testTmp.absolutePath
+            systemProperty 'user.home', file("$buildDir/test-home").absolutePath
+            systemProperty 'maven.repo.local', file("$buildDir/robolectric-maven").absolutePath
+            systemProperty 'robolectric.dependency.repo.url', 'https://repo.maven.apache.org/maven2'
+            if (project.hasProperty('probeAndroidPlatforms')) {
+                systemProperty 'robolectric.offline', 'true'
+                systemProperty 'robolectric.dependency.dir', project.property('probeAndroidPlatforms')
+            }
+            doFirst { testTmp.mkdirs(); file("$buildDir/test-home").mkdirs() }
+        }
+    }
+}
+
+tasks.register('compileToneGenerator',JavaCompile) {
+    source fileTree('sounddesign') { include '*.java' }
+    classpath=files()
+    destinationDirectory=file("$buildDir/tone-generator/classes")
+    sourceCompatibility='1.8'; targetCompatibility='1.8'
+    options.encoding='UTF-8'
+}
+tasks.register('generateToneAssets',JavaExec) {
+    dependsOn 'compileToneGenerator'
+    classpath=files("$buildDir/tone-generator/classes")
+    mainClass='ToneAssetGenerator'
+    args file("$buildDir/generated/tone-res").absolutePath,file("$buildDir/sound-previews").absolutePath
+    inputs.files(fileTree('sounddesign') { include '*.java' })
+    outputs.dir file("$buildDir/generated/tone-res")
+    outputs.dir file("$buildDir/sound-previews")
+}
+tasks.named('preBuild').configure { dependsOn 'generateToneAssets' }
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    if (!project.hasProperty('probeFastCheck')) testImplementation 'org.robolectric:robolectric:4.14.1'
+}

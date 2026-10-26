@@ -1,0 +1,28 @@
+# Build output and machine-local state
+.gradle/
+.idea/
+**/build/
+local.properties
+*.iml
+.DS_Store
+# Local signing, credentials and device data
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+.env
+.env.*
+*.apk
+*.aab
+*.apks
+*.hprof
+*.log
+*.db
+*.sqlite*
+*.bin
+*.wav
+private/
+diagnostics/
+captures/

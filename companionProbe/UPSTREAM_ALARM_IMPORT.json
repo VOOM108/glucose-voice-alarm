@@ -1,0 +1,130 @@
+{
+  "upstream_commit": "805ba0447cb7288c421cc898640183f8abb042fb",
+  "method_bodies": "verbatim; dependencies are explicit ports",
+  "files": [
+    {
+      "class": "AlertType",
+      "source": "app/src/main/java/com/eveningoutpost/dexdrip/models/AlertType.java",
+      "source_sha256": "ef8d97cef18f3281babcaed6a3ba5cba07ce919bde4ef12279db0cf52086abe9",
+      "isolated_sha256": "a818d62a13d2854192d759e23427792a79a31456fb716508a982d10ff6652ba0",
+      "methods": [
+        {
+          "signature": "public static AlertType HigherAlert(",
+          "sha256": "434e7cc5c27e8577408c7ffb4932b6f7afd8025330fc68a31b67cb294ba8ea7d"
+        },
+        {
+          "signature": "private boolean in_time_frame(",
+          "sha256": "330b4097e94d446433ba6ad4bbe0c059ed57182a206319eb04ea2d508ee194d1"
+        },
+        {
+          "signature": "static public boolean  s_in_time_frame(",
+          "sha256": "6e5dadc958209afa8c3296ff98b8487e843bb194983f30557e11014833c3e2e4"
+        },
+        {
+          "signature": "private boolean beyond_threshold(",
+          "sha256": "615c624eebe1a763cedfc0342cc3994d68fecd9ce027ceb108ef327eedd6d03d"
+        },
+        {
+          "signature": "private boolean trending_to_threshold(",
+          "sha256": "40afb950337f50a791783848684bc5b2f4d9529934893e6ec1f77436b88df95a"
+        },
+        {
+          "signature": "public boolean should_alarm(",
+          "sha256": "03aca9489ae16de8363ae3ee819326eab2969ead1949ddbf033541d2c50da5c6"
+        },
+        {
+          "signature": "public static int toTime(",
+          "sha256": "57cbc2d021ea7680d95a89ced57821d43617c8ceaf72722b26f0fc4864593577"
+        }
+      ]
+    },
+    {
+      "class": "BgReading",
+      "source": "app/src/main/java/com/eveningoutpost/dexdrip/models/BgReading.java",
+      "source_sha256": "b4f43e67f11b93d9253e2f77a7abb8ccc39e6895b87e174a9053f1649354b3ed",
+      "isolated_sha256": "b58e3a66afde0a06177c7efa7840aefc1ca952d3e5782195e71179feec125850",
+      "methods": [
+        {
+          "signature": "public double getDg_mgdl(",
+          "sha256": "0cbb289642a7b8ffb3d655584d1289beffd16f702dd1c2b3d415d69e844da005"
+        },
+        {
+          "signature": "public double getDg_slope(",
+          "sha256": "f3759f6258eacb26bbefb0e2802c11d48c214b87f20d74ecd72f5defc2381cc9"
+        },
+        {
+          "signature": "public static double calculateSlope(",
+          "sha256": "ffbdf44f5cb86a60436cebd2989789580bafc502dc2d3f61efd523e3bd1a7fba"
+        },
+        {
+          "signature": "public static double currentSlope()",
+          "sha256": "29a4ad682eac723bd39584cdb3cddfc67f93734f5abf522c32c9ab651957d6ff"
+        },
+        {
+          "signature": "public static double currentSlope(boolean",
+          "sha256": "dea59ecb725aa1e92f152feecf244370d4125dc57b5ab8d18023f7885d9b19a6"
+        },
+        {
+          "signature": "public static List<BgReading> getXRecentPoints(",
+          "sha256": "5caf199fee0d8f8e797ed351426125b56dcc999614d093fce31216d0b88554ea"
+        },
+        {
+          "signature": "private static boolean checkForDropRiseAllert(",
+          "sha256": "7ba15c8704ba2edbad6ee3b11f7b45aa361ca5dbe3051dcaefebdad16ab7575b"
+        },
+        {
+          "signature": "public static boolean trendingToAlertEnd(",
+          "sha256": "2e3d2247405de861d943d5f0d2d6d0847d0b45eeef74d56a9daa0f99bda21a4f"
+        },
+        {
+          "signature": "public static void checkForRisingAllert(",
+          "sha256": "a39b9df70b371be3edf792a0215cbf0e7975a01ff2e63f01962bae00a55960fb"
+        },
+        {
+          "signature": "public static void checkForDropAllert(",
+          "sha256": "4a4f749840378c47abec96d2b03d971378a591a8d737eecd2cbb69fee3661c1e"
+        }
+      ]
+    },
+    {
+      "class": "PersistentHigh",
+      "source": "app/src/main/java/com/eveningoutpost/dexdrip/evaluators/PersistentHigh.java",
+      "source_sha256": "b4fe50cbfcc2b466c99ef434a51a716e8f61f66e2e50afde89f1e0a6a8eee53f",
+      "isolated_sha256": "e8617f21f0d7c2ad45f5ef49f0ed023397d32b8f7626c9f6ed38fb6828c7efa9",
+      "methods": [
+        {
+          "signature": "public static boolean checkForPersistentHigh(",
+          "sha256": "1665db989f7b25f3a76948f048dc84db97c3001bf23136b07b89b2c4ea24b404"
+        },
+        {
+          "signature": "public static boolean dataQualityCheck(",
+          "sha256": "28bb1230d89443364f30b8e1065c898a6ba8b2888b5f40863eca586a08e211cb"
+        }
+      ]
+    },
+    {
+      "class": "ActiveBgAlert",
+      "source": "app/src/main/java/com/eveningoutpost/dexdrip/models/ActiveBgAlert.java",
+      "source_sha256": "917973db6502e8e9d61d84c63b982c48a343d1275b3e3307f88692ed1a00dc38",
+      "isolated_sha256": "3a6243b3566d2b13a1b2849938abe8847c9505b03cb81f7503d62761b582318f",
+      "methods": [
+        {
+          "signature": "public boolean ready_to_alarm(",
+          "sha256": "d02b6728fdfa2dab08b889cf752c663c5ff08b628b0ec3e2f7d3d98c22157a67"
+        },
+        {
+          "signature": "public void snooze(",
+          "sha256": "fe97f05c9b2e4781055892d885a9a9e162c27818f05a8a9f0b53dd5cdfd63325"
+        },
+        {
+          "signature": "public int getAndUpdateAlertingMinutes(",
+          "sha256": "9cad852f317560b3b201ed79a052608aca050fe4981344cdebf59d4ed0a2a0a0"
+        },
+        {
+          "signature": "public void updateNextAlertAt(",
+          "sha256": "7bb9be243d5de2b09a16b12e816ceb135be9d3179a22327b137ee3f52b805f7a"
+        }
+      ]
+    }
+  ]
+}

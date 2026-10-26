@@ -1,0 +1,18 @@
+<resources>
+    <style name="XCamLight" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:colorAccent">#006B70</item>
+        <item name="android:colorBackground">#F3F6F6</item>
+        <item name="android:textColorPrimary">#19363E</item>
+        <item name="android:textColorSecondary">#526B74</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+    <style name="XCamDark" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:colorAccent">#86D5D1</item>
+        <item name="android:colorBackground">#10191C</item>
+        <item name="android:textColorPrimary">#E9F1F2</item>
+        <item name="android:textColorSecondary">#A8BEC4</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

@@ -1,0 +1,7 @@
+Vorläufiges App-Icon v1, 26. Oktober 2026.
+Erzeugt mit dem integrierten Imagegen-Werkzeug; keine CLI/API-Schlüssel verwendet.
+Unverändertes ausgewähltes PNG liegt unter src/main/res/drawable-nodpi/xcam_icon_foreground_v1.png.
+Der Android-Hintergrund und die technische einfarbige Variante sind eigene Ressourcen.
+
+Vollständiger Generierungsprompt:
+Use case: logo-brand. Asset type: a single Android adaptive launcher icon foreground for a private glucose companion app, working name XCam. Create a polished, friendly, very legible original symbol: a smooth rising data line with a rounded arrow tip, embraced by a soft open circular companion arc. Calm modern product design, confident thick strokes, simple silhouette, restrained cool colors with excellent contrast on a dark background. No text, letters, digits, medical cross, heart, literal blood drop, logos, shading, mockup, device frame or drop shadow. The image is ONLY the clean foreground symbol on genuine transparency. Square canvas, symbol centered, its entire silhouette contained in the central 52% of the canvas with generous transparent padding so Android circle/squircle masks never cut it. It must remain immediately recognizable at 48 pixels. Produce one icon, no grid or alternative variants.

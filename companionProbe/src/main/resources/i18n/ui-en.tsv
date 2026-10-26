@@ -1,0 +1,631 @@
+# German source text<TAB>English UI text. Escape newline/tab/backslash as \n, \t, \\.
+Zurück	Back
+Abbrechen	Cancel
+Schließen	Close
+Speichern	Save
+Laden	Load
+Löschen	Delete
+Ersetzen	Replace
+Ändern	Edit
+Bearbeiten	Edit
+Name	Name
+Minuten	Minutes
+Sekunden	Seconds
+Ton	Sound
+Sprache	Speech
+Vibration	Vibration
+Ausgabe	Output
+Darstellung	Appearance
+Farbschema	Color scheme
+Wie das System	System
+Hell	Light
+Dunkel	Dark
+Profile	Profiles
+Stabil	Steady
+Steigend	Rising
+Fallend	Falling
+Hoch	High
+Niedrig	Low
+Dauerhaft hoch	Persistent high
+Schnell steigend	Rising fast
+Schnell sinkend	Falling fast
+Schnell fallend	Falling fast
+Doppelt aufwärts	Double up
+Doppelt abwärts	Double down
+Ganztägig	All day
+Zeitfenster	Schedule
+Wiederholungen	Repeats
+Alarmstufen	Alarm levels
+Verlauf	History
+Diagnose	Diagnostics
+Betrieb	Operation
+Testdaten	Test data
+Wiederholung	Repeat
+Standard	Default
+Samt	Velvet
+Klar	Clear
+Rund	Round
+steigend	rising
+schnell steigend	rising fast
+stabil	steady
+fallend	falling
+schnell fallend	falling fast
+doppelt aufwärts	double up
+doppelt abwärts	double down
+eingeschaltet	on
+ausgeschaltet	off
+erlaubt	allowed
+fehlt	missing
+gesperrt	blocked
+eingeschränkt	restricted
+nicht eingeschränkt	unrestricted
+ausstehend	pending
+läuft …	running …
+\nDauerhaftes AOD: am Gerät zu bestätigen	\nPersistent AOD: confirm on device
+\nEigene Benachrichtigungen: 	\nApp notifications: 
+\nErholung: Wiederholungen aussetzen	\nRecovery: suspend repeats
+\nGanztägig	\nAll day
+\nZeitfenster %02d:%02d bis %02d:%02d	\nSchedule %02d:%02d to %02d:%02d
+ Lautstärke	 volume
+ Lücken	 gaps
+ Milligramm pro Deziliter.	 milligrams per deciliter.
+ Minuten nach Beginn · 	 minutes after start · 
+ Sekunden empfangener Wert: 	 seconds ago: 
+ Stufen gespeichert. Den Live-Betrieb schaltest Du auf dem Dashboard ein.	 levels saved. Enable live output on the dashboard.
+ Unterbrechungen. Keine Sensor-Messzeitachse.	 gaps. Times show receipt, not sensor measurement.
+ anhören	 preview
+ empfangene Werte, 	 received values, 
+ mg/dl pro Minute	 mg/dl per minute
+ widersprüchliche Zeitpunkte ausgelassen	 conflicting timestamps omitted
+ · Datenlücke	 · Data gap
+ · Empfang vor 	 · Received 
+ · Prüfen	 · Check
+ · langer Ton	 · long sound
+ · länger als 	 · longer than 
+.\nNeustarttest mit getrennten Testdaten: 	.\nRestart test with isolated data: 
+. Bestätigungshistorie nicht verfügbar.	. Confirmation history unavailable.
+. Diese Selbsttests erzeugen keine Live-Ausgabe.	. These self-tests produce no live output.
+/5 Alarmarten bestanden	/5 alarm kinds passed
+/6 Prüfungen bestanden	/6 checks passed
+/8 Prüfungen bestanden	/8 checks passed
+0 = nur einmal je Lücke. Neue gültige Werte beenden die Lücke.	0 = once per gap. A new valid value ends the gap.
+; letzter Empfang nicht mehr aktuell	; last received value is stale
+Abnahme in mg/dl pro Minute (positiv eingeben)	Fall rate in mg/dl per minute (positive number)
+Abstand der Wertansagen in ganzen Minuten	Reading interval in whole minutes
+Akku-Ausnahme erteilen	Allow unrestricted battery use
+Aktuelle Einstellungen speichern	Save current settings
+Aktueller Empfang und Ausgabestatus	Current receipt and output status
+Alarm quittiert und gespeichert pausiert	Alarm acknowledged and snoozed
+Alarm sprechen	Speak alarm
+Alarm- und Snooze-Speicher mit Testdaten prüfen	Test alarm and snooze storage
+Alarmablauf mit Testdaten ausprobieren	Try a synthetic alarm
+Alarmausgabe gesperrt	Alarm output blocked
+Alarme sprechen	Speak alarms
+Alarme und Stufen	Alarms and levels
+Alarmkern mit Testdaten prüfen	Test alarm core
+Alarmstufe einschalten	Enable alarm level
+Alarmstufen gespeichert	Alarm levels saved
+Alarmstufen konnten nicht gelesen werden. Die vorhandene Datei bleibt unverändert. Bitte erneut laden.	Cannot read alarm levels. The existing file is unchanged. Reload to try again.
+Alarmstufen wurden inzwischen geändert. Bitte die Stufe aus der aktuellen Liste neu öffnen.	Alarm levels have changed. Reopen the level from the current list.
+Alarmstufen, Erholungsregeln, Lückenwarnung, Ausgabewege, Töne, Vibrationsmuster, Lautstärken, Texte, Darstellung und AOD-Einstellungen. Beim Laden wird die Live-Ausgabe ausgeschaltet. Aktuelle Werte, Pfeilzuordnungen, laufende Snooze-Fristen und Systemfreigaben gehören nicht zum Profil.	Alarm levels, recovery rules, gap warning, output channels, sounds, vibration patterns, volumes, text, appearance and AOD settings. Loading turns live output off. Readings, arrow mappings, active snooze deadlines and system permissions are excluded.
+Alarmtest mit synthetischen Daten	Synthetic alarm test
+Alarmweg fehlt	Alarm channel missing
+Alarmweg fehlt · Ausgabe prüfen	Alarm channel missing · Check output
+Alarmweg fehlt · Stufen prüfen	Alarm channel missing · Check levels
+Alarmzustand blockiert; keine Ausgabe	Alarm state blocked; no output
+Alarmzustand nicht verfügbar; keine Ausgabe	Alarm state unavailable; no output
+Alarmzustand/Einstellungen nicht lesbar; Alarmausgabe gesperrt	Cannot read alarm state or settings; alarm output blocked
+Alle Systemfreigaben sind erteilt.	All system permissions are granted.
+Alle benötigten Systemfreigaben sind erteilt.	All required system permissions are granted.
+Alle eigenen Alarme pausieren	Pause all app alarms
+Alle eigenen Ausgaben pausieren …	Pause all output …
+Android blockiert die Benachrichtigungen dieser App.	Android is blocking this app's notifications.
+Android hat den Hintergrundstart abgelehnt	Android rejected the background start
+Android konnte den nächsten Schritt nicht öffnen. Weitere Wege stehen unter Details und Systemfreigaben.	Android could not open the next step. See Details and permissions for alternatives.
+Android schränkt die Hintergrundnutzung ein.	Android is restricting background activity.
+Android vergibt Benachrichtigungszugriff für alle Apps. Verarbeitet werden nur laufende CamAPS-mg/dl-Meldungen; vollständige Meldungstexte werden nicht gespeichert.	Android grants access to notifications from all apps. Only ongoing CamAPS mg/dl notifications are processed; full notification text is not stored.
+Androids Benachrichtigungszugriff fehlt noch.	Notification access is not granted.
+Androids Tonauswahl ist hier nicht verfügbar.	Android's sound picker is unavailable here.
+Androids Tonauswahl ist nicht verfügbar.	Android's sound picker is unavailable.
+Anhören mit Testwert	Preview with test value
+Anhören stoppen	Stop preview
+Anstieg in mg/dl pro Minute	Rise rate in mg/dl per minute
+Anzeige ohne Alarme starten	Start display only
+Anzeige und Hintergrund	Display and background
+App-Glockenton wird vollständig abgespielt.	Playing the full app bell.
+App-Glockentöne anhören und auswählen	Preview and select app bells
+App-Ton konnte nicht vollständig abgespielt werden.	The app sound did not finish playing.
+App-Tonstandard noch nicht übernommen; gespeicherte Einstellungen bleiben erhalten	Default sound not applied; saved settings are retained
+App-Töne aktualisiert. Eigene Android-Töne bleiben erhalten.	App sounds updated. Custom Android sounds are retained.
+Audio noch nicht bereit. Bitte Offline-Stimme prüfen/vorbereiten und den Test erneut starten; kein späteres automatisches Abspielen.	Audio is not ready. Check or prepare the offline voice, then restart the test. It will not play later automatically.
+Audio-Hintergrundstart abgelehnt	Background audio start rejected
+Audio: kein aktiver Hintergrunddienst	Audio: no active background service
+Aus vier Empfangsminuten berechnet. Mehrfachmeldungen innerhalb einer Minute zählen einmal. Ein Pfeil allein löst keinen Alarm aus.	Calculated from four receipt minutes. Multiple notifications within a minute count once. An arrow alone does not trigger an alarm.
+Aus: auch bei zuvor stabilem oder unbekanntem Verlauf warnen.	Off: also warn after a steady or unknown trend.
+Ausgabe aktiv	Output enabled
+Ausgabe dieser Stufe	Output for this level
+Ausgabe gespeichert	Output settings saved
+Ausgabe läuft nicht · Betrieb prüfen	Output is not running · Check operation
+Ausgabe-Einstellungen gesperrt	Output settings blocked
+Ausgabe-Einstellungen konnten nicht geöffnet werden. Gespeicherte Daten bleiben unverändert.	Cannot open output settings. Saved data is unchanged.
+Ausgabe-Einstellungen nicht lesbar	Cannot read output settings
+Ausgabe-Einstellungen nicht lesbar. Vorschau gesperrt; gespeicherte Datei bleibt erhalten.	Cannot read output settings. Preview is blocked; the saved file is retained.
+Ausgabe-Einstellungen speichern	Save output settings
+Ausgabe-Einstellungen wurden inzwischen geändert. Bitte neu öffnen.	Output settings have changed. Reopen this screen.
+Ausgabeversuch fehlgeschlagen. Reservierte Frist bleibt erhalten; kein sofortiges Wiederholen nach Neustart.	Output attempt failed. The reserved deadline is retained; restarting will not immediately retry it.
+Ausgewählter Ton	Selected sound
+Ausgewählter Ton (Verfügbarkeit bitte anhören)	Selected sound (preview to check availability)
+Ausnahme erteilt	exception granted
+Ausnahme fehlt	exception missing
+Ausnahme von Akku-Optimierung anfordern	Request battery exemption
+Beginn auswählen	Select start
+Bei Erholung aussetzen	Suspend repeats during recovery
+Bei Erholung lassen sich Wiederholungen je Hoch-/Niedrigstufe aussetzen. Die optionale eigene Untergrenze ist noch nicht umgesetzt. Eine Akku-Ausnahme garantiert keinen ununterbrochenen Betrieb.	Repeats can be suspended during recovery for each high or low level. The optional lower cutoff is not implemented. A battery exemption does not guarantee uninterrupted operation.
+Beispiel neu beginnen	Restart example
+Beispiel: Keine neuen Werte. Zuletzt schnell fallend. Aktueller Wert unbekannt.	Example: No new readings. Last trend: falling fast. Current value unknown.
+Bekannte Pfeilgrafik prüfen/ändern …	Review or change known arrow …
+Benachrichtigungszugriff erlauben	Allow notification access
+Benachrichtigungszugriff öffnen	Open notification access
+Bis zu vier Formulierungen, eine je Zeile, höchstens 500 Zeichen. Leer verwendet den Standard: 	Up to four phrases, one per line, at most 500 characters. Leave blank for the default: 
+Bitte eine positive ganze Minutenzahl eingeben	Enter a positive whole number of minutes
+Bitte ganze Minuten eingeben	Enter whole minutes
+Bitte zuerst die oben fehlenden Freigaben und den CamAPS-Empfang einschalten.	First grant the missing permissions and enable CamAPS reception.
+Boost nur für App-Glockentöne. System-stumm bleibt stumm. Anhören nutzt den Entwurf.	Boost applies to app bells only. System mute remains silent. Preview uses the draft.
+CamAPS-Empfang einschalten	Enable CamAPS reception
+CamAPS-Wert derzeit nicht lesbar; warte auf ein neues Update	Cannot read the CamAPS value; waiting for a new update
+CamAPS-Trend aus bestätigter Grafikreferenz	CamAPS trend from confirmed graphic reference
+Daten werden lokal gelesen …	Reading local data …
+Datenlücke	Data gap
+Datenlücke · aktueller Wert unbekannt	Data gap · current value unknown
+Datenlücken	Data gaps
+Der CamAPS-Empfang ist ausgeschaltet.	CamAPS reception is off.
+Der Ton konnte nicht gestartet werden. Bitte einen anderen auswählen.	Could not start the sound. Select another one.
+Details schließen	Close details
+Details und Systemfreigaben	Details and permissions
+Deutsche Offline-Stimme bereit. Vorschauen starten nur auf Knopfdruck.	German offline voice ready. Previews start only when requested.
+Deutsche Offline-Stimme wird vorbereitet …	Preparing German offline voice …
+Diagnosekurve der letzten sechs Stunden, 	Diagnostic chart for the last six hours, 
+Diagnoseverlauf nicht lesbar. Vorhandene Daten bleiben erhalten.	Cannot read diagnostic history. Existing data is retained.
+Diagnoseverlauf: letzte sechs Stunden im privaten App-Speicher, technisch höchstens 5000 Ereignisse. Keine Cloud oder automatische Sicherung. Gleiche Zahlen zu neuen Empfangsereignissen bleiben erhalten. Daten lassen sich über Androids App-Speicherverwaltung löschen.	Diagnostic history: six hours in private app storage, at most 5,000 events. No cloud or automatic backup. Equal values in new receipt events are retained. Android's app storage settings can delete this data.
+Die Ausgabe-Einstellungen sind noch nicht gespeichert.	Output settings have not been saved.
+Die Ausnahme von der Akku-Optimierung fehlt noch.	The battery optimization exemption is missing.
+Die Schalter geben die Ausgabewege Deiner Alarmstufen und Lückenwarnung frei.	These switches enable the output channels configured for your alarm levels and gap warning.
+Die Töne sind direkt in der App enthalten. Die eigene Android-Tonauswahl bleibt je Alarmstufe verfügbar. Ein Klangset schaltet keine Alarmstufe und keinen abgewählten Ton ein.	These sounds are bundled with the app. Each level can still use a custom Android sound. Choosing a set does not enable a disabled alarm level or sound.
+Die native Sperrbildschirm-Anzeige gestaltet Android.	Android controls the native lock screen display.
+Die Änderungen dieser Stufe sind noch nicht gespeichert.	Changes to this level have not been saved.
+Dienst nicht gestartet: Empfang oder Systemfreigaben fehlen	Service not started: reception or system permissions are missing
+Dies ist eine Sprachvorschau von Glucose Voice Alarm. Es wird kein Messwert angesagt.	This is a speech preview of Glucose Voice Alarm. No glucose reading will be spoken.
+Diese Alarmstufe konnte nicht geöffnet werden. Gespeicherte Einstellungen bleiben unverändert. Bitte zur Liste zurückkehren.	Cannot open this alarm level. Saved settings are unchanged. Return to the list.
+Diese Ausgabe ist im aktuellen Modus ausgeschaltet.	This output is disabled in the current mode.
+Diese Grafik ist bereits zugeordnet; keine erneute Bestätigung nötig.	This graphic is already mapped; no further confirmation is needed.
+Dieses Gerät bietet keine Vibration. Bitte Ton oder Sprache verwenden.	This device has no vibration. Use sound or speech.
+Dieses Gerät bietet keine Vibration. Profil unverändert erhalten.	This device has no vibration. The profile is unchanged.
+Dieses Set als Standard verwenden	Use this set as default
+Eigene Alarme	App alarms
+Eigene Alarmpause aktiv	App alarms paused
+Eigene Ausgaben pausiert	App output paused
+Eigene Benachrichtigungen erlauben	Allow app notifications
+Eigene Formulierungen (leer für Standardtext)	Custom phrases (blank for default)
+Eigene Tonlautstärke erfordert Android 9 oder neuer.	Independent sound volume requires Android 9 or later.
+Eigene Untergrenze und intelligente Trendunterdrückung sind in diesen Beispielen nicht aktiv; die noch offenen Rückkehrregeln werden hier nicht festgelegt.	The lower cutoff and recovery suppression are not active in these examples. These examples do not define cutoff return rules.
+Eigener Android-Ton	Custom Android sound
+Eigener Android-Ton …	Custom Android sound …
+Eigener Ton …	Custom sound …
+Eigener Wiederholungsabstand nach xDrip; kein Stufen-Snooze in diesem Alarmweg.	Separate repeat interval following xDrip; this alarm has no level snooze.
+Ein Zeitfenster begrenzt die spätere Ausgabe; die Dauerberechnung bleibt nach der xDrip-Regel.	A schedule limits output; duration is still calculated using the xDrip rule.
+Ein frischer eindeutiger CamAPS-Pfeil und die berechnete xDrip-Erholungsprüfung müssen übereinstimmen. Bei stabilem, fehlendem oder widersprüchlichem Trend wird nicht ausgesetzt. Snooze bleibt unverändert.	A fresh, unambiguous CamAPS arrow must agree with the calculated xDrip recovery check. A steady, missing or conflicting trend does not suspend repeats. Snooze is unchanged.
+Eine Testminute weiter, dann prüfen	Advance one test minute, then check
+Einfügen: 	Insert: 
+Einstellungen nicht lesbar · Prüfen	Cannot read settings · Check
+Einstellungen nicht lesbar. Vorhandene Daten bleiben erhalten.	Cannot read settings. Existing data is retained.
+Empfang ausgeschaltet	Reception off
+Empfang ausgeschaltet; Trenddiagnose geleert.	Reception off; trend diagnostics cleared.
+Empfang und Sperrbildschirm	Reception and lock screen
+Empfangszeiten über sechs Stunden. Gestrichelte senkrechte Grenzen markieren Lücken über zwei Minuten. Horizontale Flächen zeigen eingestellte Hoch- und Niedrigbereiche. Die Zeichnung verändert keine Alarmberechnung.	Receipt times over six hours. Dashed vertical boundaries mark gaps longer than two minutes. Shaded horizontal areas show configured high and low ranges. Drawing does not alter alarm calculations.
+Ende auswählen	Select end
+Ereignisregel nach xDrip: grundsätzlich einmal pro erkannter Phase. Nach Ende der Bedingung kann eine neue Phase erneut melden; bei durchgehendem Zustand ist technisch nach knapp sechs Stunden eine erneute Meldung möglich. Keine einstellbare Wiederholungs- oder Snoozezeit.	Following xDrip's event rule: normally once per detected episode. A new episode may alert after the condition ends; a continuous condition may alert again after almost six hours. No configurable repeat or snooze interval.
+Erneut warnen nach … Minuten	Repeat after … minutes
+Erneutes Auslösen	Rearming
+Ersetzt Deine aktuellen Einstellungen. Die Live-Ausgabe wird ausgeschaltet; danach bitte im Dashboard wieder einschalten. Laufende Snooze-Fristen bleiben erhalten, soweit die Alarmbedingung unverändert ist.	Replaces your current settings. Live output turns off; enable it again on the dashboard. Active snooze deadlines are retained where the alarm condition is unchanged.
+Erst neue gültige Testdaten prüfen; kein Abspielen aus altem Zustand.	Check new valid test data first; saved old state does not play output.
+Fünf Speicherplätze für Deine Einstellungen.	Five slots for your settings.
+Für die Wertansagepause bitte ganze Minuten eingeben, 0 schaltet sie aus	Enter whole minutes for the reading quiet period; 0 disables it
+Für „	For “
+Gespeicherte Ausgabe-Einstellungen nicht lesbar. Sie werden nicht zurückgesetzt.	Cannot read saved output settings. They will not be reset.
+Gespeicherte Pfeilzuordnungen löschen	Delete saved arrow mappings
+Gesprochener Alarm für diese Stufe	Spoken alarm for this level
+Getrenntes Beispiel bereit. Dauerhoch braucht weitere Testminuten; schnelle Änderungen brauchen keine Snoozezeit.	Isolated example ready. Persistent high needs more test minutes; rate alarms do not use snooze.
+Globale Schalter gelten mit	Global switches also apply
+Glockentöne	Bell sounds
+Grafik inzwischen geändert oder zu alt; bitte neu prüfen	The graphic has changed or expired; check again
+Grenzwert in mg/dl	Threshold in mg/dl
+Grenzwerte und schnelle Änderungen. Neue Regeln bleiben aus, bis Du sie einschaltest.	Thresholds and fast changes. New rules stay off until you enable them.
+Große Live-Anzeige verwenden	Use large live display
+Große Live-Anzeige: 	Large live display: 
+Große Live-Anzeige: ausgeschaltet	Large live display: off
+Grundlage: xDrip+ · GPLv3. Uhranbindung und weitere Alltagserprobung stehen noch aus.	Based on xDrip+ · GPLv3. Watch integration and further everyday testing are pending.
+Heller und etwas prägnanter	Brighter and more distinct
+Hintergrund erlauben	Allow background use
+Hintergrundanzeige eingeschaltet; Live-Alarme aus	Background display on; live alarms off
+Hintergrundbetrieb beenden	Stop background operation
+Hintergrundnutzung erlauben	Allow background activity
+Hintergrundstart fehlgeschlagen. Einstellungen bleiben erhalten.	Background start failed. Settings are retained.
+Hintergrundstart nicht möglich; bitte die App öffnen.	Cannot start in the background; open the app.
+Hoch: hoher Einzelton. Dauerhoch: derselbe Ton länger. Niedrig: tiefer Einzelton. Schnell sinkend: hoch–tief. Schnell steigend: tief–hoch.	High: one high note. Persistent high: a longer high note. Low: one low note. Falling fast: high–low. Rising fast: low–high.
+Intervall außerhalb des speicherbaren Bereichs	Interval exceeds the supported range
+Isolierte CamAPS-Vektorgrafik zur manuellen Zuordnung	Isolated CamAPS vector graphic for manual mapping
+Jeder Ausgabestart erfolgt per Knopfdruck. Ein Testton dauert höchstens acht Sekunden; danach folgt gegebenenfalls die deutlich als Test bezeichnete Sprache. Androids Lautstärke und Nicht stören werden nicht verändert.	Each output starts only on request. A test sound lasts at most eight seconds, followed by speech explicitly identified as a test if selected. Android volume and Do Not Disturb are unchanged.
+Kein Platz für den Platzhalter	No room for the placeholder
+Kein Trendpfeil	No trend arrow
+Kein aktueller Wert	No current reading
+Kein frischer Empfang; eigene Alarme warten	No fresh receipt; app alarms are waiting
+Keine Alarmstufe aktiv · Stufen prüfen	No alarm level enabled · Check levels
+Keine Ansage: kein kürzlich empfangenes, zeitlich plausibles Ereignis vorhanden.	No announcement: no recent receipt with a plausible timestamp.
+Keine Vibration verfügbar.	Vibration is unavailable.
+Keine aktuelle, eindeutige Vektorgrafik zum Zuordnen verfügbar.	No current, unambiguous vector graphic is available for mapping.
+Keine deutsche Offline-Stimme bereit. Bitte Androids Sprachausgabe prüfen.	No German offline voice is ready. Check Android text-to-speech settings.
+Klangset konnte nicht gespeichert werden	Cannot save sound set
+Klangset konnte nicht vollständig übernommen werden. Bitte erneut öffnen.	The sound set was not fully applied. Reopen this screen.
+Kurze Glockentöne	Short bell sounds
+Kurzer App-Glockenton an Android übergeben.	Short app bell sent to Android.
+Lautstärke	Volume
+Letzten Empfang ansagen	Speak last receipt
+Liste neu laden	Reload list
+Live-Alarmdienst läuft	Live alarm service running
+Live-Alarmdienst läuft nicht	Live alarm service not running
+Live-Alarme ausgeschaltet	Live alarms off
+Live-Alarme ausschalten	Turn live alarms off
+Live-Alarme ausschalten, Anzeige behalten	Turn alarms off, keep display
+Live-Alarme ein	Enable live alarms
+Live-Alarme einschalten	Enable live alarms
+Live-Anzeige in Android öffnen	Open Android live display settings
+Live-Ausgabe gesperrt.	Live output blocked.
+Live-Ausgabe konnte nicht sicher ausgeschaltet werden	Could not safely turn live output off
+Live-Ausgabe läuft; Vorschau danach erneut starten.	Live output is running; try the preview afterward.
+Live-Dienst ausgeschaltet	Live service off
+Länger als … Minuten (xDrip-Regel)	Longer than … minutes (xDrip rule)
+Lückenwarnung aktiv	Gap warning enabled
+Lückenwarnung gespeichert	Gap warning saved
+Lückenwarnung prüfen	Check gap warning
+Lückenwarnung: Ausgabe nicht verfügbar	Gap warning: output unavailable
+Mindestens Ton, Alarm-Sprache oder Vibration muss verfügbar sein.	At least sound, alarm speech or vibration must be available.
+Modus unverändert	Mode unchanged
+Nach einem App-Update sind Live-Alarme erneut einzuschalten. Stufen, Töne und gespeicherte Pausen bleiben erhalten. Zeitbasis ist der Empfang.	Enable live alarms again after an app update. Levels, sounds and saved pauses are retained. Times refer to receipt.
+Name der Stufe	Level name
+Native Messwertanzeige: API nicht verfügbar; Standardanzeige	Native reading display: API unavailable; standard display
+Native Messwertanzeige: Prüfung nicht erfolgreich; Standardanzeige	Native reading display: check failed; standard display
+Native Messwertanzeige: Standardbenachrichtigung (MetricStyle erfordert Android 17)	Native reading display: standard notification (MetricStyle requires Android 17)
+Native Messwertanzeige: baubar\nLive Updates: 	Native reading display: supported\nLive Updates: 
+Neu laden	Reload
+Neue Alarmstufe	New alarm level
+Noch kein Empfang	No reading received yet
+Noch keine Ansage: Offline-Stimme wird vorbereitet oder fehlt. Danach bitte erneut auf Anhören tippen.	No announcement yet: the offline voice is preparing or unavailable. Try the preview again when ready.
+Noch keine Stufe	No levels yet
+Noch nicht fällig: Wiederholung, Snooze, Ereignissperre oder Wertintervall.	Not due yet: repeat, snooze, episode lock or reading interval.
+Noch nicht zugeordnete Grafik. Bitte nur einen klar erkennbaren Pfeil bestätigen.	Unmapped graphic. Confirm only a clearly identifiable arrow.
+Nur Hintergrundanzeige aktiv	Background display only
+Nur Wiederholungen bei fallendem Verlauf aussetzen. Der erste Alarm bleibt.	Suspend only repeats while falling. The first alarm remains.
+Nur Wiederholungen bei steigendem Verlauf aussetzen. Der erste Alarm bleibt.	Suspend only repeats while rising. The first alarm remains.
+Nur feste Beispielregeln, eine virtuelle Uhr und getrennte Testdateien im Cache. Echte Alarmstufen, Pausen, Werte und CamAPS bleiben unberührt. Es läuft kein Test im Hintergrund weiter.	Uses fixed example rules, a virtual clock and separate cache files. Real alarm levels, pauses, readings and CamAPS are unchanged. No test continues in the background.
+Nur nach schnellem Trend	Only after a fast trend
+Nur private Daten dieser App. Kein Export, kein Upload und keine zusätzlichen Sensorabfragen. Vor dem ersten gespeicherten Empfang bleibt die Kurve leer.	Uses only this app's private data. No export, upload or extra sensor requests. The chart stays empty until the first receipt is saved.
+Offline-Stimme noch nicht bereit; ein ausgewählter Ton bleibt verfügbar.	Offline voice is not ready; a selected sound remains available.
+Ohne neuen Wert seit … Minuten	No new reading for … minutes
+Ordne diese Vorschau zu. Bei einer neuen Quellmeldung bitte neu laden.	Map this preview. Reload if a new source notification arrives.
+Pause beenden	End pause
+Pause beendet; warte auf frischen Empfang	Pause ended; waiting for fresh data
+Periodische Testwertansage prüfen	Test periodic reading speech
+Pfeil zuordnen	Map arrow
+Pfeile prüfen	Review arrows
+Pfeilgrafik bestätigen	Confirm arrow graphic
+Pfeilgrafik zuordnen …	Map arrow graphic …
+Pfeilreferenz gespeichert; warte auf ein neues CamAPS-Update	Arrow reference saved; waiting for a new CamAPS update
+Pfeilzuordnungen gelöscht; warte auf ein neues CamAPS-Update	Arrow mappings deleted; waiting for a new CamAPS update
+Profil ersetzen?	Replace profile?
+Profil geladen · Live-Ausgabe aus	Profile loaded · live output off
+Profil gelöscht.	Profile deleted.
+Profil gespeichert.	Profile saved.
+Profil löschen?	Delete profile?
+Profil noch nicht vollständig geladen. Bitte App erneut öffnen.	The profile has not finished loading. Reopen the app.
+Profile nicht lesbar; vorhandene Datei bleibt erhalten.	Cannot read profiles; the existing file is retained.
+Profile wurden inzwischen geändert. Bitte erneut wählen.	Profiles have changed. Select again.
+Prüfung bei steigenden Werten. Gleichbleibende und fallende Phasen oberhalb der Grenze zählen zur verstrichenen Dauer mit.	Checked while rising. Steady and falling periods above the threshold also count toward elapsed duration.
+Referenzspeicher voll; alte Pfeilzuordnungen zuerst löschen	Reference storage is full; delete old arrow mappings first
+Set anhören	Preview set
+Set verwenden	Use set
+Snooze konnte nicht gespeichert werden	Cannot save snooze
+Snooze nach Quittierung in Minuten	Snooze duration in minutes
+So laut werden die Ansagen von Glucose Voice Alarm wiedergegeben.	This is the speech volume for Glucose Voice Alarm.
+Speicher/Zustand blockiert. Keine Testausgabe.	Storage or state blocked. No test output.
+Speichern der Alarmstufen mit Testdaten prüfen	Test alarm level storage
+Speichern fehlgeschlagen. Bisherige Einstellungen bleiben unverändert.	Save failed. Previous settings are unchanged.
+Speichern fehlgeschlagen; bisherige Einstellungen bleiben erhalten	Save failed; previous settings are retained
+Speichern fehlgeschlagen; bitte neu öffnen.	Save failed; reopen this screen.
+Speichern schaltet die Live-Ausgabe nicht ein.	Saving does not enable live output.
+Speichert die aktuellen Einstellungen in diesem Platz.	Saves the current settings in this slot.
+Speichertest mit getrennten Testdaten: 	Storage test with isolated test data: 
+Sperrbildschirm und Statusleiste	Lock screen and status bar
+Sprachausgabe hat den Text abgelehnt.	The speech engine rejected the text.
+Sprachausgabe konnte nicht vorbereitet werden.	Could not prepare speech.
+Sprachausgabe wird vorbereitet …	Preparing speech …
+Sprache ist ausgeschaltet. Änderungen bitte zuerst speichern.	Speech is off. Save your changes first.
+Sprache stoppen	Stop speech
+Sprachlautstärke anhören	Preview speech volume
+Sprachlautstärke ist stumm oder ungültig.	Speech volume is muted or invalid.
+Sprachtext mit Testdaten anhören	Preview alarm speech with test data
+Sprachvorschau konnte nicht gestartet werden.	Could not start speech preview.
+Sprachvorschau mit Testtext	Preview speech with test text
+Start angefordert. Der Betriebsstatus oben zeigt, ob der Dienst läuft.	Start requested. The status above shows whether the service is running.
+Start fehlgeschlagen · Betrieb prüfen	Start failed · Check operation
+Stimme wird vorbereitet. Sprachvorschauen bitte danach erneut starten.	Preparing voice. Restart speech previews when ready.
+Stufe aktiv	Level enabled
+Stufe bearbeiten	Edit level
+Stufe für „	Add level for “
+Stufe gespeichert	Level saved
+Stufe hinzufügen	Add level
+Stufe löschen?	Delete level?
+Stufe speichern	Save level
+Stufe öffnen	Open level
+Systemfreigabe/Empfang fehlt; Live-Dienst beendet	System permission or reception missing; live service stopped
+Systemunterstützung noch ungeprüft	System support not checked yet
+Technische Diagnose	Technical diagnostics
+Technische Prüfungen	Technical checks
+Technische Prüfungen und Pfeildiagnose	Technical checks and arrow diagnostics
+Test der Lückenwarnung. Seit vier Minuten keine neuen Werte. Zuletzt schnell fallend. Aktueller Wert unbekannt.	Gap warning test. No new readings for four minutes. Last trend: falling fast. Current value unknown.
+Test stoppen	Stop test
+Test-/Ausgabe-Einstellungen nicht lesbar; keine Ausgabe.	Cannot read test or output settings; no output.
+Testalarm für fünf Testminuten snoozen	Snooze test alarm for five test minutes
+Testausgabe an Android übergeben oder Testpause gespeichert. Das bestätigt noch keine Hörbarkeit.	Test output sent to Android or test pause saved. This does not confirm audibility.
+Testausgabe durch eine ausdrücklich gesetzte Regel unterdrückt: 	Test output suppressed by an explicit rule: 
+Testausgabe gestoppt. Kein automatischer Neustart.	Test output stopped. No automatic restart.
+Testbedingung erfüllt	Test condition met
+Testbedingung noch nicht erfüllt oder eine andere Grenzstufe hat Vorrang.	Test condition not met yet, or another threshold level has priority.
+Testdateien nicht verfügbar. Echte Dateien werden nicht angefasst.	Test files unavailable. Real files are not touched.
+Testdaten prüfen und Alarm versuchen	Check test data and try alarm
+Testlauf pausiert.	Test paused.
+Testsitzung neu geladen. Gespeicherte Testpause bleibt; für eine Ausgabe erst neue Testdaten prüfen.	Test session reloaded. The saved test pause remains; check new test data before output.
+Testsitzung neu laden (ohne Ausgabe)	Reload test session (no output)
+Text der Wertansage	Reading speech text
+Tiefer und rund	Lower and rounded
+Ton anhören	Preview sound
+Ton auswählen	Select sound
+Ton der Lückenwarnung	Gap warning sound
+Ton erforderlich: Sprache/Vibration aus	Sound required: speech and vibration off
+Ton für diese Alarmart	Sound for this alarm kind
+Ton für diese Alarmstufe	Sound for this alarm level
+Ton für diese Stufe	Sound for this level
+Ton und Sprache	Sound and speech
+Ton und Sprache kommen aus den Einstellungen der jeweiligen Alarmstufe	Sound and speech follow each alarm level's settings
+Ton, Alarm-Sprache und Vibration müssen auch unter Ausgabe freigegeben sein. Die globale Pause und Ausgabe aktiv gelten auch für die Lückenwarnung. Nach Start oder Neustart braucht sie zunächst einen echten neuen Wert; alte Verläufe werden nicht nachgeholt.	Sound, alarm speech and vibration must also be enabled under Output. The global pause and Output enabled switch also apply to gap warnings. After a start or restart, a new receipt is required; old history is not replayed.
+Tonlautstärke anhören	Preview sound volume
+Tonlautstärke ist stumm oder ungültig.	Sound volume is muted or invalid.
+Tonstandard konnte nicht gespeichert werden	Cannot save default sound
+Tonvorschau an Android übergeben; spätestens nach acht Sekunden beendet.	Sound preview sent to Android; stops within eight seconds.
+Tonwiedergabe hat nicht regulär geendet und wurde beendet.	Sound playback did not finish normally and was stopped.
+Trend anhören	Preview trend
+Trend offen	Trend unmapped
+Trenddiagnose anzeigen	Show trend diagnostics
+Trenddiagnose ausblenden	Hide trend diagnostics
+Trenddiagnose kopieren	Copy trend diagnostics
+Trendwörter	Trend phrases
+Töne	Sounds
+Uhr/Zustand nach Empfangsluecke blockiert	Clock or state blocked after receipt gap
+Ungültiger Glockenton-Boost.	Invalid bell boost.
+Verlauf gerade nicht lesbar	History is currently unavailable
+Verlauf und Diagnose	History and diagnostics
+Vibration fehlt · Ausgabe prüfen	Vibration unavailable · Check output
+Vibration für diese Stufe	Vibration for this level
+Vibration testen	Preview vibration
+Vibrationsmuster der Lückenwarnung	Gap warning vibration pattern
+Vibrationsmuster legst Du je Alarmstufe fest.	Set vibration patterns for each alarm level.
+Vibrationsvorschau gestartet.	Vibration preview started.
+Vorschau stoppen	Stop preview
+Vorschau veraltet · neu laden	Preview expired · reload
+Vorschautext an die Sprachausgabe übergeben.	Preview text sent to the speech engine.
+Wann gilt Erholung?	What counts as recovery?
+Wann warnen?	When to warn
+Warnt bei fehlenden Werten und nennt den zuletzt bekannten Verlauf. Keine Schätzung des aktuellen Werts.	Warns when readings stop and states the last known trend. Does not estimate the current value.
+Warte auf CamAPS	Waiting for CamAPS
+Warte auf Verbindung / neues CamAPS-Update	Waiting for connection or new CamAPS update
+Warte auf ein neues CamAPS-Update	Waiting for a new CamAPS update
+Warte auf ein neues CamAPS-Update für die Trenddiagnose.	Waiting for a new CamAPS update for trend diagnostics.
+Warte auf einen neuen Wert	Waiting for a new reading
+Was wird gespeichert?	What is saved?
+Weich und warm	Soft and warm
+Weiter bearbeiten	Keep editing
+Wert auf dem gesperrten Telefon sichtbar	Show value when phone is locked
+Wertansagen nach einem Alarm pausieren (Minuten, 0 = aus)	Pause reading speech after an alarm (minutes, 0 = off)
+Wertansagepause außerhalb des speicherbaren Bereichs	Reading quiet period exceeds the supported range
+Werte sprechen	Speak readings
+Wertempfang aktiv; Live-Alarme aus	Receiving readings; live alarms off
+Werttext mit Testdaten anhören	Preview reading speech with test data
+Werttext mit Testwert anhören	Preview reading text with test value
+Widersprüchliche Trendangaben	Conflicting trend information
+Wie warnen?	How to warn
+Wiederholung bei Erholung ausgesetzt	Repeat suspended during recovery
+Wiederholung in Minuten	Repeat interval in minutes
+Wird geladen …	Loading …
+Zeitbasis: Empfang des CamAPS-Werts, wie im xDrip-Companionmodus.	Times refer to receipt of the CamAPS value, as in xDrip companion mode.
+Zugriff erlauben	Allow access
+Zugriff öffnen	Open access
+Zur Kurve	Show chart
+Zurück zum Empfang	Back to reception
+Zurück zur Diagnosekurve	Back to diagnostic chart
+Zurück zur Liste	Back to list
+bereit; vor Ausgabe wäre ein neuer gültiger Empfang nötig	ready; new valid data is required before output
+bitte in Android freigeben	allow in Android settings
+gesperrt; Prüfung erforderlich	blocked; check required
+hinzufügen	add
+in Android nicht erlaubt	not allowed in Android
+von Android erlaubt	allowed by Android
+xDrip-Alarmkern: eingebunden.\nSelbsttest mit getrennten Testdaten: 	xDrip alarm core: integrated.\nSelf-test with isolated test data: 
+Änderungen verwerfen?	Discard changes?
+Änderungsrate: 	Rate of change: 
+“ aus Deinen gespeicherten Alarmstufen entfernen?	” from your saved alarm levels?
+“ entfernen? Die aktuellen Einstellungen bleiben erhalten.	”? Current settings are retained.
+“ fehlt ein aktiver Alarmweg. Bitte Ton, Sprache oder Vibration für diese Stufe einrichten. Die Einstellungen bleiben bis dahin unverändert.	” has no active alarm channel. Configure sound, speech or vibration for this level. Settings remain unchanged until then.
+“ hinzufügen	”
+↑ Schnell steigend	↑ Rising fast
+↓ Schnell fallend	↓ Falling fast
+Hintergrund & AOD	Background & AOD
+Verlauf & Diagnose	History & diagnostics
+Ausgabe eingeschaltet; warte auf ein neues CamAPS-Update	Output enabled; waiting for a new CamAPS update
+Ausgabe aktiv · Zeitbasis Empfang	Output active · receipt time
+Android bestimmt Größe und Sichtbarkeit der Live-Anzeige. Die Darstellung kann sich je nach Gerät unterscheiden.	Android controls the size and visibility of live displays. Appearance may vary by device.
+Offline-Stimme wird vorbereitet …	Preparing offline voice …
+Offline-Stimme bereit. Vorschauen starten nur auf Knopfdruck.	Offline voice ready. Previews start only when requested.
+Keine passende Offline-Stimme bereit. Bitte Androids Sprachausgabe prüfen.	No matching offline voice is ready. Check Android text-to-speech settings.
+Sprache der Ansagen	Speech language
+Eigene Texte bleiben beim Sprachwechsel erhalten.	Changing language keeps your custom text.
+Standardtexte einsetzen	Use default text
+Standardtexte einsetzen?	Use default text?
+Wert- und Trendtexte werden ersetzt. Eigene Alarmtexte bleiben erhalten.	Reading and trend text will be replaced. Custom alarm text is retained.
+↗ Steigend	↗ Rising
+→ Stabil	→ Steady
+↘ Fallend	↘ Falling
+⇈ Doppelt aufwärts	⇈ Double up
+⇊ Doppelt abwärts	⇊ Double down
+Aktualisieren	Refresh
+ Werte · 	 readings · 
+Glockenton-Boost	Bell boost
+Glockenton-Boost: +	Bell boost: +
+Alarmweg	Alarm channel
+kurz	short
+lang	long
+kurz–kurz	short–short
+kurz–lang	short–long
+lang–kurz	long–short
+lang–lang	long–long
+Aus	Off
+Sprechen	Speak
+Verwerfen	Discard
+Textregeln	Text rules
+Vibrationsmuster	Vibration pattern
+Standard: 	Default: 
+Samt · 	Velvet · 
+Klar · 	Clear · 
+Rund · 	Round · 
+Ausgeklappt	Expanded
+Eingeklappt	Collapsed
+Schalter auf dem Dashboard	Dashboard switches
+Ton, Alarme sprechen und Vibration müssen auch auf dem Dashboard eingeschaltet sein. Ausgabe aktiv und eine globale Pause gelten ebenfalls für die Lückenwarnung.	Sound, Speak alarms and Vibration must also be enabled on the dashboard. Output enabled and a global pause also apply to the gap warning.
+Text der Lückenwarnung	Gap warning text
+Zu den Variablen	About the variables
+Leer verwendet den Standard. Dauer ist die Länge der Lücke. Trend und Status beschreiben den letzten bekannten Verlauf als vollständige Sätze; sie bleiben ohne sichere Angabe leer. Ein aktueller Wert ist nicht einsetzbar.	Leave blank for the default. Duration is the length of the gap. Trend and status describe the last known situation as complete sentences; they are blank when unknown. A current value cannot be inserted.
+Lückentext: höchstens 500 Zeichen ohne Zeilenumbruch	Gap text: at most 500 characters, with no line breaks
+Unzulässige Lückenvariable: {	Invalid gap variable: {
+Ungültige Platzhalterklammern	Invalid placeholder braces
+Behalten	Keep
+aus	off
+ein	on
+Beenden	Stop
+Einstellungen	Settings
+Quittieren	Acknowledge
+Frei	Empty
+Profilname	Profile name
+Pausieren	Pause
+Benachrichtigungen	Notifications
+Kurz	Short
+Lang	Long
+Kurz · kurz	Short · short
+Kurz · lang	Short · long
+Lang · kurz	Long · short
+Lang · lang	Long · long
+: Wert außerhalb des speicherbaren Minutenbereichs	: value exceeds the supported minute range
+: bitte ganze Minuten eingeben	: enter whole minutes
+Alarmstufen wurden inzwischen geändert. Bitte die Liste neu öffnen.	Alarm levels have changed. Reopen the list.
+Alarmstufendatei zu groß	Alarm level file is too large
+Alarmzeit außerhalb des Bereichs	Alarm time exceeds the supported range
+Alarmzustandsdatei zu groß; unverändert erhalten	Alarm state file is too large; retained unchanged
+Alarmzustände wurden inzwischen geändert	Alarm state has changed
+Ausgabe-Einstellungen wurden inzwischen geändert; bitte neu öffnen	Output settings have changed; reopen this screen
+Ausgabe-Einstellungen zu groß	Output settings are too large
+Bitte Beginn und Ende wählen. Für den ganzen Tag „Ganztägig“ einschalten.	Select start and end. Select All day for the whole day.
+Bitte den Grenzwert als ganze Zahl in mg/dl eingeben	Enter the threshold as a whole number in mg/dl
+Bitte eine positive Änderungsrate eingeben (Komma oder Punkt möglich)	Enter a positive rate of change (comma or decimal point)
+Bitte einen lokalen Android-Ton auswählen	Select a local Android sound
+Doppelte Stufenkennung	Duplicate level ID
+Einstellungsdatei unvollständig oder zu groß; unverändert erhalten	Settings file incomplete or too large; retained unchanged
+Einstellungsdatei zu groß; unverändert erhalten	Settings file too large; retained unchanged
+Ereignisregel nach xDrip · keine einstellbare Wiederholungs-/Snoozezeit	xDrip event rule · no configurable repeat or snooze interval
+Erholungsregel nur für Hoch-/Niedrigstufen	Recovery rule is available only for high and low levels
+Erst einen neuen gültigen Empfang prüfen	Check a new valid receipt first
+Für Wertansagen bitte ein positives Intervall in ganzen Minuten eingeben	Enter a positive whole-minute interval for reading speech
+Für die Lückenwarnung fehlt ein aktiver Ausgabeweg	The gap warning has no active output channel
+Für diese Stufe kein gültiger Snooze	No valid snooze for this level
+Gesprochene Alarme	Spoken alarms
+Gesprochene Alarme plus Werte	Spoken alarms and readings
+Grenzwert ist nicht als positive Zahl speicherbar	Threshold cannot be saved as a positive number
+Höchstens vier Formulierungen, eine je Zeile	At most four phrases, one per line
+Höher priorisierte Stufe noch pausiert	A higher priority level is still paused
+Kein aktiver Alarm dieser Stufe	No active alarm for this level
+Kein reservierter Alarm	No reserved alarm
+Keine Quellbeobachtung	No source observation
+Keine passende geprüfte Alarmbedingung	No matching verified alarm condition
+Lautstärke muss zwischen 0 und 100 Prozent liegen	Volume must be between 0 and 100 percent
+Mindestens Ton, Alarm-Sprache oder Vibration muss eingeschaltet bleiben	At least sound, alarm speech or vibration must remain enabled
+Mindestens ein Alarmweg braucht Lautstärke über 0 % oder Vibration	At least one alarm channel needs volume above 0 percent or vibration
+Nur Töne	Sounds only
+Profil wird noch geladen. Bitte die App erneut öffnen.	Profile loading is incomplete. Reopen the app.
+Profil zu groß	Profile is too large
+Profildatei zu groß	Profile file is too large
+Profile wurden inzwischen geändert. Bitte neu öffnen.	Profiles have changed. Reopen this screen.
+Prüfsummenfehler; Alarmzustände unverändert erhalten	Checksum error; alarm state retained unchanged
+Prüfsummenfehler; Datei unverändert erhalten	Checksum error; file retained unchanged
+Sieben Trendtexte erforderlich	Seven trend phrases are required
+Snoozezeit außerhalb des Bereichs	Snooze time exceeds the supported range
+Sprachtext muss 1 bis 500 Zeichen ohne Zeilenumbruch enthalten	Speech text must contain 1 to 500 characters with no line breaks
+Synthetische Teststufe	Synthetic test level
+Synthetischer Test: 	Synthetic test: 
+Trendtexte: 1 bis 80 Zeichen, ohne Platzhalter	Trend phrases: 1 to 80 characters, no placeholders
+Uhrzeit muss neu geprüft werden; Zustände unverändert	Clock must be checked again; state unchanged
+Unbekannte Alarmart	Unknown alarm kind
+Unbekannte Ausgabe-Einstellungen	Unknown output settings format
+Unbekannter oder hier unpassender Platzhalter: {	Unknown or invalid placeholder here: {
+Unbekanntes Alarmstufenformat; unverändert erhalten	Unknown alarm level format; retained unchanged
+Unbekanntes Alarmzustandsformat	Unknown alarm state format
+Unbekanntes Klangset	Unknown sound set
+Unbekanntes Profilformat	Unknown profile format
+Unerwartete Alarmstufendaten; unverändert erhalten	Unexpected alarm level data; retained unchanged
+Ungültige Alarmstufendaten; unverändert erhalten	Invalid alarm level data; retained unchanged
+Ungültige Alarmstufenliste	Invalid alarm level list
+Ungültige Alarmzustandsliste	Invalid alarm state list
+Ungültige Alarmzustände; unverändert erhalten	Invalid alarm state; retained unchanged
+Ungültige Ausgabe-Einstellungen	Invalid output settings
+Ungültige Ausgabe-Revision	Invalid output revision
+Ungültige Grenz- oder Dauerangabe	Invalid threshold or duration
+Ungültige Pause für Wertansagen	Invalid reading quiet period
+Ungültige Profildaten; unverändert erhalten	Invalid profile data; retained unchanged
+Ungültige Profileinstellungen	Invalid profile settings
+Ungültige Profillänge	Invalid profile length
+Ungültige Profilrevision	Invalid profile revision
+Ungültige Sprachvarianten	Invalid speech variants
+Ungültige Wiederholungs- oder Snoozezeit	Invalid repeat or snooze interval
+Ungültiger Glockentonpegel	Invalid bell level
+Ungültiger Grenzwert	Invalid threshold
+Ungültiger Profilplatz	Invalid profile slot
+Ungültiger Stufenname	Invalid level name
+Ungültiger Ton	Invalid sound
+Ungültiges Alarmstufenformat; unverändert erhalten	Invalid alarm level format; retained unchanged
+Ungültiges Profil; unverändert erhalten	Invalid profile; retained unchanged
+Unvollständige Alarmzustandsdatei	Incomplete alarm state file
+Wartezeit: 1–1440 Minuten; Wiederholung: 0–1440 Minuten	Delay: 1–1440 minutes; repeat: 0–1440 minutes
+Wiederholung oder Ereignissperre noch nicht abgelaufen	Repeat or episode lock has not expired
+Zusätzliche Alarmzustandsdaten	Unexpected extra alarm state data
+Zusätzliche Ausgabe-Einstellungen	Unexpected extra output settings data
+Zusätzliche Profildaten	Unexpected extra profile data
+Zusätzliche Profileinstellungen	Unexpected extra profile settings
+“ fehlt ein aktiver Alarmweg: Ton, Sprache oder Vibration.	” needs an active alarm channel: sound, speech or vibration.
+In diesem CamAPS-Stand empfangen: 	Received with this CamAPS version: 
+ · erkannt	 · recognized
+ · noch nicht wiedererkannt	 · not yet recognized again
+Android-Standardalarm	Android default alarm
+Live-Alarme	Live alarms
+CamAPS-Trenddiagnose	CamAPS trend diagnostics
+.\nZeitbasis: Empfang. Live-Alarme: 	.\nTime basis: receipt. Live alarms: 
+Alarm-/Snooze-Speicher: 	Alarm/snooze storage: 
+Android-App-Einstellungen / Hintergrundnutzung	Android app settings / background use
+CamAPS-Empfang: 	CamAPS reception: 
+\nAkku-Optimierung: 	\nBattery optimization: 
+Akku-Ausnahme	Battery exemption
+XCam-Anzeigepruefung	Glucose Voice Alarm display test

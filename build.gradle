@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:7.4.2' }
+}
+allprojects {
+    repositories { google(); mavenCentral() }
+}
+
+tasks.named('wrapper').configure {
+    gradleVersion = '7.5'
+    distributionType = Wrapper.DistributionType.BIN
+}
