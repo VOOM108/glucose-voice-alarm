@@ -52,12 +52,7 @@ public final class SafetyActivity extends Activity {
                 if(!check.isChecked())return;
                 if(!SafetyConsent.acknowledge(this,stage,true)) {error.setText(t("Bestätigung nicht gespeichert. Bitte erneut versuchen.","Acknowledgement was not saved. Please try again."));return;}
                 if(SafetyConsent.ready(this)) {
-                    // Before acknowledgement Android may have bound and then unbound the listener.
-                    // Restore only the existing reception choice, never enable live output here.
-                    if(getSharedPreferences(CamApsListener.PREFS,0).getBoolean(CamApsListener.ENABLED,false)) {
-                        try {android.service.notification.NotificationListenerService.requestRebind(new android.content.ComponentName(this,CamApsListener.class));}
-                        catch(RuntimeException ignored) { /* The existing readiness page provides the retry. */ }
-                    }
+                    CamApsConnection.ensure(this);
                     startActivity(new Intent(this,ProbeActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));finish();
                 }
                 else render();

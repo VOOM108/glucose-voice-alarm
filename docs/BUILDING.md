@@ -66,7 +66,7 @@ python tools/check_upstream_rules.py
 
 Use a short writable test-temp path on Windows if sqlite4java has trouble with long WAL paths. The optional `probeTestTmp` property selects that directory. By default the test directory is `../t` relative to the repository. Gradle and Robolectric download dependencies on the first test run; this can be large. Test XML/HTML reports and native synthetic UI previews remain under the ignored module `build/` directory.
 
-`-PprobeFastCheck` runs only the pure Java subset. It is useful during development and does not replace the full suite. The Beta baseline has 524 complete synthetic checks, including legacy storage schemas, profiles, German/English UI and speech, glucose-unit conversion and the two-step first-start gate. Native synthetic renders cover both languages and themes, including large text. These checks do not establish real-device reliability, audibility or clinical safety.
+`-PprobeFastCheck` runs only the pure Java subset. It is useful during development and does not replace the full suite. The Beta baseline has 552 complete synthetic checks, including legacy storage schemas, profiles, German/English UI and speech, glucose-unit conversion and the two-step first-start gate. Native synthetic renders cover both languages and themes, including large text. These checks do not establish real-device reliability, audibility or clinical safety.
 
 ## Install your own build
 

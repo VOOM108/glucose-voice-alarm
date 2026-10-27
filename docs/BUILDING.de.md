@@ -66,7 +66,7 @@ python tools/check_upstream_rules.py
 
 Wenn sqlite4java unter Windows mit langen WAL-Pfaden scheitert, wähle einen kurzen beschreibbaren Testordner. `probeTestTmp` legt ihn fest; der Standard ist `../t` relativ zum Repository. Gradle und Robolectric laden beim ersten Test Abhängigkeiten herunter, was viel Speicher benötigen kann. XML-/HTML-Berichte und synthetische native UI-Bilder bleiben im ignorierten `build/` des Moduls.
 
-`-PprobeFastCheck` führt nur den reinen Java-Teil aus und ersetzt nicht die vollständige Prüfung. Der Beta-Ausgangsstand hat 524 vollständige synthetische Prüfungen, unter anderem für alte Speicherformate, Profile, deutsche/englische Oberfläche und Sprache, Einheitenumrechnung und die beiden Erststart-Bestätigungen. Native synthetische Darstellungen decken beide Sprachen und Themen sowie große Schrift ab. Das belegt keine Zuverlässigkeit, Hörbarkeit oder klinische Sicherheit am echten Gerät.
+`-PprobeFastCheck` führt nur den reinen Java-Teil aus und ersetzt nicht die vollständige Prüfung. Der Beta-Ausgangsstand hat 552 vollständige synthetische Prüfungen, unter anderem für alte Speicherformate, Profile, deutsche/englische Oberfläche und Sprache, Einheitenumrechnung und die beiden Erststart-Bestätigungen. Native synthetische Darstellungen decken beide Sprachen und Themen sowie große Schrift ab. Das belegt keine Zuverlässigkeit, Hörbarkeit oder klinische Sicherheit am echten Gerät.
 
 ## Eigenen Build installieren
 

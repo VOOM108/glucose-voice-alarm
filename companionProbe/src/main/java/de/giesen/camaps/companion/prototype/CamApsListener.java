@@ -39,9 +39,11 @@ public final class CamApsListener extends NotificationListenerService {
         super.onCreate(); if(!SafetyConsent.ready(this))return; store = new ObservationStore(this);
         RuntimeStateBridge.refresh(getFilesDir(),RuntimeClock.read(this));
     }
-    @Override public void onDestroy() { if(store!=null)store.close(); super.onDestroy(); }
+    @Override public void onDestroy() { CamApsConnection.disconnected(this); if(store!=null)store.close(); super.onDestroy(); }
     @Override public void onListenerConnected() {
-        if(!SafetyConsent.ready(this)){requestUnbind();return;}
+        CamApsConnection.connected(this);
+        // Keep Android binding intact while consent is pending; all processing stays gated.
+        if(!SafetyConsent.ready(this))return;
         receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
         ProbeState.latest = null;
         ProbeState.vectorCandidate = null;
@@ -54,6 +56,7 @@ public final class CamApsListener extends NotificationListenerService {
         // Never import getActiveNotifications() as new measurements.
     }
     @Override public void onListenerDisconnected() {
+        if(!CamApsConnection.disconnected(this))return;
         if(!SafetyConsent.ready(this))return;
         receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
         ProbeState.latest = null;

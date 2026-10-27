@@ -8,6 +8,14 @@ Experimental Android companion for spoken glucose alarms, short sounds, vibratio
 
 This repository contains source code. There are no packaged APK releases or automatic release uploads. [Build the app yourself](docs/BUILDING.md).
 
+## Reconnecting reception
+
+The app requests a missing Android listener connection when opened, when output starts and after a reported disconnection. While the background service is running, further attempts are limited to one every 30 seconds. Reception must already be enabled and notification access granted by you; the app does not grant access or enable output itself.
+
+Display and background contains “Reconnect reception”. Its details show the connection status. A connected listener is not restarted merely because readings are missing. Existing notifications are never imported as new readings.
+
+The Android connection may remain bound while the first-start notices are open. The app still processes no source notifications until both notices have been acknowledged.
+
 ## First-start acknowledgement
 
 Before first use, the app requires two separate acknowledgements: the important warning, followed by the terms of use with “I understand”. Both checkboxes start unchecked. App features, notification reception and all own output remain blocked until both steps are acknowledged. Existing installations also see these steps when this check is introduced. Afterwards, you must enable active output yourself.
@@ -31,7 +39,7 @@ With CamAPS already collecting glucose data and controlling therapy, a companion
 
 ## Scope and limitations
 
-The current version is 0.15.0 Beta. Development and device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor/Bluetooth communication, pump control, a watch app or watch complications.
+The current version is 0.15.1 Beta. Development and device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor/Bluetooth communication, pump control, a watch app or watch complications.
 
 Android 8.0 (API 26) is the minimum declared version; that is not a compatibility guarantee. On systems without the native large display, the app uses a standard notification. Persistent AOD visibility and alarm delivery are not guaranteed. Battery restrictions, notification changes, missing data, audio settings and operating-system behavior can interrupt them.
 

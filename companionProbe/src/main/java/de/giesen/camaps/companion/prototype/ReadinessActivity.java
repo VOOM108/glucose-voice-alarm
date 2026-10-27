@@ -21,6 +21,9 @@ public final class ReadinessActivity extends UiActivity {
         super.onCreate(state); if(!SafetyConsent.ready(this))return; LinearLayout body=LevelUi.screen(this);
         LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Betrieb"),28);
         status=LevelUi.text(body,"",21);
+        LevelUi.button(body,AppText.tr("Empfang neu verbinden"),v -> {
+            result.setText(CamApsConnection.reconnect(this)?AppText.tr("Verbindung angefordert · Warte auf neues CamAPS-Update"):AppText.tr("Empfang und Benachrichtigungszugriff prüfen"));render();
+        });
         enable=LevelUi.button(body,AppText.tr("Live-Alarme einschalten"),v -> next());
         result=LevelUi.text(body,"",15);
         pauseButton=LevelUi.button(body,AppText.tr("Alle eigenen Ausgaben pausieren …"),v -> pause());
@@ -67,7 +70,7 @@ public final class ReadinessActivity extends UiActivity {
                     getPackageManager().setComponentEnabledSetting(component,android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                             android.content.pm.PackageManager.DONT_KILL_APP);
                     ProbeState.latest=null; ProbeState.vectorCandidate=null; ProbeState.status=AppText.tr("Warte auf ein neues CamAPS-Update");
-                    NotificationListenerService.requestRebind(component); render(); return;
+                    CamApsConnection.ensure(this); render(); return;
                 case ACCESS: startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)); return;
                 case NOTIFICATIONS:
                     if (Build.VERSION.SDK_INT>=33) requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},17); else openDetails();
@@ -119,7 +122,7 @@ public final class ReadinessActivity extends UiActivity {
         enable.setEnabled(true);
         pauseButton.setVisibility(live && !paused?View.VISIBLE:View.GONE); resume.setVisibility(paused?View.VISIBLE:View.GONE);
         stop.setVisibility(LiveAlarmService.running() || LivePreferences.monitor(this)?View.VISIBLE:View.GONE);
-        details.setText(ready.summary()+"\n\n"+MetricNotification.capability(this)+"\n\n"+LiveAlarmService.audioState());
+        details.setText(CamApsConnection.summary()+"\n\n"+ready.summary()+"\n\n"+MetricNotification.capability(this)+"\n\n"+LiveAlarmService.audioState());
         nativeStatus.setText(DisplayDiagnostics.status(this)); DisplayDiagnostics.write(this);
     }
     @Override public void onResume() { super.onResume(); if(!SafetyConsent.ready(this))return; handler.post(refresh); }

@@ -33,7 +33,7 @@ public final class LiveAlarmService extends Service {
     private boolean playbackForeground;
     private AlarmOutputFlow.Plan activePlan,displayedPlan;
     private String displayedAlarmId;
-    private final Runnable tick=new Runnable() { @Override public void run() { runOutputs(); updateStatus(); handler.postDelayed(this,2000); } };
+    private final Runnable tick=new Runnable() { @Override public void run() { CamApsConnection.ensure(LiveAlarmService.this); runOutputs(); updateStatus(); handler.postDelayed(this,2000); } };
     static boolean running() { return current!=null && current.foreground; }
     static boolean live() { LiveAlarmService service=current; return service!=null && service.foreground && service.flow!=null && LivePreferences.alarms(service); }
     static String audioState() { LiveAlarmService service=current; return service==null?AppText.tr("Audio: kein aktiver Hintergrunddienst"):service.audioStatus; }
@@ -101,6 +101,7 @@ public final class LiveAlarmService extends Service {
         if (!LivePreferences.monitor(this) || !SystemReadiness.read(this).ready()) {
             status=terminalStatus=AppText.tr("Dienst nicht gestartet: Empfang oder Systemfreigaben fehlen"); stopSelf(); return START_NOT_STICKY;
         }
+        CamApsConnection.ensure(this);
         try { foreground(false); }
         catch (RuntimeException e) { status=terminalStatus=AppText.tr("Android hat den Hintergrundstart abgelehnt"); stopSelf(); return START_NOT_STICKY; }
         String action=intent==null?null:intent.getAction();
@@ -220,7 +221,8 @@ public final class LiveAlarmService extends Service {
         if (!LivePreferences.monitor(this) || !SystemReadiness.read(this).ready()) {
             if (flow!=null) flow.stop(); status=terminalStatus=AppText.tr("Systemfreigabe/Empfang fehlt; Live-Dienst beendet"); stopSelf(); return;
         }
-        if (!audio.busy()) { activePlan=null; releaseOutputLock(); try { foreground(false); } catch (RuntimeException e) { stopSelf(); return; } }
+        if (!audio.busy()) { activePlan=null; releaseOutputLock(); CamApsConnection.ensure(this);
+        try { foreground(false); } catch (RuntimeException e) { stopSelf(); return; } }
         AlarmStateStore.Clock now=RuntimeClock.read(this);
         boolean gapDue=preferences!=null && gap.due(preferences.gap,now);
         if(LivePreferences.alarms(this) && flow!=null && gap.waiting()) {

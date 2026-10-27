@@ -143,7 +143,7 @@ public class ProbeActivity extends UiActivity {
                 getPackageManager().setComponentEnabledSetting(component,
                         android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                         android.content.pm.PackageManager.DONT_KILL_APP);
-                NotificationListenerService.requestRebind(component);
+                CamApsConnection.ensure(this);
             }
             render();
         });

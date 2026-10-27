@@ -29,6 +29,12 @@ public class SafetyConsentPlatformTest {
     }
     private Application app;private final List<ActivityController<?>> activities=new ArrayList<>();
     @Before public void before(){
+        // Robolectric can reuse a sandbox. A first-start test needs an unbound, unthrottled
+        // listener and no delayed reconnect from another synthetic service lifecycle.
+        org.robolectric.util.ReflectionHelpers.setStaticField(CamApsConnection.class,"current",null);
+        org.robolectric.util.ReflectionHelpers.setStaticField(CamApsConnection.class,"lastAttempt",-1L);
+        org.robolectric.util.ReflectionHelpers.setStaticField(CamApsConnection.class,"failed",false);
+        ((Handler)org.robolectric.util.ReflectionHelpers.getStaticField(CamApsConnection.class,"handler")).removeCallbacksAndMessages(null);
         app=RuntimeEnvironment.getApplication();app.getSharedPreferences(SafetyConsent.PREFS,0).edit().clear().commit();
         app.getSharedPreferences("live_controls_v1",0).edit().clear().commit();
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().clear().commit();
@@ -56,6 +62,7 @@ public class SafetyConsentPlatformTest {
     @Test public void termsButtonAlsoStartsUncheckedAndFinalAcceptanceLeavesOutputOff(){
         warning();app.getSharedPreferences("live_controls_v1",0).edit().putBoolean("monitor",true).putBoolean("alarms",true).putInt("consent_version",BuildConfig.VERSION_CODE).commit();
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
+        shadowOf(app.getSystemService(NotificationManager.class)).setNotificationListenerAccessGranted(new ComponentName(app,CamApsListener.class),true);
         SafetyActivity a=open(SafetyActivity.class);Button next=(Button)tag(a,"safety_next");next.performClick();assertFalse(SafetyConsent.ready(app));
         ((CheckBox)tag(a,"safety_check")).setChecked(true);next.performClick();assertTrue(SafetyConsent.ready(app));assertFalse(LivePreferences.alarms(app));
         Intent target=shadowOf(a).getNextStartedActivity();assertEquals(ProbeActivity.class.getName(),target.getComponent().getClassName());assertTrue(a.isFinishing());

@@ -33,6 +33,7 @@ final class LiveActivation {
         Problem problem=check(activity); if(problem!=null) return problem;
         boolean monitor=LivePreferences.monitor(activity);
         try {
+            CamApsConnection.ensure(activity);
             LivePreferences.set(activity,true,true);
             activity.startForegroundService(new Intent(activity,LiveAlarmService.class)); return null;
         } catch(RuntimeException e) {

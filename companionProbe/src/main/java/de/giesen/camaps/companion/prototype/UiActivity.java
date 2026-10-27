@@ -10,5 +10,5 @@ public class UiActivity extends Activity {
         applied=AppAppearance.mode(this);AppAppearance.apply(this);super.onCreate(saved);
         SafetyConsent.require(this);
     }
-    @Override public void onResume() {super.onResume();if(!SafetyConsent.ready(this)){if(!isFinishing())SafetyConsent.require(this);return;}if(applied!=AppAppearance.mode(this))recreate();}
+    @Override public void onResume() {super.onResume();if(!SafetyConsent.ready(this)){if(!isFinishing())SafetyConsent.require(this);return;}CamApsConnection.ensure(this);if(applied!=AppAppearance.mode(this))recreate();}
 }
