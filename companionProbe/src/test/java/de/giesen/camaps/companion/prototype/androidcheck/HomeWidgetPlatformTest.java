@@ -198,23 +198,22 @@ public class HomeWidgetPlatformTest {
     @Test public void valueDigitsAreLargeAndArrowStaysBesideThemBeforeTheChart()throws Exception {
         HomeWidget.Model m=new HomeWidget.Model(demo(false),true,false,false,false,true,output());
         View normal=layout(HomeWidget.view(c,widget,320,160,m),320,160);
-        TextView number=normal.findViewById(R.id.widget_reading);
-        assertEquals("126\u2009↗",number.getText().toString());
-        assertTrue("The reading must use native large text",number.getTextSize()>=56);
+        ImageView number=normal.findViewById(R.id.widget_reading);
         Bitmap digits=Bitmap.createBitmap(number.getWidth(),number.getHeight(),Bitmap.Config.ARGB_8888);number.draw(new Canvas(digits));
-        int firstInk=digits.getWidth();for(int y=0;y<digits.getHeight();y++)for(int x=0;x<digits.getWidth();x++)if(digits.getPixel(x,y)==number.getCurrentTextColor())firstInk=Math.min(firstInk,x);
+        Rect ink=ink(digits);int firstInk=ink.left;
+        // Measure visible glyphs rather than the former TextView's em size.
+        assertTrue("The visible reading must stay large",ink.height()>=48);
         assertTrue("The reading must begin at the leading edge instead of leaving a blank block",firstInk<18);
-        android.text.Layout line=number.getLayout();
-        assertTrue("Only a thin space should separate number and arrow",line.getPrimaryHorizontal(4)-line.getPrimaryHorizontal(3)<8);
-        assertTrue("The arrow must remain large",line.getPrimaryHorizontal(5)-line.getPrimaryHorizontal(4)>=number.getTextSize()*.6f);
+        assertTrue("The visible reading and arrow must use the available width",ink.width()>number.getWidth()*.85f);
         View wide=layout(HomeWidget.view(c,widget,560,180,m),560,180);
-        assertTrue("A wider host must give the main value more room",((TextView)wide.findViewById(R.id.widget_reading)).getTextSize()>number.getTextSize());
+        ImageView larger=wide.findViewById(R.id.widget_reading);Bitmap expanded=Bitmap.createBitmap(larger.getWidth(),larger.getHeight(),Bitmap.Config.ARGB_8888);larger.draw(new Canvas(expanded));
+        assertTrue("A wider host must give the main value more room",ink(expanded).height()>ink.height());
         assertEquals(18,((TextView)normal.findViewById(R.id.widget_period)).getTextSize(),.1);
         save("widget-balanced-wide.png",HomeWidget.view(c,widget,560,180,m),560,180);
         c.getSharedPreferences(HomeWidget.PREFS,0).edit().putBoolean("controls_"+widget,false).commit();
         save("widget-balanced-no-controls.png",HomeWidget.view(c,widget,320,220,m),320,220,false);
     }
-    @Test @Config(sdk=34,qualifiers="de-w411dp-h891dp-xxxhdpi") public void nativeTextRetainsItsDpSizeOnDenseLauncherAndThroughParcel()throws Exception {
+    @Test @Config(sdk=34,qualifiers="de-w411dp-h891dp-xxxhdpi") public void roundedNumeralsRetainTheirSizeOnDenseLauncherAndThroughParcel()throws Exception {
         HomeWidget.Model m=new HomeWidget.Model(demo(false),true,false,false,false,true,output());
         for(int width:new int[]{320,400}) {
             RemoteViews rv=HomeWidget.view(c,widget,width,160,m);Parcel parcel=Parcel.obtain();
@@ -222,9 +221,11 @@ public class HomeWidgetPlatformTest {
                 rv.writeToParcel(parcel,0);parcel.setDataPosition(0);
                 RemoteViews copy=RemoteViews.CREATOR.createFromParcel(parcel);
                 View host=layout(copy,width,160);float density=c.getResources().getDisplayMetrics().density;
-                TextView number=host.findViewById(R.id.widget_reading),period=host.findViewById(R.id.widget_period);
-                assertTrue("Dense displays must not shrink native value text",number.getTextSize()/density>=56);
-                assertEquals("The adjacent arrow must survive RemoteViews parceling","126\u2009↗",number.getText().toString());
+                ImageView number=host.findViewById(R.id.widget_reading);TextView period=host.findViewById(R.id.widget_period);
+                Bitmap visible=Bitmap.createBitmap(number.getWidth(),number.getHeight(),Bitmap.Config.ARGB_8888);number.draw(new Canvas(visible));
+                assertTrue("Dense displays must not shrink the visible value",ink(visible).height()/density>=48);
+                Bitmap before=bitmap(layout(rv,width,160),R.id.widget_reading),after=bitmap(host,R.id.widget_reading);
+                assertTrue("The exact round font and arrow must survive RemoteViews parceling",before.sameAs(after));
                 assertEquals(18,period.getTextSize()/density,.1);
                 assertTrue(host.findViewById(R.id.widget_controls).getBottom()<=host.getHeight());
                 save("widget-balanced-dense-"+width+".png",copy,width,160);
@@ -256,12 +257,46 @@ public class HomeWidgetPlatformTest {
             int thickness=0;for(int y=0;y<pixels.getHeight();y++)if(pixels.getPixel(pixels.getWidth()/2,y)==0xffd4f6e7)thickness++;
             float density=c.getResources().getDisplayMetrics().density;
             assertTrue("A line must remain visible after fitting",thickness>=density);
-            assertTrue("A height mismatch must not turn the curve into a filled band",thickness<=3*density);
+            assertTrue("A height mismatch must not turn the curve into a filled band",thickness<=4*density);
             Bitmap source=((android.graphics.drawable.BitmapDrawable)chart.getDrawable()).getBitmap();
             assertEquals("Use enough source pixels for a dense screen",256,source.getHeight());
             save("widget-balanced-height-hint-"+hint+".png",rv,400,160);
         }
     }
+    @Test @Config(sdk=34) public void restrictedLauncherKeepsExactlyThePreparedRoundFontAfterParcel()throws Exception {
+        Context launcher=c.createPackageContext(c.getPackageName(),Context.CONTEXT_RESTRICTED);assertTrue(launcher.isRestricted());
+        HomeWidget.Model m=new HomeWidget.Model(demo(false),true,false,false,false,true,output());RemoteViews rv=HomeWidget.view(c,widget,400,160,m);
+        View app=layout(rv,400,160);Parcel parcel=Parcel.obtain();
+        try{rv.writeToParcel(parcel,0);parcel.setDataPosition(0);RemoteViews copy=RemoteViews.CREATOR.createFromParcel(parcel);
+            View hosted=copy.apply(launcher,new FrameLayout(launcher));
+            for(int id:new int[]{R.id.widget_reading,R.id.widget_delta})assertTrue("Launcher restrictions must not replace the font",bitmap(app,id).sameAs(bitmap(hosted,id)));
+            int memory=0;for(int id:new int[]{R.id.widget_reading,R.id.widget_delta,R.id.widget_chart})memory+=bitmap(hosted,id).getAllocationByteCount();
+            assertTrue("Bound bitmap memory for both responsive variants",memory*2<4*1024*1024);
+        }finally{parcel.recycle();}
+    }
+    @Test public void roundNumeralsKeepEveryArrowAndBothUnitFormatsInsideTransparentBounds(){
+        for(String value:new String[]{"126","9,8","10.5","—"})for(WatchSnapshot.Trend trend:WatchSnapshot.Trend.values()){
+            String arrow=HomeWidget.arrow(trend);Bitmap with=HomeWidgetRenderer.numerals(c,value,arrow,Color.WHITE,false);
+            Bitmap without=HomeWidgetRenderer.numerals(c,value,"",Color.WHITE,false);Rect r=ink(with);
+            assertTrue(r.width()>0&&r.height()>0);assertTrue(r.left>0&&r.top>0&&r.right<with.getWidth()&&r.bottom<with.getHeight());
+            if(!arrow.isEmpty())assertTrue("Known arrow must add visible glyphs",with.getWidth()>without.getWidth());
+            assertTrue(with.getWidth()<=960&&with.getHeight()<=384);
+        }
+        for(boolean small:new boolean[]{true,false}){
+            Bitmap number=HomeWidgetRenderer.numerals(c,"0","",Color.WHITE,small),missing=HomeWidgetRenderer.numerals(c,"—","",Color.WHITE,small);
+            assertEquals("A missing-value dash uses the same line height as a numeral",number.getHeight(),missing.getHeight());
+            assertTrue("The placeholder remains a thin stroke",ink(missing).height()<ink(number).height()*.3f);
+        }
+    }
+    @Test public void receiptCaptionOmitsDateButKeepsOriginalTimeAndStaleWarning()throws Exception {
+        WatchSnapshot s=demo(false);HomeWidget.Model m=new HomeWidget.Model(s,false,false,false,false,true,output());
+        TextView stamp=layout(HomeWidget.view(c,widget,320,160,m),320,160).findViewById(R.id.widget_stamp);
+        String expected="Received: "+new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received))+" · mg/dl";
+        assertEquals(expected,stamp.getText().toString());assertEquals(AppAppearance.colors(c).error,stamp.getCurrentTextColor());
+        assertTrue("Screen readers retain the full original timestamp",HomeWidget.description(m).contains(new java.text.SimpleDateFormat("dd.MM. HH:mm",Locale.getDefault()).format(new Date(s.received))));
+    }
+    private Bitmap bitmap(View root,int id){return ((android.graphics.drawable.BitmapDrawable)((ImageView)root.findViewById(id)).getDrawable()).getBitmap();}
+    private Rect ink(Bitmap b){Rect r=new Rect(b.getWidth(),b.getHeight(),0,0);for(int y=0;y<b.getHeight();y++)for(int x=0;x<b.getWidth();x++)if(Color.alpha(b.getPixel(x,y))>100){r.left=Math.min(r.left,x);r.top=Math.min(r.top,y);r.right=Math.max(r.right,x+1);r.bottom=Math.max(r.bottom,y+1);}return r;}
     private int pixels(Bitmap b,int color){int count=0;for(int y=0;y<b.getHeight();y++)for(int x=0;x<b.getWidth();x++)if(b.getPixel(x,y)==color)count++;return count;}
     private WatchSnapshot demo(boolean mmol){long now=System.currentTimeMillis();List<WatchSnapshot.Point> points=new ArrayList<>();for(int i=0;i<=120;i++)points.add(new WatchSnapshot.Point(now-(120-i)*60000L,126+65*Math.sin(i/17.)));return new WatchSnapshot(now,now-60000,126,WatchSnapshot.Trend.UP_RIGHT,mmol,true,1.2,80.,180.,points);}
     private View layout(RemoteViews rv,int width,int height) {

@@ -43,22 +43,22 @@
       "device_capture": false
     },
     "phone-widget-dark.png": {
-      "sha256": "91eb380303ce06f6d2ad8f6ca7467316182d877f699925fefe04f0baea8c4153",
+      "sha256": "848fc09887a2b1f4f59131da180de5ba2eb6a5213da28a994252986f81443761",
       "width": 320,
       "height": 160,
-      "kind": "Native synthetic app/widget rendering",
+      "kind": "Native synthetic widget rendering with launcher-safe rounded numerals",
       "component": "phone",
-      "source": "companionProbe synthetic platform UI tests",
+      "source": "companionProbe 0.20.5 synthetic platform UI tests; bounded numeral bitmaps survive restricted RemoteViews context",
       "synthetic": true,
       "device_capture": false
     },
     "phone-widget-light.png": {
-      "sha256": "b65220630d42f451bc6d93ae7f545299f8cd521c2a899cbba600e8d2977dd0fb",
+      "sha256": "af2a91be6ba3ee7098008198db32507536b1aabae5b6ae08aa90283ae2508238",
       "width": 1280,
       "height": 640,
-      "kind": "Native synthetic app/widget rendering",
+      "kind": "Native synthetic widget rendering with launcher-safe rounded numerals",
       "component": "phone",
-      "source": "companionProbe synthetic platform UI tests",
+      "source": "companionProbe 0.20.5 synthetic platform UI tests; bounded numeral bitmaps survive restricted RemoteViews context",
       "synthetic": true,
       "device_capture": false
     },

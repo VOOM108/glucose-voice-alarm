@@ -2,7 +2,7 @@
 
 [Projektübersicht](../README.de.md) · [English](README.md) · [GVA Watch](../companionWear/README.de.md) · [GVA Dots](../companionWatchFace/README.de.md)
 
-Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.20.4 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
+Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.20.5 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
 
 **Experimentelles Forschungswerkzeug; nicht für medizinische Verwendung oder Therapieentscheidungen.** Lies [SAFETY.de.md](../SAFETY.de.md). CamAPS steuert weiterhin Sensor und Pumpe.
 
@@ -18,7 +18,7 @@ Synthetische Beispiele. Dashboard und Einstellungen sind native App-Renderings; 
 
 </details>
 
-Das Widget bietet optional eine Schalterzeile für Ton, Alarm-Sprache, Wertansagen, Vibration und Ausgabe. Je nach Breite zeigt die beschriftete Kurve 30 Minuten, eine oder zwei Stunden. Die ursprüngliche Empfangszeit bleibt sichtbar. Die übrige Fläche öffnet die App.
+Das Widget bietet optional eine Schalterzeile für Ton, Alarm-Sprache, Wertansagen, Vibration und Ausgabe. Je nach Breite zeigt die beschriftete Kurve 30 Minuten, eine oder zwei Stunden. Wert/Pfeil und Delta verwenden die mitgelieferte runde Schrift auch im Launcher. Die Kurve ist etwas kräftiger; „Received: HH:mm“ zeigt die ursprüngliche Empfangsuhrzeit ohne Datum. Die übrige Fläche öffnet die App.
 
 ## Ausgabe und Einstellungen
 

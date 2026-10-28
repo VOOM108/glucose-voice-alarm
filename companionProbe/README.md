@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Deutsch](README.de.md) · [GVA Watch](../companionWear/README.md) · [GVA Dots](../companionWatchFace/README.md)
 
-The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.20.4 Beta**. The phone works without either watch component.
+The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.20.5 Beta**. The phone works without either watch component.
 
 **Experimental research tool; not for medical use or treatment decisions.** Read [SAFETY.md](../SAFETY.md). CamAPS continues to control the sensor and pump.
 
@@ -18,7 +18,7 @@ Synthetic examples. Dashboard and setting images are native app renderings; the 
 
 </details>
 
-The widget has an optional single row of sound, alarm speech, reading speech, vibration and output toggles. Its chart switches between labeled 30-minute, one-hour and two-hour windows as width changes. Original receipt time remains visible. The entire remaining surface opens the app.
+The widget has an optional single row of sound, alarm speech, reading speech, vibration and output toggles. Its chart switches between labeled 30-minute, one-hour and two-hour windows as width changes. The reading/arrow and delta use the bundled round font in the launcher. The curve has a slightly thicker line; “Received: HH:mm” shows the original receipt time without a date. The entire remaining surface opens the app.
 
 ## Output and settings
 

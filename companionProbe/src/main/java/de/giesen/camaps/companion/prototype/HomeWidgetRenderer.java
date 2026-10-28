@@ -7,6 +7,30 @@ import java.util.*;
 /** Native drawing for a bounded widget bitmap; no forecast or alarm input. */
 final class HomeWidgetRenderer {
     private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
+    private static Typeface rounded;
+    /** Render only the numerals locally: launcher RemoteViews cannot load app fonts reliably.
+     * Tight bounds and FIT_START preserve the typeface, adjacency and leading alignment
+     * across process boundaries without a bitmap sized from unreliable host heights.
+     * The parent data region supplies the complete accessible text and click target. */
+    static Bitmap numerals(android.content.Context context,String value,String arrow,int color,boolean small) {
+        Typeface font;
+        synchronized(HomeWidgetRenderer.class){if(rounded==null)rounded=context.getResources().getFont(R.font.gva_rounded_widget);font=rounded;}
+        Paint digits=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.SUBPIXEL_TEXT_FLAG);digits.setTypeface(font);digits.setTextSize(small?128:256);digits.setColor(color);
+        Paint trend=new Paint(digits);trend.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL));trend.setTextSize(digits.getTextSize()*.85f);
+        Rect a=new Rect(),b=new Rect();digits.getTextBounds(value,0,value.length(),a);
+        float arrowX=digits.measureText(value)+digits.measureText("\u2009");
+        RectF bounds=new RectF(a);Rect zero=new Rect();digits.getTextBounds("0",0,1,zero);
+        // A missing-value dash must occupy a numeral's line box; fitting its tiny
+        // ink height to the entire view would turn it into a thick bar.
+        bounds.top=Math.min(bounds.top,zero.top);bounds.bottom=Math.max(bounds.bottom,zero.bottom);
+        if(!arrow.isEmpty()){trend.getTextBounds(arrow,0,arrow.length(),b);bounds.union(arrowX+b.left,b.top,arrowX+b.right,b.bottom);}
+        float scale=Math.min(1,Math.min(956f/Math.max(1,bounds.width()),380f/Math.max(1,bounds.height())));
+        Bitmap bitmap=Bitmap.createBitmap(Math.max(1,(int)Math.ceil(bounds.width()*scale)+4),Math.max(1,(int)Math.ceil(bounds.height()*scale)+4),Bitmap.Config.ARGB_8888);
+        bitmap.setDensity(Bitmap.DENSITY_NONE);bitmap.setHasMipMap(true);
+        Canvas canvas=new Canvas(bitmap);canvas.translate(2,2);canvas.scale(scale,scale);canvas.translate(-bounds.left,-bounds.top);
+        canvas.drawText(value,0,0,digits);if(!arrow.isEmpty())canvas.drawText(arrow,arrowX,0,trend);
+        return bitmap;
+    }
     static int historyMinutes(float width){float chartWidth=(width-8)/2.25f;return chartWidth>=160?120:chartWidth>=100?60:30;}
     static String historyLabel(int minutes){return minutes==120?"2 h":minutes==60?"1 h":"30 min";}
     Bitmap image(WatchSnapshot s,boolean fresh,boolean dark,int logicalWidth,float density,int minutes,long now) {
@@ -41,7 +65,7 @@ final class HomeWidgetRenderer {
     private void segment(Canvas c,List<DiagnosticSeries.Sample> points,WatchSnapshot s,long from,long span,double lo,double hi,float left,float right,float top,float bottom,boolean dark,boolean fresh){
         if(points.isEmpty())return;Path path=new Path();DiagnosticSeries.Sample first=points.get(0);path.moveTo(x(first.time,from,span,left,right),y(first.value,lo,hi,top,bottom));
         for(double[] a:ChartCurve.controls(points))path.cubicTo(x(a[0],from,span,left,right),y(a[1],lo,hi,top,bottom),x(a[2],from,span,left,right),y(a[3],lo,hi,top,bottom),x(a[4],from,span,left,right),y(a[5],lo,hi,top,bottom));
-        p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(2.25f);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);p.setColor(fresh?(dark?0xffd4f6e7:0xff156747):0xff8b9993);c.drawPath(path,p);
+        p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(3.25f);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);p.setColor(fresh?(dark?0xffd4f6e7:0xff156747):0xff8b9993);c.drawPath(path,p);
         if(fresh&&s.high!=null){c.save();c.clipRect(left,top,right,y(s.high,lo,hi,top,bottom));p.setColor(dark?0xffffd28c:0xff936000);c.drawPath(path,p);c.restore();}
         if(fresh&&s.low!=null){c.save();c.clipRect(left,y(s.low,lo,hi,top,bottom),right,bottom);p.setColor(dark?0xffff5c5c:0xffc02737);c.drawPath(path,p);c.restore();}
         p.setStyle(Paint.Style.FILL);if(points.size()==1){p.setColor(!fresh?0xff8b9993:s.low!=null&&first.value<s.low?(dark?0xffff5c5c:0xffc02737):s.high!=null&&first.value>s.high?(dark?0xffffd28c:0xff936000):(dark?0xffd4f6e7:0xff156747));c.drawCircle(x(first.time,from,span,left,right),y(first.value,lo,hi,top,bottom),1.75f,p);}

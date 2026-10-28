@@ -65,12 +65,11 @@ final class HomeWidget {
         v.setImageViewBitmap(R.id.widget_chart,new HomeWidgetRenderer().image(model.reading,model.fresh,dark,chartWidth,density,HomeWidgetRenderer.historyMinutes(dataWidth),System.currentTimeMillis()));
         WatchSnapshot s=model.reading;GlucoseUnit unit=s!=null&&s.mmol?GlucoseUnit.MMOL:GlucoseUnit.MGDL;
         int ink=model.fresh?colors.ink:colors.muted;
-        v.setTextViewText(R.id.widget_reading,readingText(s,unit));
-        v.setTextColor(R.id.widget_reading,ink);
-        String stamp=s==null?"—":new java.text.SimpleDateFormat("dd.MM. HH:mm",Locale.getDefault()).format(new Date(s.received))+" · "+unit.label;
+        v.setImageViewBitmap(R.id.widget_reading,HomeWidgetRenderer.numerals(c,s==null?"—":unit.number(s.value,Locale.getDefault()),s==null?"":arrow(s.trend),ink,false));
+        String stamp=s==null?"—":"Received: "+new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received))+" · "+unit.label;
         v.setTextViewText(R.id.widget_stamp,stamp);v.setTextColor(R.id.widget_stamp,s!=null&&!model.fresh?colors.error:colors.muted);
         v.setTextViewText(R.id.widget_period,HomeWidgetRenderer.historyLabel(HomeWidgetRenderer.historyMinutes(dataWidth)));v.setTextColor(R.id.widget_period,colors.muted);
-        v.setTextViewText(R.id.widget_delta,s==null||!model.fresh||s.rate==null?"—":unit.rate(s.rate,Locale.getDefault()).replace(" "+unit.label," "));v.setTextColor(R.id.widget_delta,ink);
+        v.setImageViewBitmap(R.id.widget_delta,HomeWidgetRenderer.numerals(c,s==null||!model.fresh||s.rate==null?"—":unit.rate(s.rate,Locale.getDefault()).replace(" "+unit.label," "),"",ink,true));
         v.setContentDescription(R.id.widget_data,description(model)+" "+tr("Zeitraum: ","History window: ")+HomeWidgetRenderer.historyMinutes(dataWidth)+tr(" Minuten."," minutes."));
         v.setOnClickPendingIntent(R.id.widget_data,dashboard);
         v.setViewVisibility(R.id.widget_controls,show?View.VISIBLE:View.GONE);
@@ -95,16 +94,6 @@ final class HomeWidget {
     }
     static String arrow(WatchSnapshot.Trend trend) {
         switch(trend){case DOUBLE_UP:return "⇈";case UP:return "↑";case UP_RIGHT:return "↗";case FLAT:return "→";case DOWN_RIGHT:return "↘";case DOWN:return "↓";case DOUBLE_DOWN:return "⇊";default:return "";}
-    }
-    static CharSequence readingText(WatchSnapshot s,GlucoseUnit unit) {
-        String value=s==null?"—":unit.number(s.value,Locale.getDefault()),trend=s==null?"":arrow(s.trend);
-        if(trend.isEmpty())return value;
-        android.text.SpannableString text=new android.text.SpannableString(value+"\u2009"+trend);int start=value.length()+1;
-        // Android's standard parcelable spans keep the arrow adjacent after the
-        // RemoteViews transfer, without relying on the numerals font for its glyph.
-        text.setSpan(new android.text.style.TypefaceSpan("sans-serif"),start,text.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        text.setSpan(new android.text.style.RelativeSizeSpan(.85f),start,text.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return text;
     }
     private static void toggle(RemoteViews v,int text,int track,String label,boolean enabled,boolean dark,AppAppearance.Colors colors) {
         v.setTextViewText(text,label);v.setTextColor(text,enabled?colors.ink:colors.muted);
