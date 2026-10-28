@@ -22,6 +22,7 @@ Device work has focused on Pixel 7 Pro, Android 17, CamAPS FX 1.4(194).111, and 
 
 - Other CamAPS variants, units and notification structures; manual trend matching after source updates or conflicts.
 - Other phones, launchers, watches and Android versions; AOD/live-display placement and contention with other apps.
+- Intermittent icon-only status-bar display has been reported on the Pixel. The app's short text and active Android promotion were confirmed; the cause remains unresolved.
 - Natural data gaps, process restarts, disconnection/reconnection, stale display transitions and source-clock differences on real devices.
 - Perceptibility and delivery of every enabled alarm route, including watch vibration, Do Not Disturb and background restrictions. The watch has no independent alarm fallback.
 - Complication/tile cadence and battery cost in everyday active and ambient use. Synthetic timing tests cannot establish these.
