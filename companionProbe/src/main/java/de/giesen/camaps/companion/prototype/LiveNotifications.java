@@ -29,16 +29,17 @@ final class LiveNotifications {
     }
     Notification status(Number value,NotificationParser.Trend trend,long received,boolean fresh,String detail) {
         String clock=received>0?new java.text.SimpleDateFormat("HH:mm",java.util.Locale.GERMANY).format(new java.util.Date(received)):AppText.tr("Warte auf einen neuen Wert");
+        boolean known=value!=null&&received>0;
         Notification.Builder builder=new Notification.Builder(context,STATUS_CHANNEL).setSmallIcon(R.drawable.ic_xcam_status)
-                .setContentTitle(value!=null && fresh?UnitPreferences.display(context).number(value.doubleValue(),java.util.Locale.getDefault())+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol):AppText.tr("Kein aktueller Wert"))
-                .setContentText(!fresh && detail.startsWith(AppText.tr("Datenlücke"))?clock+AppText.tr(" · Datenlücke"):clock).setOngoing(true).setOnlyAlertOnce(true).setCategory(Notification.CATEGORY_STATUS)
+                .setContentTitle(known?MetricNotification.reading(value.doubleValue(),trend,UnitPreferences.display(context),fresh):AppText.tr("Kein aktueller Wert"))
+                .setContentText(known&&!fresh?clock+" · "+MetricNotification.ageTitle(received):!fresh && detail.startsWith(AppText.tr("Datenlücke"))?clock+AppText.tr(" · Datenlücke"):clock).setOngoing(true).setLocalOnly(true).setOnlyAlertOnce(true).setCategory(Notification.CATEGORY_STATUS)
                 .setContentIntent(open(ProbeActivity.class,1)).setVisibility(LivePreferences.publicValue(context)?Notification.VISIBILITY_PUBLIC:Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Einstellungen"),open(ReadinessActivity.class,2)).build())
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Beenden"),action(LiveAlarmService.STOP,null,3)).build());
         if (Build.VERSION.SDK_INT>=31) builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE);
-        if (received>0 && value!=null && fresh) {
+        if (known) {
             builder.setWhen(received).setShowWhen(false).setUsesChronometer(false);
-            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value.doubleValue(),trend,received,UnitPreferences.display(context));
+            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value.doubleValue(),trend,received,UnitPreferences.display(context),fresh);
         } else builder.setShowWhen(false);
         return builder.build();
     }
@@ -50,21 +51,25 @@ final class LiveNotifications {
         alarm(level,value,trend,additional,false);
     }
     void alarm(AlarmLevel level,double value,NotificationParser.Trend trend,String additional,boolean refresh) {
+        String title=level.name+(additional==null?"":" · "+additional);
+        String text=AppText.tr("Aktuell: ")+UnitPreferences.display(context).number(value,java.util.Locale.getDefault())+" "+UnitPreferences.display(context).label+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol);
         Notification.Builder builder=new Notification.Builder(context,ALARM_CHANNEL).setSmallIcon(R.drawable.ic_xcam_status)
-                .setContentTitle(level.name+(additional==null?"":" · "+additional)).setContentText(AppText.tr("Aktuell: ")+UnitPreferences.display(context).number(value,java.util.Locale.getDefault())+" "+UnitPreferences.display(context).label+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol))
-                .setContentIntent(open(ReadinessActivity.class,4)).setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setOnlyAlertOnce(refresh)
+                .setContentTitle(title).setContentText(text)
+                .setContentIntent(open(ReadinessActivity.class,4)).setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setLocalOnly(true).setOnlyAlertOnce(refresh)
                 .setVisibility(LivePreferences.publicValue(context)?Notification.VISIBILITY_PUBLIC:Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Quittieren"),action(LiveAlarmService.ACK,level.rule.id,5)).build());
         if (LevelForm.hasSnooze(level.rule.kind)) builder.addAction(new Notification.Action.Builder(0,"Snooze "+level.rule.outputs.snoozeMinutes+" Min.",action(LiveAlarmService.SNOOZE,level.rule.id,6)).build());
         manager.notify(ALARM_ID,builder.build());
+        if(refresh)WatchAlertPublisher.update(context,title,text);else WatchAlertPublisher.alarm(context,title,text);
     }
     void gap(String message) {
         Notification.Builder builder=new Notification.Builder(context,ALARM_CHANNEL).setSmallIcon(R.drawable.ic_xcam_status)
                 .setContentTitle(AppText.tr("Datenlücke")).setContentText(message).setStyle(new Notification.BigTextStyle().bigText(message))
-                .setContentIntent(open(GapSettingsActivity.class,7)).setCategory(Notification.CATEGORY_ALARM).setOngoing(true)
+                .setContentIntent(open(GapSettingsActivity.class,7)).setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setLocalOnly(true)
                 .setVisibility(LivePreferences.publicValue(context)?Notification.VISIBILITY_PUBLIC:Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Quittieren"),action(LiveAlarmService.ACK,"gap_warning",8)).build());
         manager.notify(ALARM_ID,builder.build());
+        WatchAlertPublisher.alarm(context,AppText.tr("Datenlücke"),message);
     }
-    void clearAlarm() { manager.cancel(ALARM_ID); }
+    void clearAlarm() { manager.cancel(ALARM_ID); WatchAlertPublisher.clear(context); }
 }

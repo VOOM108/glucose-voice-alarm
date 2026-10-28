@@ -66,7 +66,20 @@ python tools/check_upstream_rules.py
 
 Use a short writable test-temp path on Windows if sqlite4java has trouble with long WAL paths. The optional `probeTestTmp` property selects that directory. By default the test directory is `../t` relative to the repository. Gradle and Robolectric download dependencies on the first test run; this can be large. Test XML/HTML reports and native synthetic UI previews remain under the ignored module `build/` directory.
 
-`-PprobeFastCheck` runs only the pure Java subset. It is useful during development and does not replace the full suite. The Beta baseline has 552 complete synthetic checks, including legacy storage schemas, profiles, German/English UI and speech, glucose-unit conversion and the two-step first-start gate. Native synthetic renders cover both languages and themes, including large text. These checks do not establish real-device reliability, audibility or clinical safety.
+`-PprobeFastCheck` runs only the pure Java subset. It is useful during development and does not replace the full suite. The phone baseline has 647 complete synthetic checks, including storage schemas, profiles, German/English UI and speech, unit conversion, first-start gates and the watch display protocol. Native synthetic renders cover both languages and themes, including large text. The watch module has 50 checks in total, including separate consent confirmations and menu actions, plus synthetic display and menu renders. These checks do not establish real-device reliability, audibility or clinical safety.
+
+The watch app and code-free face use the separate `watch-build/` project with JDK 21 and Android SDK Platform 35. Its pinned Gradle 8.9 / AGP 8.7.2 / Kotlin 2.1.21 build supports Wear Compose Material 3. The phone toolchain above stays unchanged. In a shell configured for the watch JDK and SDK:
+
+```sh
+cd watch-build
+./gradlew :companionWear:assembleDebug :companionWatchFace:assembleDebug
+./gradlew :companionWear:testDebugUnitTest
+./gradlew :companionWear:testTileQaUnitTest
+```
+
+Changing the phone application ID alone breaks the pair. If you customize IDs, update the watch application ID and the face default-provider package references too. The face has its own application ID. Both builds must retain the same Android user directory or explicitly use the same self-owned signing key. Google Play services is required for the phone/watch Data Layer connection.
+
+Both phone and watch apps must retain the same application ID and signing key. See [watch setup](../companionWear/README.md).
 
 ## Install your own build
 
@@ -84,4 +97,6 @@ This updates only a matching application ID/signature and retains that app's dat
 ./gradlew :companionProbe:dependencies
 ```
 
-The app uses Android platform APIs, without a bundled third-party application runtime. JUnit and Robolectric are test-only. See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and preserve publisher notices when redistributing dependencies. Do not commit `local.properties`, keystores, credentials, personal logs, build folders or generated APKs.
+The phone and watch apps include the Google Play services Wearable client; the watch also uses AndroidX complication/Compose libraries and licensed Roboto Flex. JUnit and Robolectric are test-only. See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and preserve publisher notices when redistributing dependencies. Do not commit `local.properties`, keystores, credentials, personal logs, build folders or generated APKs.
+
+The four tile checks run separately under `testTileQaUnitTest`. Only that QA variant includes the Android tile renderer and its resources; the normal debug APK does not. The remaining 46 watch checks run under `testDebugUnitTest`.

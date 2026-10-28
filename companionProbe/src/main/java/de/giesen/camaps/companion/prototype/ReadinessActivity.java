@@ -69,7 +69,8 @@ public final class ReadinessActivity extends UiActivity {
                     ComponentName component=new ComponentName(this,CamApsListener.class);
                     getPackageManager().setComponentEnabledSetting(component,android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                             android.content.pm.PackageManager.DONT_KILL_APP);
-                    ProbeState.latest=null; ProbeState.vectorCandidate=null; ProbeState.status=AppText.tr("Warte auf ein neues CamAPS-Update");
+                    ProbeState.clear(); ProbeState.vectorCandidate=null; ProbeState.status=AppText.tr("Warte auf ein neues CamAPS-Update");
+                    if(WatchPublisher.enabled(this))WatchPublisher.clear(this);
                     CamApsConnection.ensure(this); render(); return;
                 case ACCESS: startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)); return;
                 case NOTIFICATIONS:

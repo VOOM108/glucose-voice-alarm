@@ -21,10 +21,33 @@
         android:allowBackup="false" android:fullBackupContent="false"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity android:name=".SafetyActivity" android:exported="false" />
+        <activity android:name=".WidgetControlActivity" android:exported="false" android:excludeFromRecents="true" />
+        <activity android:name=".WidgetConfigureActivity" android:exported="true">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter>
+        </activity>
+        <receiver android:name=".HomeWidgetProvider" android:label="@string/widget_name" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.TIME_SET"/>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+                <action android:name="android.intent.action.LOCALE_CHANGED"/>
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/home_widget_info"/>
+        </receiver>
         <activity android:name=".GapSettingsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ProfilesActivity" android:exported="false" />
         <activity android:name=".DeveloperOptionsActivity" android:exported="false" />
         <activity android:name=".AppearanceActivity" android:exported="false" />
+        <activity android:name=".WatchSettingsActivity" android:exported="false" />
+        <service android:name=".PhoneWatchRequests" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:path="/gva/request/v1" />
+            </intent-filter>
+        </service>
         <activity android:name=".AlarmLevelsActivity" android:exported="false" />
         <activity android:name=".ReadinessActivity" android:exported="false" />
         <activity android:name=".DiagnosticHistoryActivity" android:exported="false" />

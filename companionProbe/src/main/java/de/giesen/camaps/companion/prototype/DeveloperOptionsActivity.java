@@ -33,7 +33,7 @@ public final class DeveloperOptionsActivity extends UiActivity {
         LevelUi.button(body,AppText.tr("CamAPS-Einheit neu erkennen"),v -> new AlertDialog.Builder(this).setTitle(AppText.tr("Einheit neu erkennen?"))
                 .setMessage(AppText.tr("Schaltet die Live-Ausgabe aus und verwirft das aktuelle Empfangsfenster. Die nächste gültige CamAPS-Meldung legt die Quelleinheit neu fest. Gespeicherte Alarmgrenzen bleiben unverändert."))
                 .setNegativeButton(AppText.tr("Abbrechen"),null).setPositiveButton(AppText.tr("Neu erkennen"),(d,w) -> {
-                    LivePreferences.set(this,LivePreferences.monitor(this),false);LiveAlarmService.sourceDisconnected();LiveAlarmService.settingsChanged();ProbeState.latest=null;ProbeState.vectorCandidate=null;
+                    LivePreferences.set(this,LivePreferences.monitor(this),false);LiveAlarmService.sourceDisconnected();LiveAlarmService.settingsChanged();ProbeState.clear();ProbeState.vectorCandidate=null;
                     status.setText(UnitPreferences.reset(this)?AppText.tr("Warte auf einen neuen gültigen CamAPS-Wert"):AppText.tr("Einheit konnte nicht zurückgesetzt werden"));source.setText(UnitPreferences.status(this));
                 }).show());
     }

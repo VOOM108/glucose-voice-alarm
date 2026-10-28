@@ -11,4 +11,5 @@ public class UiActivity extends Activity {
         SafetyConsent.require(this);
     }
     @Override public void onResume() {super.onResume();if(!SafetyConsent.ready(this)){if(!isFinishing())SafetyConsent.require(this);return;}CamApsConnection.ensure(this);if(applied!=AppAppearance.mode(this))recreate();}
+    @Override protected void onPause(){HomeWidget.changed(this);super.onPause();}
 }

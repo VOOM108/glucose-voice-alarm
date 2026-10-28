@@ -1,0 +1,6 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp" android:minHeight="120dp" android:minResizeWidth="220dp" android:minResizeHeight="120dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="1800000" android:widgetCategory="home_screen" android:widgetFeatures="reconfigurable|configuration_optional"
+    android:initialLayout="@layout/home_widget" android:previewLayout="@layout/home_widget" android:description="@string/widget_description"
+    android:configure="de.giesen.camaps.companion.prototype.WidgetConfigureActivity"/>

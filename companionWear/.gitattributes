@@ -1,0 +1,2 @@
+# Preserve third-party license documents byte-for-byte, including upstream spacing.
+licenses/*.txt -text -whitespace

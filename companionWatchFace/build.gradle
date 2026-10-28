@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+apply plugin: 'com.android.application'
+android {
+    namespace 'de.giesen.gva.dots'
+    compileSdk 34
+    buildFeatures { buildConfig false }
+    // AGP 7 still generates resource identifier classes. Remove those unused
+    // identifiers so the WFF package is genuinely code-free; retain all resources.
+    buildTypes { debug { minifyEnabled true; shrinkResources false } }
+    defaultConfig { applicationId 'de.giesen.gva.dots'; minSdk 33; targetSdk 34; versionCode 6; versionName '0.1.5-beta' }
+    if(project.hasProperty('probeKeystore')) { signingConfigs { debug { storeFile file(project.property('probeKeystore')) } } }
+}

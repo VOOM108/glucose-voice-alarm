@@ -1,2 +1,4 @@
-# Catalog fragments deliberately preserve spaces before a following value.
-src/main/resources/i18n/ui-en.tsv whitespace=-blank-at-eol
+# Preserve upstream legal notices byte-for-byte, including original line endings and trailing spaces.
+src/main/assets/licenses/GoogleSansFlex-TRADEMARKS.md -text -whitespace
+src/main/assets/licenses/GoogleSansFlex-OFL.txt -text -whitespace
+src/main/assets/licenses/RobotoFlex-OFL.txt -text -whitespace

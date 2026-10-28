@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<WatchFace width="600" height="600" clipShape="CIRCLE">
+  <Metadata key="CLOCK_TYPE" value="ANALOG" />
+  <Metadata key="PREVIEW_TIME" value="10:08:00" />
+  <Scene backgroundColor="#FF000000">
+    <ComplicationSlot slotId="1" supportedTypes="SMALL_IMAGE EMPTY" x="0" y="0" width="600" height="600">
+      <BoundingOval x="0" y="0" width="600" height="600" />
+      <DefaultProviderPolicy primaryProvider="de.giesen.camaps.companion.prototype/de.giesen.gva.watch.DisplayComplication" primaryProviderType="SMALL_IMAGE" defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
+      <Complication type="SMALL_IMAGE">
+        <PartImage x="0" y="0" width="600" height="600" alpha="255">
+          <Variant mode="AMBIENT" target="alpha" value="0" />
+          <Image resource="[COMPLICATION.SMALL_IMAGE]" />
+        </PartImage>
+        <PartImage x="0" y="0" width="600" height="600" alpha="0">
+          <Variant mode="AMBIENT" target="alpha" value="255" />
+          <Image resource="[COMPLICATION.SMALL_IMAGE_AMBIENT]" />
+        </PartImage>
+      </Complication>
+    </ComplicationSlot>
+    <ComplicationSlot slotId="2" supportedTypes="SHORT_TEXT EMPTY" x="119" y="394" width="176" height="112">
+      <BoundingBox x="0" y="0" width="176" height="112" />
+      <DefaultProviderPolicy primaryProvider="de.giesen.camaps.companion.prototype/de.giesen.gva.watch.AgeComplication" primaryProviderType="SHORT_TEXT" defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
+      <Complication type="SHORT_TEXT">
+        <PartText x="0" y="0" width="176" height="112">
+          <Variant mode="AMBIENT" target="alpha" value="220" />
+          <Text align="CENTER">
+            <Font family="roboto_flex_footer" size="72" color="#FFFFFFFF" weight="BLACK">
+              <Template>%s<Parameter expression="[COMPLICATION.TEXT]" />
+              </Template>
+            </Font>
+          </Text>
+        </PartText>
+      </Complication>
+    </ComplicationSlot>
+    <Group name="clock_points" x="0" y="0" width="600" height="600">
+      <Variant mode="AMBIENT" target="alpha" value="110" />
+      <PartDraw name="hour" x="0" y="0" width="600" height="600">
+        <Transform target="angle" value="[HOUR_0_11_MINUTE] * 30" />
+        <Ellipse x="276" y="27" width="48" height="48">
+          <Fill color="#FF64B5FF" />
+        </Ellipse>
+      </PartDraw>
+      <PartDraw name="minute" x="0" y="0" width="600" height="600">
+        <Transform target="angle" value="[MINUTE] * 6" />
+        <Ellipse x="283" y="34" width="34" height="34">
+          <Fill color="#FFFFAA55" />
+        </Ellipse>
+      </PartDraw>
+    </Group>
+  </Scene>
+</WatchFace>

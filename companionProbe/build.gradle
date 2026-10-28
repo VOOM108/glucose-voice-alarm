@@ -7,8 +7,8 @@ android {
         applicationId 'de.giesen.camaps.companion.prototype'
         minSdk 26
         targetSdk 34
-        versionCode 28
-        versionName '0.15.1-beta'
+        versionCode 38
+        versionName '0.20.4-beta'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -25,6 +25,8 @@ android {
         debug { minifyEnabled false }
     }
     sourceSets.main.res.srcDir "$buildDir/generated/tone-res"
+    sourceSets.main.java.srcDir '../companionWatchShared/java'
+    sourceSets.test.java.srcDir '../companionWatchShared/test'
     aaptOptions { noCompress 'wav' }
     if (project.hasProperty('probeFastCheck')) {
         sourceSets.test.java.exclude '**/androidcheck/**'
@@ -74,6 +76,7 @@ tasks.register('generateToneAssets',JavaExec) {
 tasks.named('preBuild').configure { dependsOn 'generateToneAssets' }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-wearable:18.2.0'
     testImplementation 'junit:junit:4.13.2'
     if (!project.hasProperty('probeFastCheck')) testImplementation 'org.robolectric:robolectric:4.14.1'
 }

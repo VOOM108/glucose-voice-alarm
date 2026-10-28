@@ -123,7 +123,9 @@ public class ProbeActivity extends UiActivity {
         receive.setOnCheckedChangeListener((button, checked) -> {
             getSharedPreferences(CamApsListener.PREFS, MODE_PRIVATE).edit()
                     .putBoolean(CamApsListener.ENABLED, checked).apply();
-            ProbeState.latest = null;
+            ProbeState.clear();
+            HomeWidget.changed(this);
+            if(WatchPublisher.enabled(this))WatchPublisher.clear(this);
             ProbeState.vectorCandidate = null;
             AlarmProbe.clear(checked?AlarmProbe.Ingress.WAITING:AlarmProbe.Ingress.OFF);
             saveCoreReport();
@@ -181,7 +183,9 @@ public class ProbeActivity extends UiActivity {
             getSharedPreferences(VectorReference.SHAPE_PREFS,MODE_PRIVATE).edit().clear().apply();
             getSharedPreferences(VectorReference.HISTORY_PREFS,MODE_PRIVATE).edit().clear().apply();
             ReferenceAuditStore.clear(this);
-            ProbeState.latest=null;
+            ProbeState.clear();
+            HomeWidget.changed(this);
+            if(WatchPublisher.enabled(this))WatchPublisher.clear(this);
             ProbeState.status=AppText.tr("Pfeilzuordnungen gelöscht; warte auf ein neues CamAPS-Update");
             if (audio!=null) audio.stop();
             render();
@@ -211,7 +215,7 @@ public class ProbeActivity extends UiActivity {
     private void render() {
         if(coverage!=null) coverage.setText(ArrowCoverage.summary(this));
         if (SystemClock.elapsedRealtime()-lastDisplayDiagnostic>2000 || lastDisplayDiagnostic==0) { DisplayDiagnostics.write(this); lastDisplayDiagnostic=SystemClock.elapsedRealtime(); }
-        ProbeState.Observation current = ProbeState.latest;
+        ProbeState.Observation current = ProbeState.display(this);
         SystemReadiness readiness=SystemReadiness.read(this);
         operationStatus.setText(SystemReadiness.operatingTitle(this));
         UiActions.title(operation,readiness.ready()?AppText.tr("Anzeige und Hintergrund"):readiness.nextAction());
@@ -239,7 +243,7 @@ public class ProbeActivity extends UiActivity {
         NotificationParser.Trend exact=candidate==null?NotificationParser.Trend.UNKNOWN:TrendReference.lookup(getSharedPreferences(VectorReference.PREFS,MODE_PRIVATE).getAll(),candidate.key);
         NotificationParser.Trend shape=candidate==null?NotificationParser.Trend.UNKNOWN:TrendReference.lookup(getSharedPreferences(VectorReference.SHAPE_PREFS,MODE_PRIVATE).getAll(),candidate.shapeKey);
         boolean known=ShapeReference.resolve(exact,shape)!=NotificationParser.Trend.UNKNOWN;
-        boolean parsedKnown=current!=null && current.trend!=NotificationParser.Trend.UNKNOWN;
+        boolean parsedKnown=ProbeState.latest!=null && ProbeState.latest.trend!=NotificationParser.Trend.UNKNOWN;
         confirmVector.setVisibility(!parsedKnown && candidate!=null && candidate.current()?View.VISIBLE:View.GONE);
         vectorStatus.setVisibility(!parsedKnown && candidate!=null && candidate.current()?View.VISIBLE:View.GONE);
         UiActions.title(confirmVector,known?AppText.tr("Bekannte Pfeilgrafik prüfen/ändern …"):AppText.tr("Pfeilgrafik zuordnen …"));
@@ -252,7 +256,7 @@ public class ProbeActivity extends UiActivity {
                 ?MetricNotification.trendTitle(current.trend):candidate!=null && candidate.current()?AppText.tr("Trend offen"):AppText.tr("Kein Trendpfeil")));
         value.setText(current == null ? "—" : unit.number(current.value,java.util.Locale.getDefault())+(current.trend==NotificationParser.Trend.UNKNOWN?"":" "+current.trend.symbol));
         value.setContentDescription(current==null?AppText.tr("Noch kein Empfang"):unit.number(current.value,java.util.Locale.getDefault())+" "+unit.label);
-        boolean currentFresh=current!=null && SpeechPolicy.canSpeak(enabled(),current.receivedElapsed,SystemClock.elapsedRealtime(),current.postedWall,System.currentTimeMillis());
+        boolean currentFresh=ProbeState.displayFresh(this,current);
         Double rate=currentFresh?current.receiptRate.at(System.currentTimeMillis()):null;
         calculatedRate.setText(rate==null?"":unit.rate(rate,java.util.Locale.getDefault()));
         calculatedRate.setVisibility(rate==null?View.GONE:View.VISIBLE);
@@ -303,7 +307,9 @@ public class ProbeActivity extends UiActivity {
                         String encoded=VectorHistory.append(history.getString("entries",""),new VectorHistory.Entry(captured.key,captured.shapeKey,choices[selected[0]]));
                         historySaved=history.edit().putString("entries",encoded).commit();
                     } catch (IllegalArgumentException | ClassCastException e) { /* Preserve unknown history; reference storage is independent. */ }
-                    ProbeState.latest=null;
+                    ProbeState.clear();
+                    HomeWidget.changed(this);
+                    if(WatchPublisher.enabled(this))WatchPublisher.clear(this);
                     if (audio!=null) audio.stop();
                     ProbeState.status=AppText.tr("Pfeilreferenz gespeichert; warte auf ein neues CamAPS-Update")+(historySaved?"":AppText.tr(". Bestätigungshistorie nicht verfügbar."));
                     render();

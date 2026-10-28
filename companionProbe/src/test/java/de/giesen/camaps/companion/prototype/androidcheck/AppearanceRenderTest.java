@@ -89,6 +89,21 @@ public class AppearanceRenderTest {
                 try(FileOutputStream out=new FileOutputStream(new File(folder,(alarm?"alarm":"output")+"-"+mode.name().toLowerCase(Locale.ROOT)+".png"))) { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG,100,out)); }
             } finally { controller.pause().stop().destroy(); }
         }
+        renderWatchTransferStatus(app);
+    }
+    private void renderWatchTransferStatus(Context app)throws Exception {
+        for(AppAppearance.Mode mode:new AppAppearance.Mode[]{AppAppearance.Mode.LIGHT,AppAppearance.Mode.DARK}) {
+            AppAppearance.set(app,mode);long now=System.currentTimeMillis();
+            WatchPublisher.status=new WatchTransferStatus(WatchTransferStatus.Event.DISPLAY,WatchTransferStatus.Result.SENT,now);
+            WatchAlertPublisher.status=new WatchTransferStatus(WatchTransferStatus.Event.TEST,WatchTransferStatus.Result.SENT,now);
+            ActivityController<WatchSettingsActivity> controller=Robolectric.buildActivity(WatchSettingsActivity.class).create().start().resume().visible();
+            try {
+                ScrollView scroll=null;for(View v:views(controller.get().findViewById(android.R.id.content)))if(v instanceof ScrollView){scroll=(ScrollView)v;break;}
+                assertNotNull(scroll);View body=scroll.getChildAt(0);body.measure(View.MeasureSpec.makeMeasureSpec(411,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED));body.layout(0,0,411,body.getMeasuredHeight());
+                Bitmap bitmap=Bitmap.createBitmap(411,body.getHeight(),Bitmap.Config.ARGB_8888);Canvas canvas=new Canvas(bitmap);canvas.drawColor(AppAppearance.colors(app).background);body.draw(canvas);
+                File folder=new File("build/ui-previews");folder.mkdirs();try(FileOutputStream out=new FileOutputStream(new File(folder,"watch-transfer-"+mode.name().toLowerCase(Locale.ROOT)+".png"))){assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG,100,out));}
+            } finally {controller.pause().stop().destroy();}
+        }
     }
     @Test public void renderLightDarkAndLargeFontDashboardWithoutWrappedNavigationButtons() throws Exception {
         Context app=RuntimeEnvironment.getApplication();
@@ -98,7 +113,7 @@ public class AppearanceRenderTest {
             app.getResources().updateConfiguration(config,metrics); AppAppearance.set(app,mode);
             app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
             long posted=System.currentTimeMillis()-(stale?SpeechPolicy.MAX_RECEIPT_AGE_MS+1000:0);
-            ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.FLAT,SystemClock.elapsedRealtime(),posted,"synthetic");
+            ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.FLAT,SystemClock.elapsedRealtime()-(stale?SpeechPolicy.MAX_RECEIPT_AGE_MS+1000:0),posted,"synthetic");
             org.robolectric.util.ReflectionHelpers.setField(ProbeState.latest,"receivedWall",posted); ProbeState.vectorCandidate=null;
             ActivityController<ProbeActivity> controller=Robolectric.buildActivity(ProbeActivity.class).create().start().resume().visible(); ProbeActivity activity=controller.get();
             try {

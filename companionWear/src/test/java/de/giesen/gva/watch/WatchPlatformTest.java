@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+package de.giesen.gva.watch;
+import android.graphics.*;
+import android.provider.Settings;
+import java.io.*;
+import java.util.*;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.robolectric.*;
+import org.robolectric.annotation.*;
+import static org.junit.Assert.*;
+@RunWith(RobolectricTestRunner.class) @Config(sdk=34) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+public class WatchPlatformTest {
+    android.app.Application c;
+    @Before public void reset(){c=RuntimeEnvironment.getApplication();c.getSharedPreferences("watch_safety_v1",0).edit().clear().commit();WatchStore.clear(c);Settings.Global.putInt(c.getContentResolver(),"boot_count",1);}
+    @Test public void transportCannotGrantWatchConsent()throws Exception{assertFalse(WatchStore.accept(c,WatchRenderer.demo(System.currentTimeMillis()).encode()));assertNull(WatchStore.read(c));}
+    @Test public void firstAcknowledgmentDoesNotUnlockData(){WatchConsent.accept(c,1);assertFalse(WatchConsent.ready(c));}
+    @Test public void olderPacketCannotOverwriteCurrentPacket()throws Exception{WatchConsent.accept(c,1);WatchConsent.accept(c,2);long now=System.currentTimeMillis();assertTrue(WatchStore.accept(c,WatchRenderer.demo(now).encode()));assertFalse(WatchStore.accept(c,WatchRenderer.demo(now-1).encode()));}
+    @Test public void rebootCannotRenewCachedFreshness()throws Exception{WatchConsent.accept(c,1);WatchConsent.accept(c,2);WatchStore.accept(c,WatchRenderer.demo(System.currentTimeMillis()).encode());Settings.Global.putInt(c.getContentResolver(),"boot_count",2);assertFalse(WatchStore.read(c).fresh(c,System.currentTimeMillis()));}
+    @Test public void cacheClearDoesNotAlterLegalAcknowledgments()throws Exception{WatchConsent.accept(c,1);WatchConsent.accept(c,2);WatchStore.accept(c,WatchRenderer.demo(System.currentTimeMillis()).encode());WatchStore.clear(c);assertNull(WatchStore.read(c));assertTrue(WatchConsent.ready(c));}
+    @Test public void renderActiveAmbientAndStale()throws Exception{
+        long now=1800000000000L;WatchSnapshot s=WatchRenderer.demo(now);WatchRenderer renderer=new WatchRenderer(c);
+        File folder=new File(System.getProperty("gva.watch.renders"));assertTrue(folder.isDirectory()||folder.mkdirs());
+        for(String mode:new String[]{"active","ambient","stale","no-data","two-hours","ambient-two-hours","long-delta","zero-age"}){
+            boolean ambient=mode.startsWith("ambient"),fresh=!mode.equals("stale")&&!mode.equals("no-data");
+            int hours=mode.contains("two-hours")?2:1;
+            WatchSnapshot view=mode.equals("long-delta")?new WatchSnapshot(s.generated,s.received,s.value,s.trend,true,true,-12.34*18.0182,s.low,s.high,s.points):s;
+            Bitmap b=Bitmap.createBitmap(600,600,Bitmap.Config.ARGB_8888);
+            if(mode.equals("zero-age"))renderer.draw(new Canvas(b),600,view,fresh,ambient,hours,true,false,now,"0");
+            else renderer.draw(new Canvas(b),600,mode.equals("no-data")?null:view,fresh,ambient,hours,true,false,now);
+            try(FileOutputStream out=new FileOutputStream(new File(folder,mode+".png"))){assertTrue(b.compress(Bitmap.CompressFormat.PNG,100,out));}
+            if(ambient){assertEquals(Color.BLACK,b.getPixel(300,250));assertNotEquals(Color.BLACK,b.getPixel(300,51));assertEquals(Color.BLACK,b.getPixel(300,550));}
+            if(mode.equals("active"))assertNotEquals(Color.BLACK,b.getPixel(300,250));
+        }
+    }
+    @Test public void existingUnitChoiceIsUsedForNumbersAndDelta(){assertEquals("7,0",WatchRenderer.number(126.1274,true,false).replace('.',','));assertEquals("+0,07",WatchRenderer.number(1.2,true,true).replace('.',','));}
+}

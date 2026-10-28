@@ -1,0 +1,164 @@
+{
+  "synthetic_only": true,
+  "personal_device_images_included": false,
+  "images": {
+    "phone-dashboard-dark.png": {
+      "sha256": "5b399b46ca87773bcd6b2dbf7c9f3d85b59d1469798dfdae4adf364bb6508ebd",
+      "width": 411,
+      "height": 891,
+      "kind": "Native synthetic app/widget rendering",
+      "component": "phone",
+      "source": "companionProbe synthetic platform UI tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "phone-dashboard-light.png": {
+      "sha256": "fbb5fff9aa44eb1572444afc4a1536dbc64b1b917a3c6ea1c0002987c66e82d5",
+      "width": 411,
+      "height": 891,
+      "kind": "Native synthetic app/widget rendering",
+      "component": "phone",
+      "source": "companionProbe synthetic platform UI tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "phone-settings-output.png": {
+      "sha256": "003e1fe370a3a97310b3f9e80e6828d9d169068d0d5d64fc0b78b2de6a0c00e3",
+      "width": 411,
+      "height": 1610,
+      "kind": "Native synthetic app/widget rendering",
+      "component": "phone",
+      "source": "companionProbe synthetic platform UI tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "phone-settings-levels.png": {
+      "sha256": "b3ddb8758206121d7025b8de6c454181dde63d996bdf648758387cb367737d45",
+      "width": 411,
+      "height": 1348,
+      "kind": "Native synthetic app/widget rendering",
+      "component": "phone",
+      "source": "companionProbe synthetic platform UI tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "phone-widget-dark.png": {
+      "sha256": "91eb380303ce06f6d2ad8f6ca7467316182d877f699925fefe04f0baea8c4153",
+      "width": 320,
+      "height": 160,
+      "kind": "Native synthetic app/widget rendering",
+      "component": "phone",
+      "source": "companionProbe synthetic platform UI tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "phone-widget-light.png": {
+      "sha256": "b65220630d42f451bc6d93ae7f545299f8cd521c2a899cbba600e8d2977dd0fb",
+      "width": 1280,
+      "height": 640,
+      "kind": "Native synthetic app/widget rendering",
+      "component": "phone",
+      "source": "companionProbe synthetic platform UI tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "watch-face-active.png": {
+      "sha256": "b5ef2183020cb88b9dcf7e06d1317c3d668f64be921472c37a1db5bfc4a4f637",
+      "width": 600,
+      "height": 600,
+      "kind": "Synthetic shared-renderer face preview with clock/age arrangement",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "watch-face-ambient.png": {
+      "sha256": "ebfe0d882d57e8994fbbb81da57f0532dd7afd6b1088a2d5b9deed35cee8059d",
+      "width": 600,
+      "height": 600,
+      "kind": "Synthetic shared-renderer ambient face preview",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "watch-tile.png": {
+      "sha256": "7412d9bc794e8539a62862e980456e5f04ff98ed5624703cb3acc859e23b8799",
+      "width": 450,
+      "height": 450,
+      "kind": "Native synthetic tile rendering",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "complication-composite.png": {
+      "sha256": "363b773e1f3b0cb185a5bfc8b664caa337e78be2077a02bdd22b2be12cdbf890",
+      "width": 320,
+      "height": 320,
+      "kind": "Native composite complication graphic",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "complication-age.png": {
+      "sha256": "d92b380b45f8ee09a485cc51cb4500aff9f7233673ae895eac089414162289f6",
+      "width": 320,
+      "height": 160,
+      "kind": "Provider text content rendered as an example; host face controls styling",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "complication-value.png": {
+      "sha256": "934e16386a96e20cf3ce93a226fe8834d87b466d5d9c75f7e1488bcb2df40088",
+      "width": 320,
+      "height": 160,
+      "kind": "Provider text content rendered as an example; host face controls styling",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "complication-trend.png": {
+      "sha256": "776ee37463ccbe5ee2cd1fca8b754af203df7df48fef7d9595cf08259e9f84d7",
+      "width": 320,
+      "height": 160,
+      "kind": "Provider text content rendered as an example; host face controls styling",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "complication-delta.png": {
+      "sha256": "ee017b170361f79c37008b097a3cf363d9affcd9b8c94608f35bb3ba2338f633",
+      "width": 320,
+      "height": 160,
+      "kind": "Provider text content rendered as an example; host face controls styling",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "complication-curve.png": {
+      "sha256": "07d1509a550cdabd7a4ede2a2cc0ffdc93f041c74632bbc83f61df0d6185684a",
+      "width": 320,
+      "height": 120,
+      "kind": "Native synthetic curve complication graphic",
+      "component": "watch",
+      "source": "companionWear native synthetic renderer/provider/tile tests",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "phone-aod-schematic.svg": {
+      "sha256": "43f6320133dbfb3572a41d3e9cb614aee59070ce787252cc335083405ba3cb2e",
+      "kind": "Code-native SVG schematic, not an Android/Pixel screenshot",
+      "component": "phone",
+      "source": "MetricNotification.java fields: trend title, receipt-time metric label, reading with arrow",
+      "synthetic": true,
+      "device_capture": false
+    }
+  }
+}

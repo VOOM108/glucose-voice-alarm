@@ -71,7 +71,7 @@ public final class LiveAlarmService extends Service {
     }
     static void settingsChanged() {
         LiveAlarmService service=current;
-        if (service!=null) service.handler.post(() -> { service.audio.stop(); service.reload(); service.updateStatus(); });
+        if (service!=null) service.handler.post(() -> { service.audio.stop(); service.reload(); service.updateStatus(); HomeWidget.changed(service); });
     }
     static void displayChanged() {
         LiveAlarmService service=current;
@@ -110,11 +110,13 @@ public final class LiveAlarmService extends Service {
             if (SNOOZE.equals(action)) snooze(intent.getStringExtra("id"));
         } else reload();
         handler.removeCallbacks(tick); handler.post(tick);
+        HomeWidget.changed(this);
         return START_STICKY;
     }
     private void foreground(boolean playback) {
         if (foreground && playbackForeground==playback) return;
-        Notification notification=notifications.status(value,displayTrend(),received==null?0:received.wallMs,fresh(),status);
+        DisplayStatus shown=displayStatus();
+        Notification notification=notifications.status(shown.value,shown.trend,shown.received,shown.fresh,status);
         if (Build.VERSION.SDK_INT>=34) startForeground(LiveNotifications.STATUS_ID,notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE|(playback?ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:0));
         else startForeground(LiveNotifications.STATUS_ID,notification);
@@ -269,23 +271,36 @@ public final class LiveAlarmService extends Service {
         AlarmOutputFlow.Outcome result=flow.snooze(id,level.rule.outputs.snoozeMinutes,RuntimeClock.read(this));
         status=result==AlarmOutputFlow.Outcome.ACCEPTED?AppText.tr("Alarm quittiert und gespeichert pausiert"):AppText.tr("Snooze konnte nicht gespeichert werden");
     }
-    private NotificationParser.Trend displayTrend() {
-        return trend;
+    private static final class DisplayStatus {
+        final Double value;final NotificationParser.Trend trend;final long received;final boolean fresh;
+        DisplayStatus(Double v,NotificationParser.Trend t,long r,boolean f){value=v;trend=t;received=r;fresh=f;}
+    }
+    /** Display retention never supplies an input to fresh(), evaluate() or an audio path. */
+    private DisplayStatus displayStatus() {
+        ProbeState.Observation shown=ProbeState.display(this);
+        if(shown!=null)return new DisplayStatus(shown.value,shown.trend,shown.receivedWall,ProbeState.displayFresh(this,shown)&&fresh());
+        if(ProbeState.displayAllowed(this)&&value!=null&&received!=null) {
+            AlarmStateStore.Clock now=RuntimeClock.read(this);
+            long elapsed=now.elapsedMs-received.elapsedMs,wall=now.wallMs-received.wallMs;
+            if(now.boot==received.boot&&elapsed>=0&&wall>=0&&elapsed<=ProbeState.DISPLAY_MAX_AGE_MS&&Math.abs(wall-elapsed)<=60000)
+                return new DisplayStatus(value,trend,received.wallMs,fresh());
+        }
+        return new DisplayStatus(null,NotificationParser.Trend.UNKNOWN,0,false);
     }
     private void updateStatus() {
         if (notifications==null || !foreground) return;
-        boolean fresh=fresh(); long age=received==null?-1:Math.max(0,(SystemClock.elapsedRealtime()-received.elapsedMs)/60000);
-        String detail=status+(received!=null?AppText.tr(" · Empfang vor ")+age+" Min.":"");
-        NotificationParser.Trend shown=displayTrend();
-        String signature=detail+"|"+value+"|"+shown+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this)+"|"+UnitPreferences.display(this,preferences);
-        if (!signature.equals(lastSummary)) { notifications.update(value,shown,received==null?0:received.wallMs,fresh,detail); lastSummary=signature;
+        DisplayStatus display=displayStatus(); boolean fresh=display.fresh; long age=display.received==0?-1:Math.max(0,(System.currentTimeMillis()-display.received)/60000);
+        String detail=status+(display.received>0?AppText.tr(" · Empfang vor ")+age+" Min.":"");
+        NotificationParser.Trend shown=display.trend;
+        String signature=detail+"|"+display.value+"|"+display.received+"|"+shown+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this)+"|"+UnitPreferences.display(this,preferences);
+        if (!signature.equals(lastSummary)) { notifications.update(display.value,shown,display.received,fresh,detail); lastSummary=signature;
             handler.postDelayed(() -> DisplayDiagnostics.write(this),300); }
     }
     private void releaseOutputLock() { if (outputLock!=null && outputLock.isHeld()) outputLock.release(); }
     @Override public void onDestroy() {
         handler.removeCallbacksAndMessages(null); if (flow!=null) flow.stop(); if (audio!=null) audio.close();
         releaseOutputLock(); if (notifications!=null) notifications.clearAlarm();
-        stopForeground(STOP_FOREGROUND_REMOVE); foreground=false; if (current==this) current=null; status=terminalStatus==null?AppText.tr("Live-Dienst ausgeschaltet"):terminalStatus; super.onDestroy();
+        stopForeground(STOP_FOREGROUND_REMOVE); foreground=false; if (current==this) current=null; status=terminalStatus==null?AppText.tr("Live-Dienst ausgeschaltet"):terminalStatus; HomeWidget.changed(this); super.onDestroy();
     }
     @Override public IBinder onBind(Intent intent) { return null; }
 }

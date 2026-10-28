@@ -45,13 +45,15 @@ public final class CamApsListener extends NotificationListenerService {
         // Keep Android binding intact while consent is pending; all processing stays gated.
         if(!SafetyConsent.ready(this))return;
         receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
-        ProbeState.latest = null;
+        ProbeState.unavailable();
         ProbeState.vectorCandidate = null;
         AlarmProbe.clear(AlarmProbe.Ingress.WAITING);
         coreReport();
         clearDiagnosticCache();
         ProbeState.diagnostics = "Verbunden; warte auf ein neues CamAPS-Update für die Trenddiagnose.";
         ProbeState.status = "Verbunden; warte auf ein neues CamAPS-Update";
+        HomeWidget.changed(this);
+        if(WatchPublisher.enabled(this))WatchPublisher.changed(this);
         if (!enabled()) requestUnbind();
         // Never import getActiveNotifications() as new measurements.
     }
@@ -59,13 +61,15 @@ public final class CamApsListener extends NotificationListenerService {
         if(!CamApsConnection.disconnected(this))return;
         if(!SafetyConsent.ready(this))return;
         receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
-        ProbeState.latest = null;
+        ProbeState.unavailable();
         ProbeState.vectorCandidate = null;
         AlarmProbe.clear(AlarmProbe.Ingress.OFF);
         coreReport();
         clearDiagnosticCache();
         ProbeState.diagnostics = "Kein verbundener Benachrichtigungsempfang.";
         ProbeState.status = "Benachrichtigungsempfang nicht verbunden";
+        HomeWidget.changed(this);
+        if(WatchPublisher.enabled(this))WatchPublisher.changed(this);
     }
     private boolean enabled() { return SafetyConsent.ready(this) && getSharedPreferences(PREFS, MODE_PRIVATE).getBoolean(ENABLED, false); }
 
@@ -160,8 +164,10 @@ public final class CamApsListener extends NotificationListenerService {
             LiveAlarmService.invalidCurrentSource();
             AlarmProbe.clear(AlarmProbe.Ingress.NO_VALUE);
             coreReport();
-            ProbeState.latest = null;
+            if(UnitPreferences.conflict(this))ProbeState.clear();else ProbeState.unavailable();
             ProbeState.status = result.reason;
+            HomeWidget.changed(this);
+            if(WatchPublisher.enabled(this)) { if(UnitPreferences.conflict(this))WatchPublisher.clear(this);else WatchPublisher.changed(this); }
             return;
         }
         ReceiptWindow.Intake intake=receiptOrder.receive(sbn.getKey(),sbn.getPostTime(),result.mgdl,receiptClock);
@@ -183,14 +189,18 @@ public final class CamApsListener extends NotificationListenerService {
             ReceiptRate.Result rate=ReceiptRate.calculate(receiptOrder.points(),receiptClock.wallMs);
             LiveAlarmService.receive(sbn.getKey(),sbn.getPostTime(),result.mgdl,result.trend);
             coreReport();
-            ProbeState.latest = new ProbeState.Observation(result.mgdl, result.trend,
-                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey(),rate);
+            ProbeState.observed(new ProbeState.Observation(result.mgdl, result.trend,
+                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey(),rate));
             ProbeState.status = result.reason + "; Zeitbasis: Empfang";
+            HomeWidget.changed(this);
+            if(WatchPublisher.enabled(this))WatchPublisher.changed(this);
         } catch (RuntimeException e) {
             AlarmProbe.clear(AlarmProbe.Ingress.NO_VALUE);
             coreReport();
-            ProbeState.latest = null;
+            ProbeState.unavailable();
             ProbeState.status = "Empfang konnte nicht lokal gespeichert werden";
+            HomeWidget.changed(this);
+            if(WatchPublisher.enabled(this))WatchPublisher.changed(this);
         }
     }
     @Override public void onNotificationRemoved(StatusBarNotification sbn) {
@@ -201,12 +211,14 @@ public final class CamApsListener extends NotificationListenerService {
         ProbeState.Observation latest = ProbeState.latest;
         if (latest != null && latest.notificationKey.equals(sbn.getKey())) {
             receiptOrder.clear(); LiveAlarmService.sourceDisconnected();
-            ProbeState.latest = null;
+            ProbeState.unavailable();
             AlarmProbe.clear(AlarmProbe.Ingress.WAITING);
             coreReport();
             clearDiagnosticCache();
             ProbeState.diagnostics = "CamAPS-Benachrichtigung entfernt; warte auf ein neues Ereignis.";
             ProbeState.status = "CamAPS-Benachrichtigung entfernt";
+            HomeWidget.changed(this);
+            if(WatchPublisher.enabled(this))WatchPublisher.changed(this);
         }
     }
     private void clearDiagnosticCache() {

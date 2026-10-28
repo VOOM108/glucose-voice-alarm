@@ -24,11 +24,13 @@ public final class UnitPreferences {
         return true;
     }
     static long epoch(Context context) { return prefs(context).getLong("epoch",0); }
-    static void markConflict(Context context) { prefs(context).edit().putBoolean("conflict",true).commit(); }
+    static void markConflict(Context context) { prefs(context).edit().putBoolean("conflict",true).commit(); ProbeState.clear(); }
     static synchronized boolean reset(Context context) {
         SharedPreferences p=prefs(context);long epoch=p.getLong("epoch",0);
         if(epoch==Long.MAX_VALUE)return false;
-        return p.edit().remove("source").putBoolean("conflict",false).putLong("epoch",epoch+1).commit();
+        boolean saved=p.edit().remove("source").putBoolean("conflict",false).putLong("epoch",epoch+1).commit();
+        if(saved) { ProbeState.clear(); if(WatchPublisher.enabled(context))WatchPublisher.clear(context); }
+        return saved;
     }
     public static boolean conflict(Context context) { return prefs(context).getBoolean("conflict",false); }
     public static GlucoseUnit display(Context context,OutputPreferences p) { return (p==null?GlucoseUnit.Mode.AUTO:p.unitMode).resolve(source(context)); }

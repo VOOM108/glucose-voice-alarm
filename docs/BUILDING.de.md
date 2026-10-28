@@ -66,7 +66,18 @@ python tools/check_upstream_rules.py
 
 Wenn sqlite4java unter Windows mit langen WAL-Pfaden scheitert, wähle einen kurzen beschreibbaren Testordner. `probeTestTmp` legt ihn fest; der Standard ist `../t` relativ zum Repository. Gradle und Robolectric laden beim ersten Test Abhängigkeiten herunter, was viel Speicher benötigen kann. XML-/HTML-Berichte und synthetische native UI-Bilder bleiben im ignorierten `build/` des Moduls.
 
-`-PprobeFastCheck` führt nur den reinen Java-Teil aus und ersetzt nicht die vollständige Prüfung. Der Beta-Ausgangsstand hat 552 vollständige synthetische Prüfungen, unter anderem für alte Speicherformate, Profile, deutsche/englische Oberfläche und Sprache, Einheitenumrechnung und die beiden Erststart-Bestätigungen. Native synthetische Darstellungen decken beide Sprachen und Themen sowie große Schrift ab. Das belegt keine Zuverlässigkeit, Hörbarkeit oder klinische Sicherheit am echten Gerät.
+`-PprobeFastCheck` führt nur den reinen Java-Teil aus und ersetzt nicht die vollständige Prüfung. Der Telefonstand hat 647 synthetische Prüfungen, unter anderem für Speicherformate, Profile, deutsche/englische Oberfläche und Sprache, Einheiten, Erststart-Bestätigungen und das Uhren-Anzeigeformat. Native Darstellungen decken beide Sprachen und Themen sowie große Schrift ab. Das Uhrenmodul ergänzt 50 Prüfungen, darunter die getrennten Bestätigungen und Menüaktionen, sowie synthetische Anzeige- und Menüansichten. Das belegt keine Zuverlässigkeit, Hörbarkeit oder klinische Sicherheit am echten Gerät.
+
+Uhren-App und codefreies Zifferblatt haben unter `watch-build/` einen getrennten Build mit JDK 21 und Android SDK Platform 35. Gepinnt sind Gradle 8.9, AGP 8.7.2 und Kotlin 2.1.21 für Wear Compose Material 3. Die Telefonwerkzeuge oben bleiben unverändert. In einer für das Uhren-JDK und SDK eingerichteten Shell:
+
+```sh
+cd watch-build
+./gradlew :companionWear:assembleDebug :companionWatchFace:assembleDebug
+./gradlew :companionWear:testDebugUnitTest
+./gradlew :companionWear:testTileQaUnitTest
+```
+
+Telefon- und Uhren-App müssen dieselbe App-ID und Signatur behalten. Siehe [Uhren-Einrichtung](../companionWear/README.md).
 
 ## Eigenen Build installieren
 
@@ -84,4 +95,9 @@ Der Befehl aktualisiert nur eine passende Installation mit Datenerhalt. Öffne d
 ./gradlew :companionProbe:dependencies
 ```
 
-Die App nutzt Android-System-APIs ohne mitgelieferte fremde App-Laufzeit. JUnit und Robolectric werden nur für Tests verwendet. Beachte [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) und die Hinweise der Herausgeber beim Weitergeben von Abhängigkeiten. Keine `local.properties`, Schlüssel, Zugangsdaten, persönlichen Protokolle, Buildordner oder APKs einchecken.
+Telefon und Uhr binden den Google-Play-services-Wearable-Client ein; die Uhr verwendet zusätzlich AndroidX-Komplikations-/Compose-Bibliotheken und die lizenzierte Roboto Flex. JUnit und Robolectric werden nur für Tests verwendet. Beachte [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) und die Hinweise der Herausgeber beim Weitergeben von Abhängigkeiten. Keine `local.properties`, Schlüssel, Zugangsdaten, persönlichen Protokolle, Buildordner oder APKs einchecken.
+
+Die vier Kachelprüfungen laufen getrennt unter `testTileQaUnitTest`. Nur diese QA-Variante bindet den Android-Kachel-Renderer mit seinen Ressourcen ein; die normale Debug-APK enthält ihn nicht. Die 46 übrigen Uhrenprüfungen laufen unter `testDebugUnitTest`.
+
+
+Telefon- und Uhren-App müssen dieselbe App-ID und denselben Signierschlüssel behalten. Bei eigener App-ID auch die Uhren-App und die Default-Provider-Paketnamen im Zifferblatt anpassen. Das Zifferblatt hat eine eigene App-ID. Beide Builds brauchen dasselbe Android-Benutzerverzeichnis oder ausdrücklich denselben eigenen Signierschlüssel. Die Datenverbindung zwischen Telefon und Uhr benötigt Google Play services.

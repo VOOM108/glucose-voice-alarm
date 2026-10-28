@@ -1,0 +1,24 @@
+{
+  "origin": "https://github.com/googlefonts/googlesans-flex",
+  "distribution_commit": "bd8f81ddb5c74d5c8897b36ad88b440266245103",
+  "source_url": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/googlesansflex/GoogleSansFlex%5BROND%2Copsz%2Cslnt%2Cwdth%2Cwght%5D.ttf",
+  "source_git_blob": "1d8d8ae5a7c6d0e48312d2a0a478bad92caee73a",
+  "source_sha256": "a9ac770798857d5e8ac593ced42b22e40a7c08cec98319f92b0eccc2783a77ba",
+  "license": "SIL Open Font License 1.1",
+  "license_sha256": "fc13d69f63e36d284b6e383d4d1463d8ad404f0aa065e57cf961252d51063137",
+  "trademarks_sha256": "5cad381c0828db656f32a787a1eff76db3303c74ec4f94668ae9fc2873ffe42f",
+  "copyright": "Copyright 2015 The Google Sans Flex Authors (https://github.com/googlefonts/googlesans-flex)",
+  "modification": "Static Latin and punctuation subset; internal family renamed GVA Rounded Widget; weight900, width100, roundedness100, optical size48, slant0. Font remains SIL OFL 1.1.",
+  "axes": {
+    "opsz": 48,
+    "wdth": 100,
+    "wght": 900,
+    "ROND": 100,
+    "slnt": 0
+  },
+  "tool": "fontTools 4.57.0",
+  "static_sha256": "2cced0f0c56ec7e9db7f9ec5b32a27ca70dbc3645257cd8406a1445b3db47743",
+  "static_bytes": 79716,
+  "variable_tables_present": false,
+  "unmodified_reconstructible_source_cache_only": true
+}

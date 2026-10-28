@@ -26,7 +26,8 @@ final class DisplayDiagnostics {
                         .setSmallIcon(R.drawable.ic_xcam_status).setContentTitle("Anzeigepruefung").setOngoing(true);
                 boolean styled=MetricNotification.apply(builder,123,NotificationParser.Trend.FLAT,System.currentTimeMillis());
                 Notification sample=builder.build();
-                synthetic=styled && "Stabil".contentEquals(sample.extras.getCharSequence(Notification.EXTRA_TITLE))
+                synthetic=styled && AppText.tr("Stabil").contentEquals(sample.extras.getCharSequence(Notification.EXTRA_TITLE))
+                        && "123".equals(sample.extras.getString("android.shortCriticalText"))
                         && "ja".equals(flag(sample,"hasPromotableCharacteristics"))?"bestanden":"fehlgeschlagen";
             } catch (RuntimeException | LinkageError e) { synthetic="fehlgeschlagen"; }
         }

@@ -15,6 +15,7 @@ public final class AppearanceActivity extends UiActivity {
         LevelUi.button(body,"de".equals(AppText.language())?"Sicherheit und Bedingungen":"Safety and terms",v -> startActivity(new android.content.Intent(this,SafetyActivity.class)));
         LevelUi.text(body,AppText.tr("Die native Sperrbildschirm-Anzeige gestaltet Android."),14);
         LevelUi.text(body,UnitPreferences.status(this),14);
+        LevelUi.button(body,WatchPublisher.tr("Uhr","Watch"),v -> startActivity(new android.content.Intent(this,WatchSettingsActivity.class)));
         LevelUi.button(body,AppText.tr("Entwickleroptionen"),v -> startActivity(new android.content.Intent(this,DeveloperOptionsActivity.class)));
     }
 }

@@ -29,6 +29,7 @@ final class LivePreferences {
         if(!SafetyConsent.ready(c)){monitor=false;alarms=false;}
         c.getSharedPreferences(FILE,Context.MODE_PRIVATE).edit().putBoolean("monitor",monitor).putBoolean("alarms",monitor && alarms)
                 .putInt("consent_version",alarms?BuildConfig.VERSION_CODE:-1).commit();
+        HomeWidget.changed(c);
     }
     static void setPublicValue(Context c,boolean value) { c.getSharedPreferences(FILE,Context.MODE_PRIVATE).edit().putBoolean("lockscreen_value",value).commit(); }
     static void alarmStarted(Context c) {
@@ -50,6 +51,7 @@ final class LivePreferences {
         de.giesen.camaps.companion.prototype.alarm.AlarmStateStore.Clock now=RuntimeClock.read(c);
         c.getSharedPreferences(FILE,Context.MODE_PRIVATE).edit().putLong("pause_until",until).putLong("pause_wall",now.wallMs)
                 .putLong("pause_elapsed",now.elapsedMs).putLong("pause_boot",now.boot).commit();
+        HomeWidget.changed(c);
     }
     private LivePreferences() {}
 }

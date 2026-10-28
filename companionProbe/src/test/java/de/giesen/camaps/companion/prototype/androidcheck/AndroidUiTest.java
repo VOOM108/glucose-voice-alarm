@@ -257,6 +257,7 @@ public class AndroidUiTest {
     @Test public void dashboardMarksAnOldValueAsStaleWithoutASecondsCounter() {
         app.getSharedPreferences(CamApsListener.PREFS,Context.MODE_PRIVATE).edit().putBoolean(CamApsListener.ENABLED,true).commit();
         ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.FLAT,SystemClock.elapsedRealtime()-300000,System.currentTimeMillis()-300000,"synthetic");
+        org.robolectric.util.ReflectionHelpers.setField(ProbeState.latest,"receivedWall",ProbeState.latest.postedWall);
         ProbeActivity activity=open(ProbeActivity.class).get(); shadowOf(Looper.getMainLooper()).idle(); boolean stale=false;
         for (View view:views(activity.getWindow().getDecorView())) if ("dashboard_time".equals(view.getTag())) {
             TextView time=(TextView)view; stale=time.getCurrentTextColor()==AppAppearance.colors(activity).error;

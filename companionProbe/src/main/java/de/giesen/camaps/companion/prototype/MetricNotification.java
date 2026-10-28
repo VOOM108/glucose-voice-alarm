@@ -29,23 +29,44 @@ final class MetricNotification {
         return apply(builder,value,trend,receivedWall,GlucoseUnit.MGDL);
     }
     static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit) {
+        return apply(builder,value,trend,receivedWall,unit,true);
+    }
+    static CharSequence reading(double value,NotificationParser.Trend trend,GlucoseUnit unit,boolean fresh) {
+        String display=unit.number(value,Locale.getDefault())+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol);
+        if(fresh)return display;
+        android.text.SpannableString text=new android.text.SpannableString(display);
+        text.setSpan(new android.text.style.ForegroundColorSpan(0xff899298),0,text.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return text;
+    }
+    static CharSequence clock(long receivedWall,boolean fresh) {
+        String time=label(receivedWall);if(fresh)return time;
+        android.text.SpannableString text=new android.text.SpannableString(time);
+        text.setSpan(new android.text.style.ForegroundColorSpan(0xffff6b6b),0,text.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return text;
+    }
+    static String ageTitle(long receivedWall) {
+        long age=Math.max(0,(System.currentTimeMillis()-receivedWall)/60000L);
+        return age+AppText.tr(" min alt");
+    }
+    static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit,boolean fresh) {
         if (Build.VERSION.SDK_INT<37) return false;
         try {
             Class<?> metric=Class.forName("android.app.Notification$Metric");
             Class<?> metricValue=Class.forName("android.app.Notification$Metric$MetricValue");
             Class<?> fixedText=Class.forName("android.app.Notification$Metric$FixedText");
             Class<?> style=Class.forName("android.app.Notification$MetricStyle");
-            String display=unit.number(value,Locale.getDefault())+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol);
+            CharSequence display=reading(value,trend,unit,fresh);
             Object rendered=fixedText.getConstructor(CharSequence.class).newInstance(display);
-            String time=label(receivedWall);
+            CharSequence time=clock(receivedWall,fresh);
             Object entry=metric.getConstructor(metricValue,CharSequence.class).newInstance(rendered,time);
             Object renderedStyle=style.getConstructor().newInstance(); style.getMethod("addMetric",metric).invoke(renderedStyle,entry);
             style.getMethod("setCriticalMetric",int.class).invoke(renderedStyle,0);
             builder.setStyle((Notification.Style)renderedStyle);
             // An empty ordinary title becomes the app name on the Pixel. Use a short trend word.
             // The required metric label remains the clock; value/arrow stay in the large metric.
-            builder.setContentTitle(trendTitle(trend)).setContentText(null).setShowWhen(false).setUsesChronometer(false);
-            Notification.Builder.class.getMethod("setShortCriticalText",String.class).invoke(builder,display);
+            builder.setContentTitle(fresh?trendTitle(trend):ageTitle(receivedWall)).setContentText(null).setShowWhen(false).setUsesChronometer(false);
+            // Keep the status-bar chip compact; the large metric above retains its arrow.
+            Notification.Builder.class.getMethod("setShortCriticalText",String.class).invoke(builder,unit.number(value,Locale.getDefault()));
             Notification.Builder.class.getMethod("setRequestPromotedOngoing",boolean.class).invoke(builder,true);
             return true;
         } catch (ReflectiveOperationException | RuntimeException | LinkageError e) { return false; }

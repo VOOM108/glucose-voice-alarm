@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+android {
+    namespace 'de.giesen.gva.watch'
+    compileSdk 35
+    defaultConfig { applicationId 'de.giesen.camaps.companion.prototype'; minSdk 30; targetSdk 35; versionCode 40; versionName '0.19.0-beta' }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
+    kotlinOptions { jvmTarget='1.8' }
+    buildFeatures { compose true }
+    buildTypes { tileQa { initWith debug; matchingFallbacks=['debug'] } }
+    if(project.hasProperty('probeKeystore')) { signingConfigs { debug { storeFile file(project.property('probeKeystore')) } } }
+    sourceSets.main.java.srcDir '../companionWatchShared/java'
+    sourceSets.main.assets.srcDir 'licenses'
+    sourceSets.testTileQa.java.srcDir 'src/tileQaUnitTest/java'
+    testOptions {
+        unitTests.includeAndroidResources=true
+        unitTests.all {
+            if(name=='testTileQaUnitTest') { filter { includeTestsMatching 'de.giesen.gva.watch.WatchTileTest' } }
+            if(project.hasProperty('probeTestJava')) { executable=project.property('probeTestJava'); jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED','--add-opens=java.base/java.util=ALL-UNNAMED' }
+            systemProperty 'robolectric.dependency.repo.url','https://repo.maven.apache.org/maven2'
+            if(project.hasProperty('probeAndroidPlatforms')) { systemProperty 'robolectric.offline','true'; systemProperty 'robolectric.dependency.dir',project.property('probeAndroidPlatforms') }
+            systemProperty 'gva.watch.renders',file("$buildDir/watch-renders").absolutePath
+        }
+    }
+}
+dependencies {
+    implementation 'com.google.android.gms:play-services-wearable:18.2.0'
+    implementation 'androidx.wear.watchface:watchface-complications-data-source:1.2.0'
+    implementation 'androidx.wear.protolayout:protolayout-expression:1.4.2'
+    implementation 'androidx.wear.tiles:tiles:1.6.2'
+    implementation 'androidx.wear.protolayout:protolayout-material3:1.4.2'
+    implementation 'androidx.activity:activity-compose:1.10.1'
+    implementation 'androidx.wear.compose:compose-foundation:1.5.6'
+    implementation 'androidx.wear.compose:compose-material3:1.5.6'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+    testImplementation 'androidx.compose.ui:ui-test-junit4:1.9.4'
+    testImplementation 'androidx.wear.protolayout:protolayout-expression-pipeline:1.4.2'
+    tileQaImplementation 'androidx.wear.tiles:tiles-renderer:1.6.2'
+    testImplementation 'androidx.wear.tiles:tiles-proto:1.6.2'
+    testImplementation 'androidx.wear.protolayout:protolayout-proto:1.4.2'
+}

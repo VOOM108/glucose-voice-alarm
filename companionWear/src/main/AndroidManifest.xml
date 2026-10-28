@@ -1,0 +1,68 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-feature android:name="android.hardware.type.watch" />
+    <application android:label="GVA Watch" android:allowBackup="false" android:fullBackupContent="false"
+        android:icon="@drawable/watch_icon" android:theme="@android:style/Theme.Material.NoActionBar">
+        <meta-data android:name="com.google.android.wearable.standalone" android:value="false" />
+        <service android:name=".WatchTileService" android:label="GVA · Wert und Kurve" android:icon="@drawable/watch_icon"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER" android:exported="true">
+            <intent-filter><action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER"/></intent-filter>
+            <meta-data android:name="androidx.wear.tiles.PREVIEW" android:resource="@drawable/tile_preview"/>
+        </service>
+        <activity android:name=".WatchActivity" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+        </activity>
+        <service android:name=".WatchReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:path="/gva/alert/v1" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:path="/gva/display/v1" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:path="/gva/clear/v1" />
+            </intent-filter>
+        </service>
+        <receiver android:name=".WatchAlertDismissed" android:exported="false" />
+        <service android:name=".DisplayComplication" android:label="GVA · Wert und Kurve" android:icon="@drawable/watch_icon"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER" android:exported="true">
+            <intent-filter><action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/></intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SHORT_TEXT,SMALL_IMAGE"/>
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300"/>
+        </service>
+        <service android:name=".AgeComplication" android:label="GVA · Alter (Min.)" android:icon="@drawable/watch_icon"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER" android:exported="true">
+            <intent-filter><action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/></intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SHORT_TEXT"/>
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300"/>
+        </service>
+        <service android:name=".ValueComplication" android:label="@string/complication_value" android:icon="@drawable/watch_icon"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER" android:exported="true">
+            <intent-filter><action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/></intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SHORT_TEXT"/>
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300"/>
+        </service>
+        <service android:name=".TrendComplication" android:label="@string/complication_trend" android:icon="@drawable/watch_icon"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER" android:exported="true">
+            <intent-filter><action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/></intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SHORT_TEXT,ICON"/>
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300"/>
+        </service>
+        <service android:name=".DeltaComplication" android:label="@string/complication_delta" android:icon="@drawable/watch_icon"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER" android:exported="true">
+            <intent-filter><action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/></intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SHORT_TEXT"/>
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300"/>
+        </service>
+        <service android:name=".CurveComplication" android:label="@string/complication_curve" android:icon="@drawable/watch_icon"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER" android:exported="true">
+            <intent-filter><action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/></intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SMALL_IMAGE"/>
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300"/>
+        </service>
+    </application>
+</manifest>

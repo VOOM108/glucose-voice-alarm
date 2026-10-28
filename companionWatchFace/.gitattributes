@@ -1,0 +1,2 @@
+# Preserve the upstream font license byte for byte, including its original whitespace.
+src/main/assets/RobotoFlex-OFL.txt -text -whitespace

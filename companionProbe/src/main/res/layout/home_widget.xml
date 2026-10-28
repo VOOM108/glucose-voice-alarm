@@ -1,0 +1,48 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="8dp" android:background="@drawable/widget_surface_dark" android:clipToOutline="true"
+    android:importantForAccessibility="no">
+    <LinearLayout android:id="@+id/widget_data" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:orientation="horizontal" android:contentDescription="@string/widget_waiting" android:minHeight="48dp" android:importantForAccessibility="yes">
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1.25" android:orientation="vertical">
+                <TextView android:id="@+id/widget_reading" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+                    android:gravity="start|center_vertical" android:fontFamily="@font/gva_rounded_widget" android:textStyle="bold" android:textFontWeight="900" android:includeFontPadding="false"
+                    android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="28sp" android:autoSizeMaxTextSize="120sp" android:autoSizeStepGranularity="2sp" android:importantForAccessibility="no"/>
+            <TextView android:id="@+id/widget_stamp" android:layout_width="match_parent" android:layout_height="22dp" android:gravity="start|center_vertical"
+                android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="14sp" android:autoSizeStepGranularity="1sp" android:importantForAccessibility="no"/>
+        </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical">
+            <ImageView android:id="@+id/widget_chart" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+            <TextView android:id="@+id/widget_period" android:layout_width="match_parent" android:layout_height="24dp" android:gravity="start|center_vertical"
+                android:includeFontPadding="false" android:maxLines="1" android:textSize="18sp" android:textStyle="bold" android:importantForAccessibility="no"/>
+            <TextView android:id="@+id/widget_delta" android:layout_width="match_parent" android:layout_height="22dp" android:gravity="start|center_vertical"
+                android:fontFamily="@font/gva_rounded_widget" android:textStyle="bold" android:textFontWeight="900" android:includeFontPadding="false" android:maxLines="1"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="18sp" android:autoSizeStepGranularity="1sp" android:importantForAccessibility="no"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/widget_controls" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="4dp" android:orientation="horizontal">
+        <LinearLayout android:id="@+id/widget_tone" style="@style/WidgetToggle">
+            <ImageView android:id="@+id/widget_tone_track" style="@style/WidgetToggleTrack"/>
+            <TextView android:id="@+id/widget_tone_label" style="@style/WidgetToggleLabel"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/widget_alarm" style="@style/WidgetToggle">
+            <ImageView android:id="@+id/widget_alarm_track" style="@style/WidgetToggleTrack"/>
+            <TextView android:id="@+id/widget_alarm_label" style="@style/WidgetToggleLabel"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/widget_value" style="@style/WidgetToggle">
+            <ImageView android:id="@+id/widget_value_track" style="@style/WidgetToggleTrack"/>
+            <TextView android:id="@+id/widget_value_label" style="@style/WidgetToggleLabel"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/widget_vibration" style="@style/WidgetToggle">
+            <ImageView android:id="@+id/widget_vibration_track" style="@style/WidgetToggleTrack"/>
+            <TextView android:id="@+id/widget_vibration_label" style="@style/WidgetToggleLabel"/>
+        </LinearLayout>
+        <ImageView android:id="@+id/widget_master_separator" android:layout_width="1dp" android:layout_height="26dp"
+            android:layout_gravity="center_vertical" android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
+            android:visibility="gone" android:importantForAccessibility="no"/>
+        <LinearLayout android:id="@+id/widget_master" style="@style/WidgetToggle">
+            <ImageView android:id="@+id/widget_master_track" style="@style/WidgetToggleTrack"/>
+            <TextView android:id="@+id/widget_master_label" style="@style/WidgetToggleLabel"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,280 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+package de.giesen.camaps.companion.prototype;
+import android.app.*;
+import android.appwidget.*;
+import android.content.*;
+import android.graphics.*;
+import android.os.*;
+import android.view.*;
+import android.widget.*;
+import de.giesen.camaps.companion.prototype.alarm.*;
+import de.giesen.gva.watch.WatchSnapshot;
+import java.io.*;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.*;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.robolectric.*;
+import org.robolectric.android.controller.*;
+import org.robolectric.annotation.*;
+import org.robolectric.shadows.*;
+import org.robolectric.util.ReflectionHelpers;
+import static org.junit.Assert.*;
+import static org.robolectric.Shadows.shadowOf;
+
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk=28,qualifiers="de-w360dp-h800dp-mdpi",shadows={CamApsConnectionTest.ListenerPort.class})
+@LooperMode(LooperMode.Mode.PAUSED) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+public class HomeWidgetPlatformTest {
+    Application c;int widget;final List<ActivityController<?>> activities=new ArrayList<>();
+    @Before public void reset()throws Exception {
+        c=RuntimeEnvironment.getApplication();ConsentTestSupport.accept(c);AppText.configure(Locale.GERMAN);ProbeState.clear();
+        for(String file:new String[]{LevelStore.FILE_NAME,OutputPreferenceStore.FILE_NAME,ProfileStore.FILE_NAME,SettingsTransaction.FILE_NAME})new File(c.getFilesDir(),file).delete();
+        for(String name:new String[]{HomeWidget.PREFS,AppAppearance.PREFS,"live_controls_v1",UnitPreferences.PREFS,"gva_watch_link_v1"})c.getSharedPreferences(name,0).edit().clear().commit();
+        c.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
+        c.deleteDatabase("probe-observations.db");ShadowSystemClock.advanceBy(Duration.ofHours(3));
+        shadowOf(c.getSystemService(KeyguardManager.class)).setIsDeviceLocked(false);
+        new OutputPreferenceStore(c.getFilesDir()).save(0,new OutputPreferences(AlarmEngine.OutputMode.TONES_ONLY,0,SpeechTemplate.VALUE_DEFAULT));
+        AppWidgetManager manager=AppWidgetManager.getInstance(c);shadowOf(manager).setAllowedToBindAppWidgets(true);
+        AppWidgetProviderInfo info=new AppWidgetProviderInfo();info.provider=new ComponentName(c,HomeWidgetProvider.class);info.initialLayout=R.layout.home_widget;
+        shadowOf(manager).addInstalledProvider(info);
+        widget=43;assertTrue(manager.bindAppWidgetIdIfAllowed(widget,new ComponentName(c,HomeWidgetProvider.class)));
+        assertTrue(HomeWidget.owns(c,widget));
+    }
+    @After public void close()throws Exception {
+        for(ActivityController<?> a:activities)a.pause().stop().destroy();
+        await();ProbeState.clear();
+    }
+    private void await()throws Exception {CountDownLatch done=new CountDownLatch(1);HomeWidget.request(c,done::countDown);assertTrue(done.await(15,TimeUnit.SECONDS));}
+    private void received(long age) throws Exception {
+        long now=System.currentTimeMillis();ProbeState.Observation o=new ProbeState.Observation(126,NotificationParser.Trend.UP_RIGHT,SystemClock.elapsedRealtime()-age,now-age,"synthetic-widget");
+        ReflectionHelpers.setField(o,"receivedWall",now-age);ProbeState.observed(o);
+        try(ObservationStore store=new ObservationStore(c)){/* Database schema exists; no old value is made current. */}
+    }
+    private WidgetControlActivity action(PendingIntent p){Intent i=shadowOf(p).getSavedIntent();ActivityController<WidgetControlActivity> a=Robolectric.buildActivity(WidgetControlActivity.class,i).create();activities.add(a);return a.get();}
+    private OutputPreferenceStore.Snapshot output()throws Exception{return new OutputPreferenceStore(c.getFilesDir()).load();}
+    @Test public void widgetReadsAcceptedDataWithoutEnablingWatchTransfer()throws Exception {
+        received(0);assertFalse(WatchPublisher.enabled(c));HomeWidget.Model m=HomeWidget.model(c);
+        assertNotNull(m.reading);assertEquals(126,m.reading.value,0);assertEquals(WatchSnapshot.Trend.UP_RIGHT,m.reading.trend);assertTrue(m.fresh);
+        assertNull(WatchPublisher.snapshot(c));assertFalse(LivePreferences.alarms(c));
+    }
+    @Test public void aGapKeepsTheOriginalReceiptButCannotProduceFreshDelta()throws Exception {
+        received(5*60000);long receipt=ProbeState.display(c).receivedWall;ProbeState.unavailable();
+        HomeWidget.Model m=HomeWidget.model(c);assertNotNull(m.reading);assertFalse(m.fresh);assertEquals(receipt,m.reading.received);
+        assertNull(m.reading.rate);assertTrue(HomeWidget.description(m).contains("Veraltet"));assertFalse(LivePreferences.alarms(c));
+    }
+    @Test public void expiryUntrustedClockConsentAndDisabledReceptionHideTheValue()throws Exception {
+        received(121*60000);assertNull(HomeWidget.model(c).reading);
+        received(0);ProbeState.Observation o=ProbeState.latest;ReflectionHelpers.setField(o,"receivedWall",o.receivedWall-120000);assertNull(HomeWidget.model(c).reading);
+        received(0);c.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,false).commit();assertNull(HomeWidget.model(c).reading);
+        c.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
+        c.getSharedPreferences(SafetyConsent.PREFS,0).edit().clear().commit();assertNull(HomeWidget.model(c).reading);assertFalse(HomeWidget.model(c).ready);
+    }
+    @Test public void storedHistoryCannotRestoreAReadingAfterProcessStateWasCleared()throws Exception {
+        received(0);ProbeState.clear();assertNull(PhoneDisplaySnapshot.read(c));assertNull(HomeWidget.model(c).reading);
+    }
+    @Test public void invalidWidgetAndLockedDeviceCannotChangeAChannel()throws Exception {
+        long revision=output().revision;
+        action(HomeWidget.control(c,-77,1,true,revision,false));assertEquals(revision,output().revision);
+        shadowOf(c.getSystemService(KeyguardManager.class)).setIsDeviceLocked(true);
+        action(HomeWidget.control(c,widget,1,true,revision,false));assertEquals(revision,output().revision);
+    }
+    @Test public void channelClickAppliesAnExplicitStateAndAReplayDoesNothing()throws Exception {
+        PendingIntent p=HomeWidget.control(c,widget,1,true,output().revision,false);
+        action(p);assertTrue(output().preferences.alarmSpeechEnabled);long revision=output().revision;
+        action(p);assertEquals(revision,output().revision);assertTrue(output().preferences.alarmSpeechEnabled);assertFalse(LivePreferences.alarms(c));
+    }
+    @Test public void lastAlarmRouteCannotBeTurnedOffByWidget()throws Exception {
+        long revision=output().revision;action(HomeWidget.control(c,widget,0,false,revision,false));
+        assertEquals(revision,output().revision);assertTrue(output().preferences.tonesEnabled);assertNotNull(ShadowAlertDialog.getLatestAlertDialog());
+        ShadowAlertDialog.getLatestAlertDialog().dismiss();
+    }
+    @Test public void valueSpeechNeedsItsExistingIntervalSetup()throws Exception {
+        long revision=output().revision;WidgetControlActivity a=action(HomeWidget.control(c,widget,2,true,revision,false));
+        Intent next=shadowOf(a).getNextStartedActivity();assertEquals(OutputSettingsActivity.class.getName(),next.getComponent().getClassName());
+        assertTrue(next.getBooleanExtra("enable_values",false));assertEquals(revision,output().revision);
+    }
+    @Test public void masterOffPreservesReceptionAndChannels()throws Exception {
+        LivePreferences.set(c,true,true);long revision=output().revision;
+        action(HomeWidget.control(c,widget,-1,false,revision,true));assertFalse(LivePreferences.alarms(c));assertTrue(LivePreferences.monitor(c));assertEquals(revision,output().revision);
+    }
+    @Test public void masterOnWithMissingSystemPermissionNeverArmsOutput()throws Exception {
+        shadowOf(c.getSystemService(NotificationManager.class)).setNotificationsEnabled(false);
+        WidgetControlActivity a=action(HomeWidget.control(c,widget,-1,true,output().revision,false));assertFalse(LivePreferences.alarms(c));assertFalse(a.isFinishing());
+    }
+    @Test public void masterOnUsesTheExistingForegroundActivationWhenReady()throws Exception {
+        NotificationManager notifications=c.getSystemService(NotificationManager.class);shadowOf(notifications).setNotificationsEnabled(true);shadowOf(notifications).setNotificationListenerAccessGranted(new ComponentName(c,CamApsListener.class),true);
+        shadowOf(c.getSystemService(PowerManager.class)).setIgnoringBatteryOptimizations(c.getPackageName(),true);shadowOf(c.getSystemService(ActivityManager.class)).setBackgroundRestricted(false);
+        new LevelStore(c.getFilesDir()).save(0,Collections.singletonList(new SyntheticAlarmScenario(AlarmEngine.Kind.HIGH).level));
+        WidgetControlActivity a=action(HomeWidget.control(c,widget,-1,true,output().revision,false));assertTrue(LivePreferences.alarms(c));assertTrue(a.isFinishing());
+        Intent service=shadowOf(c).getNextStartedService();assertNotNull(service);assertEquals(LiveAlarmService.class.getName(),service.getComponent().getClassName());
+    }
+    @Test public void vibrationMayBeTheOnlyWidgetEnabledAlarmRoute()throws Exception {
+        shadowOf((Vibrator)c.getSystemService(Context.VIBRATOR_SERVICE)).setHasVibrator(true);
+        OutputPreferenceStore.Snapshot p=output();new OutputPreferenceStore(c.getFilesDir()).save(p.revision,p.preferences.withChannels(true,true,false,true));
+        action(HomeWidget.control(c,widget,0,false,output().revision,false));action(HomeWidget.control(c,widget,1,false,output().revision,false));
+        assertFalse(output().preferences.tonesEnabled);assertFalse(output().preferences.alarmSpeechEnabled);assertTrue(output().preferences.vibrationEnabled);
+        long revision=output().revision;action(HomeWidget.control(c,widget,3,false,revision,false));assertEquals(revision,output().revision);assertTrue(output().preferences.vibrationEnabled);
+        ShadowAlertDialog.getLatestAlertDialog().dismiss();
+    }
+    @Test @Config(sdk=34) public void responsiveViewsHaveBoundedTwoSizeImagesAndCanBeParceled()throws Exception {
+        Bundle options=new Bundle();options.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES,new ArrayList<>(Arrays.asList(new android.util.SizeF(300,128),new android.util.SizeF(320,160))));
+        RemoteViews rv=HomeWidget.views(c,widget,options,new HomeWidget.Model(demo(false),true,false,false,false,true,output()));
+        Parcel parcel=Parcel.obtain();try{rv.writeToParcel(parcel,0);assertTrue(parcel.dataSize()>0);parcel.setDataPosition(0);RemoteViews recreated=RemoteViews.CREATOR.createFromParcel(parcel);assertNotNull(recreated.apply(c,new FrameLayout(c)));}finally{parcel.recycle();}
+    }
+    @Test public void refreshBroadcastCannotChangeOutputOrChannels()throws Exception {
+        long revision=output().revision;HomeWidgetProvider provider=new HomeWidgetProvider();
+        provider.onReceive(c,new Intent("de.giesen.gva.WIDGET_TOGGLE").putExtra("channel",0).putExtra("enabled",false));await();
+        assertEquals(revision,output().revision);assertTrue(output().preferences.tonesEnabled);assertFalse(LivePreferences.alarms(c));
+    }
+    @Test public void toggleRowIsAvailableAtEverySupportedHeightAndCanStillBeHidden(){
+        for(int height:new int[]{128,160,220})assertTrue(HomeWidget.controls(c,widget,220,height));
+        c.getSharedPreferences(HomeWidget.PREFS,0).edit().putBoolean("controls_"+widget,false).commit();assertFalse(HomeWidget.controls(c,widget,300,160));assertTrue(HomeWidget.controls(c,widget+1,300,160));
+    }
+    @Test public void configureOnlyChangesWidgetPresentation()throws Exception {
+        Intent i=new Intent(c,WidgetConfigureActivity.class).putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widget);
+        ActivityController<WidgetConfigureActivity> a=Robolectric.buildActivity(WidgetConfigureActivity.class,i).create();activities.add(a);
+        CheckBox check=findCheck(a.get().getWindow().getDecorView());assertNotNull(check);check.setChecked(false);assertTrue(click(a.get().getWindow().getDecorView(),"Speichern"));
+        assertFalse(HomeWidget.controls(c,widget,300,340));assertFalse(LivePreferences.alarms(c));assertEquals(Activity.RESULT_OK,shadowOf(a.get()).getResultCode());
+    }
+    @Test public void backgroundOpensDashboardWithoutChangingOutput()throws Exception {
+        LivePreferences.set(c,true,true);HomeWidget.Model m=HomeWidget.model(c);
+        View view=HomeWidget.view(c,widget,320,340,m).apply(c,new FrameLayout(c));
+        view.findViewById(R.id.widget_root).performClick();Intent next=shadowOf(c).getNextStartedActivity();
+        assertEquals(ProbeActivity.class.getName(),next.getComponent().getClassName());assertTrue(LivePreferences.alarms(c));
+    }
+    @Test public void fiveTogglesFitOneVisibleRowAtTheMinimumSize()throws Exception {
+        View root=HomeWidget.view(c,widget,220,128,HomeWidget.model(c)).apply(c,new FrameLayout(c));
+        root.measure(View.MeasureSpec.makeMeasureSpec(220,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(128,View.MeasureSpec.EXACTLY));root.layout(0,0,220,128);
+        ViewGroup row=root.findViewById(R.id.widget_controls);assertEquals(View.VISIBLE,row.getVisibility());
+        assertTrue(row.getBottom()<=root.getHeight()-root.getPaddingBottom());assertEquals(2,((ViewGroup)root).getChildCount());
+        for(int id:new int[]{R.id.widget_tone,R.id.widget_alarm,R.id.widget_value,R.id.widget_vibration,R.id.widget_master}){View toggle=row.findViewById(id);assertEquals(0,toggle.getTop());assertEquals(44,toggle.getHeight());assertTrue(toggle.getRight()<=row.getWidth());assertNotNull(toggle.getContentDescription());}
+        assertEquals(View.GONE,root.findViewById(R.id.widget_master_separator).getVisibility());
+        assertEquals(36,root.findViewById(R.id.widget_tone_track).getWidth());assertEquals(18,root.findViewById(R.id.widget_tone_track).getHeight());
+        root.findViewById(R.id.widget_alarm).performClick();Intent intent=shadowOf(c).getNextStartedActivity();assertEquals(WidgetControlActivity.class.getName(),intent.getComponent().getClassName());
+    }
+    @Test @Config(sdk=34) public void controlsUseImmutableExplicitPrivateActivityIntents()throws Exception {
+        PendingIntent p=HomeWidget.control(c,widget,0,false,output().revision,false);assertTrue(p.isImmutable());
+        Intent i=shadowOf(p).getSavedIntent();assertEquals(WidgetControlActivity.class.getName(),i.getComponent().getClassName());
+        assertFalse(c.getPackageManager().getActivityInfo(i.getComponent(),0).exported);assertNotNull(i.getData());
+    }
+    @Test public void remoteViewsRenderBothThemesAndModesWithoutTouchingOutput()throws Exception {
+        WatchSnapshot sample=demo(false);OutputPreferenceStore.Snapshot output=output();
+        for(AppAppearance.Mode theme:new AppAppearance.Mode[]{AppAppearance.Mode.DARK,AppAppearance.Mode.LIGHT}) {
+            AppAppearance.set(c,theme);
+            for(int height:new int[]{160,220})save("widget-balanced-"+theme.name().toLowerCase()+"-"+height+".png",HomeWidget.view(c,widget,320,height,new HomeWidget.Model(sample,true,false,false,false,true,output)),320,height);
+        }
+        AppAppearance.set(c,AppAppearance.Mode.DARK);
+        save("widget-balanced-stale.png",HomeWidget.view(c,widget,320,160,new HomeWidget.Model(sample,false,false,false,false,true,output)),320,160);
+        save("widget-balanced-empty.png",HomeWidget.view(c,widget,320,160,new HomeWidget.Model(null,false,false,false,false,true,output)),320,160);
+        AppText.configure(Locale.ENGLISH);
+        save("widget-balanced-english-mmol.png",HomeWidget.view(c,widget,320,160,new HomeWidget.Model(demo(true),true,false,false,false,true,output)),320,160);
+        AppText.configure(Locale.GERMAN);
+        for(int width:new int[]{220,260,400})save("widget-balanced-width-"+width+".png",HomeWidget.view(c,widget,width,160,new HomeWidget.Model(sample,true,false,false,false,true,output)),width,160);
+        assertFalse(LivePreferences.alarms(c));
+    }
+    @Test public void aLongGapInTheCurveIsNeverConnected(){
+        long now=1800000000000L;List<WatchSnapshot.Point> points=Arrays.asList(new WatchSnapshot.Point(now-50*60000,110),new WatchSnapshot.Point(now-10*60000,110));
+        WatchSnapshot s=new WatchSnapshot(now,now,110,WatchSnapshot.Trend.FLAT,false,true,null,80.,180.,points);
+        Bitmap b=new HomeWidgetRenderer().image(s,true,true,300,1f,60,now);
+        int line=0;for(int y=0;y<b.getHeight();y++)for(int x=b.getWidth()/3;x<b.getWidth()*2/3;x++)if(b.getPixel(x,y)==0xffd4f6e7)line++;
+        assertEquals(0,line);
+    }
+    @Test public void narrowerChartsUseShorterClearlyNamedWindows()throws Exception {
+        assertEquals(30,HomeWidgetRenderer.historyMinutes(204));assertEquals("30 min",HomeWidgetRenderer.historyLabel(30));
+        assertEquals(60,HomeWidgetRenderer.historyMinutes(304));assertEquals("1 h",HomeWidgetRenderer.historyLabel(60));
+        assertEquals(120,HomeWidgetRenderer.historyMinutes(384));assertEquals("2 h",HomeWidgetRenderer.historyLabel(120));
+        View normal=HomeWidget.view(c,widget,320,160,new HomeWidget.Model(demo(false),true,false,false,false,true,output())).apply(c,new FrameLayout(c));
+        assertTrue(normal.findViewById(R.id.widget_data).getContentDescription().toString().contains("60 Minuten"));
+        assertEquals(View.VISIBLE,normal.findViewById(R.id.widget_master_separator).getVisibility());
+    }
+    @Test public void olderPointsAreOmittedFromAShorterWindowRatherThanCompressed(){
+        long now=1800000000000L;List<WatchSnapshot.Point> points=Arrays.asList(new WatchSnapshot.Point(now-90*60000,60),new WatchSnapshot.Point(now-10*60000,110));
+        WatchSnapshot s=new WatchSnapshot(now,now,110,WatchSnapshot.Trend.FLAT,false,true,null,80.,180.,points);HomeWidgetRenderer r=new HomeWidgetRenderer();
+        assertEquals(0,pixels(r.image(s,true,true,96,1f,30,now),0xffff5c5c));
+        assertTrue(pixels(r.image(s,true,true,180,1f,120,now),0xffff5c5c)>0);
+    }
+    @Test public void valueDigitsAreLargeAndArrowStaysBesideThemBeforeTheChart()throws Exception {
+        HomeWidget.Model m=new HomeWidget.Model(demo(false),true,false,false,false,true,output());
+        View normal=layout(HomeWidget.view(c,widget,320,160,m),320,160);
+        TextView number=normal.findViewById(R.id.widget_reading);
+        assertEquals("126\u2009↗",number.getText().toString());
+        assertTrue("The reading must use native large text",number.getTextSize()>=56);
+        Bitmap digits=Bitmap.createBitmap(number.getWidth(),number.getHeight(),Bitmap.Config.ARGB_8888);number.draw(new Canvas(digits));
+        int firstInk=digits.getWidth();for(int y=0;y<digits.getHeight();y++)for(int x=0;x<digits.getWidth();x++)if(digits.getPixel(x,y)==number.getCurrentTextColor())firstInk=Math.min(firstInk,x);
+        assertTrue("The reading must begin at the leading edge instead of leaving a blank block",firstInk<18);
+        android.text.Layout line=number.getLayout();
+        assertTrue("Only a thin space should separate number and arrow",line.getPrimaryHorizontal(4)-line.getPrimaryHorizontal(3)<8);
+        assertTrue("The arrow must remain large",line.getPrimaryHorizontal(5)-line.getPrimaryHorizontal(4)>=number.getTextSize()*.6f);
+        View wide=layout(HomeWidget.view(c,widget,560,180,m),560,180);
+        assertTrue("A wider host must give the main value more room",((TextView)wide.findViewById(R.id.widget_reading)).getTextSize()>number.getTextSize());
+        assertEquals(18,((TextView)normal.findViewById(R.id.widget_period)).getTextSize(),.1);
+        save("widget-balanced-wide.png",HomeWidget.view(c,widget,560,180,m),560,180);
+        c.getSharedPreferences(HomeWidget.PREFS,0).edit().putBoolean("controls_"+widget,false).commit();
+        save("widget-balanced-no-controls.png",HomeWidget.view(c,widget,320,220,m),320,220,false);
+    }
+    @Test @Config(sdk=34,qualifiers="de-w411dp-h891dp-xxxhdpi") public void nativeTextRetainsItsDpSizeOnDenseLauncherAndThroughParcel()throws Exception {
+        HomeWidget.Model m=new HomeWidget.Model(demo(false),true,false,false,false,true,output());
+        for(int width:new int[]{320,400}) {
+            RemoteViews rv=HomeWidget.view(c,widget,width,160,m);Parcel parcel=Parcel.obtain();
+            try {
+                rv.writeToParcel(parcel,0);parcel.setDataPosition(0);
+                RemoteViews copy=RemoteViews.CREATOR.createFromParcel(parcel);
+                View host=layout(copy,width,160);float density=c.getResources().getDisplayMetrics().density;
+                TextView number=host.findViewById(R.id.widget_reading),period=host.findViewById(R.id.widget_period);
+                assertTrue("Dense displays must not shrink native value text",number.getTextSize()/density>=56);
+                assertEquals("The adjacent arrow must survive RemoteViews parceling","126\u2009↗",number.getText().toString());
+                assertEquals(18,period.getTextSize()/density,.1);
+                assertTrue(host.findViewById(R.id.widget_controls).getBottom()<=host.getHeight());
+                save("widget-balanced-dense-"+width+".png",copy,width,160);
+            } finally {parcel.recycle();}
+        }
+    }
+    @Test @Config(sdk=34) public void aSingleExactLauncherSizeIsUsedInsteadOfUnrelatedFallbackDimensions()throws Exception {
+        Bundle options=new Bundle();options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,220);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,128);
+        options.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES,new ArrayList<>(Collections.singletonList(new android.util.SizeF(400,160))));
+        View host=layout(HomeWidget.views(c,widget,options,new HomeWidget.Model(demo(false),true,false,false,false,true,output())),400,160);
+        assertEquals("2 h",((TextView)host.findViewById(R.id.widget_period)).getText().toString());
+    }
+    @Test public void legacyPortraitKeepsNarrowWidthAndNormalizedChart()throws Exception {
+        Bundle options=new Bundle();options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,320);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,560);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,128);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,180);
+        View host=layout(HomeWidget.views(c,widget,options,new HomeWidget.Model(demo(false),true,false,false,false,true,output())),320,180);
+        ImageView chart=host.findViewById(R.id.widget_chart);Bitmap b=((android.graphics.drawable.BitmapDrawable)chart.getDrawable()).getBitmap();
+        assertEquals("Portrait chart must use its own normalized height",64,b.getHeight());
+        assertEquals("Portrait uses the narrower width",132,b.getWidth());
+    }
+    @Test @Config(sdk=34,qualifiers="de-w411dp-h891dp-xxxhdpi") public void aWrongLauncherHeightCannotInflateTheCurveIntoABand()throws Exception {
+        AppAppearance.set(c,AppAppearance.Mode.DARK);long now=System.currentTimeMillis();
+        List<WatchSnapshot.Point> points=new ArrayList<>();for(int i=0;i<=120;i++)points.add(new WatchSnapshot.Point(now-(120-i)*60000L,110));
+        WatchSnapshot sample=new WatchSnapshot(now,now,110,WatchSnapshot.Trend.FLAT,false,true,null,80.,180.,points);
+        HomeWidget.Model m=new HomeWidget.Model(sample,true,false,false,false,true,output());
+        for(int hint:new int[]{120,240}) {
+            RemoteViews rv=HomeWidget.view(c,widget,400,hint,m);View root=layout(rv,400,160);ImageView chart=root.findViewById(R.id.widget_chart);
+            Bitmap pixels=Bitmap.createBitmap(chart.getWidth(),chart.getHeight(),Bitmap.Config.ARGB_8888);chart.draw(new Canvas(pixels));
+            int thickness=0;for(int y=0;y<pixels.getHeight();y++)if(pixels.getPixel(pixels.getWidth()/2,y)==0xffd4f6e7)thickness++;
+            float density=c.getResources().getDisplayMetrics().density;
+            assertTrue("A line must remain visible after fitting",thickness>=density);
+            assertTrue("A height mismatch must not turn the curve into a filled band",thickness<=3*density);
+            Bitmap source=((android.graphics.drawable.BitmapDrawable)chart.getDrawable()).getBitmap();
+            assertEquals("Use enough source pixels for a dense screen",256,source.getHeight());
+            save("widget-balanced-height-hint-"+hint+".png",rv,400,160);
+        }
+    }
+    private int pixels(Bitmap b,int color){int count=0;for(int y=0;y<b.getHeight();y++)for(int x=0;x<b.getWidth();x++)if(b.getPixel(x,y)==color)count++;return count;}
+    private WatchSnapshot demo(boolean mmol){long now=System.currentTimeMillis();List<WatchSnapshot.Point> points=new ArrayList<>();for(int i=0;i<=120;i++)points.add(new WatchSnapshot.Point(now-(120-i)*60000L,126+65*Math.sin(i/17.)));return new WatchSnapshot(now,now-60000,126,WatchSnapshot.Trend.UP_RIGHT,mmol,true,1.2,80.,180.,points);}
+    private View layout(RemoteViews rv,int width,int height) {
+        float density=c.getResources().getDisplayMetrics().density;int w=Math.round(width*density),h=Math.round(height*density);
+        View v=rv.apply(c,new FrameLayout(c));v.measure(View.MeasureSpec.makeMeasureSpec(w,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(h,View.MeasureSpec.EXACTLY));v.layout(0,0,w,h);return v;
+    }
+    private void save(String name,RemoteViews rv,int width,int height)throws Exception {save(name,rv,width,height,true);}
+    private void save(String name,RemoteViews rv,int width,int height,boolean controls)throws Exception {
+        if(!controls)rv.setViewVisibility(R.id.widget_controls,View.GONE);
+        View v=layout(rv,width,height);Bitmap b=Bitmap.createBitmap(v.getWidth(),v.getHeight(),Bitmap.Config.ARGB_8888);v.draw(new Canvas(b));
+        assertEquals(controls?View.VISIBLE:View.GONE,v.findViewById(R.id.widget_controls).getVisibility());
+        File folder=new File("build/ui-previews");folder.mkdirs();try(FileOutputStream out=new FileOutputStream(new File(folder,name))){assertTrue(b.compress(Bitmap.CompressFormat.PNG,100,out));}
+    }
+    private CheckBox findCheck(View v){if(v instanceof CheckBox)return (CheckBox)v;if(v instanceof ViewGroup)for(int n=0;n<((ViewGroup)v).getChildCount();n++){CheckBox r=findCheck(((ViewGroup)v).getChildAt(n));if(r!=null)return r;}return null;}
+    private boolean click(View v,String label){if(v instanceof TextView&&label.contentEquals(((TextView)v).getText()))return v.performClick();if(v instanceof ViewGroup)for(int n=0;n<((ViewGroup)v).getChildCount();n++)if(click(((ViewGroup)v).getChildAt(n),label))return true;return false;}
+}
