@@ -8,6 +8,8 @@ import java.util.*;
 final class HomeWidgetRenderer {
     private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
     private static Typeface rounded;
+    // Midpoint between the last two device-tested weights.
+    private static final float CURVE_STROKE=(3.25f+64f*15f/141f)/2;
     /** Render only the numerals locally: launcher RemoteViews cannot load app fonts reliably.
      * Tight bounds and FIT_START preserve the typeface, adjacency and leading alignment
      * across process boundaries without a bitmap sized from unreliable host heights.
@@ -24,8 +26,20 @@ final class HomeWidgetRenderer {
         // ink height to the entire view would turn it into a thick bar.
         bounds.top=Math.min(bounds.top,zero.top);bounds.bottom=Math.max(bounds.bottom,zero.bottom);
         if(!arrow.isEmpty()){trend.getTextBounds(arrow,0,arrow.length(),b);bounds.union(arrowX+b.left,b.top,arrowX+b.right,b.bottom);}
-        float scale=Math.min(1,Math.min(956f/Math.max(1,bounds.width()),380f/Math.max(1,bounds.height())));
-        Bitmap bitmap=Bitmap.createBitmap(Math.max(1,(int)Math.ceil(bounds.width()*scale)+4),Math.max(1,(int)Math.ceil(bounds.height()*scale)+4),Bitmap.Config.ARGB_8888);
+        if(!small){
+            // A short value must not become larger just because it has fewer
+            // digits or a narrower arrow. Reserve one common three-digit box.
+            float referenceX=digits.measureText("888")+digits.measureText("\u2009"),referenceRight=referenceX;
+            for(String direction:new String[]{"⇈","↑","↗","→","↘","↓","⇊"}){
+                trend.getTextBounds(direction,0,direction.length(),b);referenceRight=Math.max(referenceRight,referenceX+b.right);
+            }
+            bounds.right=Math.max(bounds.right,referenceRight);
+        }
+        // Reserve trailing space rather than letting FIT_START enlarge the ink
+        // to fill the entire reading region. Leading alignment stays unchanged.
+        float occupancy=small?.9f:.8f;
+        float scale=Math.min(1,Math.min(956f*occupancy/Math.max(1,bounds.width()),380f*occupancy/Math.max(1,bounds.height())));
+        Bitmap bitmap=Bitmap.createBitmap(Math.max(1,(int)Math.ceil(bounds.width()*scale/occupancy)+4),Math.max(1,(int)Math.ceil(bounds.height()*scale/occupancy)+4),Bitmap.Config.ARGB_8888);
         bitmap.setDensity(Bitmap.DENSITY_NONE);bitmap.setHasMipMap(true);
         Canvas canvas=new Canvas(bitmap);canvas.translate(2,2);canvas.scale(scale,scale);canvas.translate(-bounds.left,-bounds.top);
         canvas.drawText(value,0,0,digits);if(!arrow.isEmpty())canvas.drawText(arrow,arrowX,0,trend);
@@ -65,10 +79,10 @@ final class HomeWidgetRenderer {
     private void segment(Canvas c,List<DiagnosticSeries.Sample> points,WatchSnapshot s,long from,long span,double lo,double hi,float left,float right,float top,float bottom,boolean dark,boolean fresh){
         if(points.isEmpty())return;Path path=new Path();DiagnosticSeries.Sample first=points.get(0);path.moveTo(x(first.time,from,span,left,right),y(first.value,lo,hi,top,bottom));
         for(double[] a:ChartCurve.controls(points))path.cubicTo(x(a[0],from,span,left,right),y(a[1],lo,hi,top,bottom),x(a[2],from,span,left,right),y(a[3],lo,hi,top,bottom),x(a[4],from,span,left,right),y(a[5],lo,hi,top,bottom));
-        p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(3.25f);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);p.setColor(fresh?(dark?0xffd4f6e7:0xff156747):0xff8b9993);c.drawPath(path,p);
+        p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(CURVE_STROKE);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);p.setColor(fresh?(dark?0xffd4f6e7:0xff156747):0xff8b9993);c.drawPath(path,p);
         if(fresh&&s.high!=null){c.save();c.clipRect(left,top,right,y(s.high,lo,hi,top,bottom));p.setColor(dark?0xffffd28c:0xff936000);c.drawPath(path,p);c.restore();}
         if(fresh&&s.low!=null){c.save();c.clipRect(left,y(s.low,lo,hi,top,bottom),right,bottom);p.setColor(dark?0xffff5c5c:0xffc02737);c.drawPath(path,p);c.restore();}
-        p.setStyle(Paint.Style.FILL);if(points.size()==1){p.setColor(!fresh?0xff8b9993:s.low!=null&&first.value<s.low?(dark?0xffff5c5c:0xffc02737):s.high!=null&&first.value>s.high?(dark?0xffffd28c:0xff936000):(dark?0xffd4f6e7:0xff156747));c.drawCircle(x(first.time,from,span,left,right),y(first.value,lo,hi,top,bottom),1.75f,p);}
+        p.setStyle(Paint.Style.FILL);if(points.size()==1){p.setColor(!fresh?0xff8b9993:s.low!=null&&first.value<s.low?(dark?0xffff5c5c:0xffc02737):s.high!=null&&first.value>s.high?(dark?0xffffd28c:0xff936000):(dark?0xffd4f6e7:0xff156747));c.drawCircle(x(first.time,from,span,left,right),y(first.value,lo,hi,top,bottom),CURVE_STROKE/2,p);}
     }
     private float x(double time,long from,long span,float left,float right){return (float)(left+(right-left)*(time-from)/span);}
     private float y(double value,double lo,double hi,float top,float bottom){return (float)(bottom-(bottom-top)*(value-lo)/(hi-lo));}
