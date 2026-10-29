@@ -2,6 +2,7 @@
 package de.giesen.camaps.companion.prototype;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.Context;
 import de.giesen.camaps.companion.prototype.alarm.*;
 import java.io.IOException;
 
@@ -11,7 +12,7 @@ final class LiveActivation {
         final String text; final Class<? extends Activity> target;
         Problem(String text,Class<? extends Activity> target) { this.text=text; this.target=target; }
     }
-    static Problem check(Activity activity) {
+    static Problem check(Context activity) {
         if(!SafetyConsent.ready(activity))return new Problem("de".equals(AppText.language())?"Sicherheitshinweise bestätigen":"Acknowledge safety notices",SafetyActivity.class);
         SystemReadiness ready=SystemReadiness.read(activity);
         if(!ready.ready()) return new Problem(ready.nextAction()+AppText.tr(" · Prüfen"),ReadinessActivity.class);
@@ -29,7 +30,7 @@ final class LiveActivation {
             return null;
         } catch(IOException | IllegalArgumentException e) { return new Problem(AppText.tr("Einstellungen nicht lesbar · Prüfen"),ReadinessActivity.class); }
     }
-    static Problem start(Activity activity) {
+    static Problem start(Context activity) {
         Problem problem=check(activity); if(problem!=null) return problem;
         boolean monitor=LivePreferences.monitor(activity);
         try {

@@ -6,7 +6,7 @@
 
 | Component | Version | Source minimum / special requirement |
 |---|---|---|
-| Phone | 0.20.7 Beta | Android API 26 minimum declaration; native large metric display requires Android 17/API 37 |
+| Phone | 0.21.3 Beta | Android API 26 minimum declaration; native large metric display requires Android 17/API 37 |
 | GVA Watch, including tile and six complication sources | 0.19.0 Beta | API 30 minimum declaration; some dynamic-age behavior requires newer APIs |
 | GVA Dots | 0.1.5 Beta | Wear OS 4+, Watch Face Format v1 |
 
@@ -14,15 +14,16 @@ The phone/watch application ID and signing key must match for Google Play servic
 
 ## What has been checked
 
-The phone suite contains 651 synthetic checks; the watch suite contains 50, including four tile checks. Native renderings cover phone themes/settings, the widget, watch data views, the tile and complication graphics. The source review checks imported xDrip rule hashes, private-file exclusions, local links, dependency/font notices, package identity and independent debug signing. Tests do not establish clinical safety or reliable alarm delivery. On 28 October 2026, the exported repository was independently rebuilt with all 651 phone checks and 50 watch checks passing (701 total). All three APKs compiled using a matching ordinary debug identity, without the private developer key. Those APKs were used only for validation and are not distributed. The installed apps were not changed during this documentation/source preparation.
+The phone suite contains 679 synthetic checks; the unchanged watch suite contains 50, including four tile checks. The exported phone source is independently rebuilt and tested without the private developer key; watch test evidence is reused only for byte-identical sources. All three validation APKs use the same ordinary debug identity and are not distributed. Source review checks imported xDrip rule hashes, private-file exclusions, local links, dependency/font notices and package identities. Synthetic tests do not establish clinical safety or reliable alarm delivery. This source publication does not modify the installed apps.
 
-Device work has focused on Pixel 7 Pro, Android 17, CamAPS FX 1.4(194).111, and Galaxy Watch5 Pro, Wear OS 6/One UI 8 Watch. The user observed value/trend speech and phone live-display behavior. The watch-face appearance, age field and worn ambient display were checked. Watch active-mode updates were observed approximately once per minute. The user accepted the phone widget’s appearance on the Pixel launcher in version 0.20.7, including its rounded font, bounded reading size and revised curve weight. These observations are not a compatibility or reliability guarantee.
+Device work has focused on Pixel 7 Pro, Android 17, CamAPS FX 1.4(194).111, and Galaxy Watch5 Pro, Wear OS 6/One UI 8 Watch. The user observed value/trend speech and phone live-display behavior. The watch-face appearance, age field and worn ambient display were checked. Watch active-mode updates were observed approximately once per minute. The user accepted the phone widget’s appearance on the Pixel launcher in version 0.20.7, including its rounded font, bounded reading size and revised curve weight. The later 0.21.3 widget arrows and direct toggles, and the editable display trend text, are synthetically checked; their latest Pixel behavior still needs user acceptance. These observations are not a compatibility or reliability guarantee.
 
 ## Open before broader use
 
 - Other CamAPS variants, units and notification structures; manual trend matching after source updates or conflicts.
 - Other phones, launchers, watches and Android versions; AOD/live-display placement and contention with other apps.
-- Intermittent icon-only status-bar display has been reported on the Pixel. The app's short text and active Android promotion were confirmed; the cause remains unresolved.
+- On the Pixel, GVA can show only its icon while another live chip is active. In a user check, opening the competing app restored the GVA number. The internal Android decision path was not measured.
+- Very narrow widget previews can wrap the receipt/unit caption; launcher-specific sizing still needs checks.
 - Natural data gaps, process restarts, disconnection/reconnection, stale display transitions and source-clock differences on real devices.
 - Perceptibility and delivery of every enabled alarm route, including watch vibration, Do Not Disturb and background restrictions. The watch has no independent alarm fallback.
 - Complication/tile cadence and battery cost in everyday active and ambient use. Synthetic timing tests cannot establish these.

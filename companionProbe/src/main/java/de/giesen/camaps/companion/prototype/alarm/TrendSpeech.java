@@ -24,7 +24,7 @@ public final class TrendSpeech {
         this.enabled=Collections.unmodifiableList(new ArrayList<>(enabled));
     }
     public static TrendSpeech defaults() { return defaults("de"); }
-    public static TrendSpeech defaults(String language) { return "en".equals(language)?new TrendSpeech(Arrays.asList("rising","rising fast","steady","falling","falling fast","double up","double down")):new TrendSpeech(Arrays.asList("steigend","schnell steigend","stabil","fallend","schnell fallend","doppelt aufwärts","doppelt abwärts")); }
+    public static TrendSpeech defaults(String language) { return "en".equals(language)?new TrendSpeech(Arrays.asList("rising","rising fast","steady","falling","falling fast","rising very fast","falling very fast")):new TrendSpeech(Arrays.asList("steigend","schnell steigend","stabil","fallend","schnell fallend","sehr schnell steigend","sehr schnell fallend")); }
     public String word(Trend trend) {
         if(trend==null) return "";
         int index;

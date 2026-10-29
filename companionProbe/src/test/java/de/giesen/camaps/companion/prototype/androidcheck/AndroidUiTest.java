@@ -354,7 +354,7 @@ public class AndroidUiTest {
         assertTrue(MetricNotification.label(System.currentTimeMillis()).matches("[0-9]{2}:[0-9]{2}"));
     }
     @Test public void compactNativeTitleDescribesEachArrowWithoutRepeatingTheValueOrAppName() {
-        String[] expected={"Doppelt aufwärts","Schnell steigend","Steigend","Stabil","Fallend","Schnell fallend","Doppelt abwärts","Trend offen"};
+        String[] expected={"Sehr schnell steigend","Schnell steigend","Steigend","Stabil","Fallend","Schnell fallend","Sehr schnell fallend","Trend offen"};
         NotificationParser.Trend[] trends=NotificationParser.Trend.values(); assertEquals(expected.length,trends.length);
         for (int i=0;i<trends.length;i++) assertEquals(expected[i],MetricNotification.trendTitle(trends[i]));
     }

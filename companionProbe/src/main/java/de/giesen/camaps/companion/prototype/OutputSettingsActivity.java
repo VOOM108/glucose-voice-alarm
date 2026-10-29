@@ -71,7 +71,7 @@ public final class OutputSettingsActivity extends UiActivity {
             trendPanel=new LinearLayout(this); trendPanel.setOrientation(LinearLayout.VERTICAL);
             trendDisclosure=DisclosureRow.add(body,AppText.tr("Trendwörter"),trendPanel);
             LevelUi.text(trendPanel,AppText.tr("Haken aus: dieses Trendwort nicht ansagen. Pfeil und Alarmprüfung bleiben unverändert."),14);
-            String[] trendLabels={AppText.tr("↗ Steigend"),AppText.tr("↑ Schnell steigend"),AppText.tr("→ Stabil"),AppText.tr("↘ Fallend"),AppText.tr("↓ Schnell fallend"),AppText.tr("⇈ Doppelt aufwärts"),AppText.tr("⇊ Doppelt abwärts")};
+            String[] trendLabels={AppText.tr("↗ Steigend"),AppText.tr("↑ Schnell steigend"),AppText.tr("→ Stabil"),AppText.tr("↘ Fallend"),AppText.tr("↓ Schnell fallend"),AppText.tr("⇈ Sehr schnell steigend"),AppText.tr("⇊ Sehr schnell fallend")};
             for(int i=0;i<TrendSpeech.COUNT;i++) {
                 EditText field=LevelUi.field(trendPanel,trendLabels[i],p.trendSpeech.words.get(i),InputType.TYPE_CLASS_TEXT);
                 field.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(80)}); trendWords.add(field);

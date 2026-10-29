@@ -10,7 +10,7 @@ final class ProfileController {
         if(!SafetyConsent.ready(c))throw new IOException("Safety acknowledgement required");
         synchronized(ConfigurationFiles.LOCK) {
             SettingsTransaction.requireComplete(c.getFilesDir());
-            return new ConfigurationSnapshot(new LevelStore(c.getFilesDir()).load(),new OutputPreferenceStore(c.getFilesDir()).load(),AppAppearance.mode(c).name(),SoundDefaults.preferredSet(c),LivePreferences.nativeDisplay(c),LivePreferences.publicValue(c));
+            return new ConfigurationSnapshot(new LevelStore(c.getFilesDir()).load(),new OutputPreferenceStore(c.getFilesDir()).load(),AppAppearance.mode(c).name(),SoundDefaults.preferredSet(c),LivePreferences.nativeDisplay(c),LivePreferences.publicValue(c),DisplayTrendPreferences.load(c).words);
         }
     }
     static void apply(Context c,ConfigurationSnapshot desired) throws IOException {
@@ -33,8 +33,8 @@ final class ProfileController {
             if(!SettingsTransaction.pending(c.getFilesDir())) return;
             disarm(c);
             ConfigurationSnapshot desired=SettingsTransaction.recoverCore(c.getFilesDir());
-            if(!c.getSharedPreferences(AppAppearance.PREFS,0).edit().putString("mode",desired.appearance).commit()
-                    || !c.getSharedPreferences(SoundDefaults.PREFS,0).edit().putString("set",desired.soundSet).putBoolean("installed",true).commit()
+            DisplayTrendPreferences.applyProfile(c,desired.appearance,desired.displayWords);
+            if(!c.getSharedPreferences(SoundDefaults.PREFS,0).edit().putString("set",desired.soundSet).putBoolean("installed",true).commit()
                     || !c.getSharedPreferences("live_controls_v1",0).edit().putBoolean("native_display",desired.nativeDisplay).putBoolean("lockscreen_value",desired.publicValue).commit())
                 throw new IOException("Profil noch nicht vollständig geladen. Bitte App erneut öffnen.");
             SettingsTransaction.complete(c.getFilesDir());

@@ -13,13 +13,17 @@ The native status-bar chip receives only the number in the selected unit, withou
 
 ## Home-screen widget
 
-Phone version 0.20.0 introduced a resizable GVA widget. From 0.20.2, the large reading and CamAPS arrow share the left side, with a flat chart beside them on the right. The original receipt time, marked “Received:”, unit and delta per minute appear below. Units and light/dark appearance follow the app; the timestamp is not a verified sensor measurement time.
+Phone version 0.20.0 introduced a resizable GVA widget. From 0.20.2, the large reading and CamAPS arrow share the left side, with a flat chart beside them on the right. The original receipt time, marked “Received:” (“Empfangen:” in German), unit and delta per minute appear below. Units, labels and light/dark appearance follow the app; the timestamp is not a verified sensor measurement time.
 
 Depending on the available width, the chart shows 30 minutes, one or two hours, labeled directly below as “30 min”, “1 h” or “2 h”. GVA reserves space for the reading and arrow first and shortens the chart window as width decreases. The label describes the visible time window; missing data stays empty within it. The dashboard diagnostic chart still covers six hours.
+
+From 0.21.3, the arrow grows with widget width. It uses spare space beside the reading while preserving the numeral size and chart area. Narrow widgets limit the arrow to the space available.
 
 Long-press an empty area of the home screen and select Widgets → Glucose Voice Alarm → GVA · Glucose. From 0.20.3, the minimum height is 120 dp. From 0.20.5, the reading/arrow and delta are drawn as sharp, bounded images so the bundled round font survives the launcher’s restricted context. Time and history-window labels remain native text views. The widget bundles a heavy, rounded instance of Google Sans Flex for the reading and delta under SIL OFL 1.1, without relying on a particular font being installed on the phone. The watch continues to use Roboto Flex. The reading is left-aligned, with the arrow beside it. A shared size reference and a capped image height keep two- and three-digit readings at comparable sizes. The chart uses a medium-weight line and a fixed drawing height, so inaccurate launcher height hints do not change its relative weight. The history-window label is larger, and the chart uses the available height. There is no fixed 4×2 grid request. The launcher determines the grid size and required cells from the minimum dimensions. You can make an existing widget shorter there.
 
 The toggle row remains visible at low heights: sound, alarm speech (“Alarm”), reading speech (“Reading”), vibration and the output master switch. Toggles are larger, with extra space and a subtle divider separating output from the four channels when width permits. Switch positions show on/off; during a running global pause, the master label reads “Paused”. Tapping elsewhere opens the dashboard. Profiles and other settings remain available in the app. Launchers that support widget editing can still hide the toggle row for each widget.
+
+From 0.21.1, toggles switch directly in the widget without briefly showing the app. If a required setting is missing when the widget is built, such as the reading interval or an alarm output route, that toggle opens the existing setup screen. Missing permissions when enabling output also open setup. If a prerequisite changes after the widget is built, the switch is left unchanged and the widget refreshes; setup problems show a brief message. Stale clicks and clicks on a locked device cannot change settings.
 
 At least one effective alarm route must remain available. If a prerequisite is missing, the app shows its existing validation and does not apply an invalid change. Old clicks from a superseded widget view cannot change newer settings. A locked device must be unlocked first. Adding, resizing or refreshing the widget does not enable output.
 
@@ -56,7 +60,7 @@ With CamAPS already collecting glucose data and controlling therapy, a companion
 
 ## Scope and limitations
 
-The prepared phone version is 0.20.7 Beta. Development and phone device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor communication or pump control.
+The prepared phone version is 0.21.3 Beta. Development and phone device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor communication or pump control.
 
 Optional [GVA Watch and the GVA Dots face](../companionWear/README.en.md) have been tested in part on a Galaxy Watch5 Pro running Wear OS 6 / One UI 8 Watch. They show readings and a short chart, with optional forwarding of accepted phone alerts. Phone-to-watch transfer starts off. Complication timing, alarm delivery and battery use need further device testing.
 
@@ -66,7 +70,7 @@ The time shown is receipt/processing time, not a verified sensor measurement tim
 
 ## Watch display
 
-GVA Watch 0.19.0 Beta and the code-free GVA Dots 0.1.5 Beta face work with the prepared phone version 0.20.7 Beta. The round display uses Roboto Flex, a one- or two-hour curve and a reduced ambient view. Menus use official Wear Material 3 components. The watch app also supplies a tile with the same data layout, without time dots. Alongside the composite display and age source, separate reading, CamAPS trend, delta per minute and chart sources can be selected in compatible third-party faces. The watch displays data and can relay accepted phone alarms with vibration. It does not calculate glucose alarms independently. See [watch setup and limits](../companionWear/README.en.md). Everyday device testing continues; the new standalone complications and tile still need device acceptance.
+GVA Watch 0.19.0 Beta and the code-free GVA Dots 0.1.5 Beta face work with the prepared phone version 0.21.3 Beta. The round display uses Roboto Flex, a one- or two-hour curve and a reduced ambient view. Menus use official Wear Material 3 components. The watch app also supplies a tile with the same data layout, without time dots. Alongside the composite display and age source, separate reading, CamAPS trend, delta per minute and chart sources can be selected in compatible third-party faces. The watch displays data and can relay accepted phone alarms with vibration. It does not calculate glucose alarms independently. See [watch setup and limits](../companionWear/README.en.md). Everyday device testing continues; the new standalone complications and tile still need device acceptance.
 
 From version 0.18.0, forwarding GVA alarms and data-gap warnings to GVA Watch can be enabled separately from display transfer. The watch creates its own notifications with vibration. Both apps require opt-in; Appearance → Watch includes a labeled test without readings. Forwarding follows accepted phone alarm outputs, without offline replay. Routine readings do not create watch notifications. [Setup and limits](../companionWear/README.en.md#watch-alerts).
 
@@ -84,7 +88,9 @@ Values and alarm thresholds remain in canonical mg/dl with fractional precision.
 
 ## Trend and rate of change
 
-The arrow and trend word come from CamAPS on the dashboard, AOD/lock screen and in speech. A missing arrow is not replaced with a calculated one. All seven spoken trend words can be edited. A checkbox beside each word controls whether it is spoken. Unchecked words are omitted like a missing trend while their text is preserved. Profiles include these switches; displayed arrows and alarm conditions are unchanged.
+The trend direction comes from CamAPS on the dashboard, AOD/lock screen and in speech. A missing arrow is not replaced with a calculated one. Under Appearance → Display trend text, you can edit the seven displayed phrases for the dashboard and AOD separately from speech. Blank fields use the default in the UI language. Keep phrases short: Android may truncate long AOD text. Stale readings still show their age there. The double-arrow defaults are “Rising very fast” and “Falling very fast”.
+
+Edit spoken phrases under Output → Trend phrases. A checkbox beside each word controls whether it is spoken. Unchecked words are omitted like a missing trend while their text is preserved. New speech defaults also use “rising very fast” and “falling very fast”. Stored speech phrases are retained; you can replace them with defaults after confirmation in the output editor. Profiles store display and speech text separately. Neither changes arrow identity or alarm conditions.
 
 The dashboard also shows the app's own signed rate in a separate smaller line, in the selected unit per minute. It uses the last four valid receipt-minute points, keeping the last reading in each minute, and the actual elapsed time. Insufficient or stale data hides the line. Times refer to receipt; gaps are not filled.
 

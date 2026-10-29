@@ -15,7 +15,7 @@ public final class SettingsTransaction {
             requireComplete(directory);
             LevelStore.Snapshot levels=new LevelStore(directory).load(); OutputPreferenceStore.Snapshot output=new OutputPreferenceStore(directory).load();
             if(levels.revision==Long.MAX_VALUE || output.revision==Long.MAX_VALUE) throw new IOException("Einstellungs-Revisionsgrenze erreicht");
-            ConfigurationSnapshot next=new ConfigurationSnapshot(new LevelStore.Snapshot(levels.revision+1,desired.levels.levels),new OutputPreferenceStore.Snapshot(output.revision+1,desired.output.preferences),desired.appearance,desired.soundSet,desired.nativeDisplay,desired.publicValue);
+            ConfigurationSnapshot next=new ConfigurationSnapshot(new LevelStore.Snapshot(levels.revision+1,desired.levels.levels),new OutputPreferenceStore.Snapshot(output.revision+1,desired.output.preferences),desired.appearance,desired.soundSet,desired.nativeDisplay,desired.publicValue,desired.displayWords);
             ConfigurationFiles.write(new File(directory,FILE_NAME),next.encode());
         }
     }

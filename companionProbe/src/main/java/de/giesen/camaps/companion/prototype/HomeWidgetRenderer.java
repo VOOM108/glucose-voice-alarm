@@ -15,6 +15,9 @@ final class HomeWidgetRenderer {
      * across process boundaries without a bitmap sized from unreliable host heights.
      * The parent data region supplies the complete accessible text and click target. */
     static Bitmap numerals(android.content.Context context,String value,String arrow,int color,boolean small) {
+        return numerals(context,value,arrow,color,small,320);
+    }
+    static Bitmap numerals(android.content.Context context,String value,String arrow,int color,boolean small,int widgetWidthDp) {
         Typeface font;
         synchronized(HomeWidgetRenderer.class){if(rounded==null)rounded=context.getResources().getFont(R.font.gva_rounded_widget);font=rounded;}
         Paint digits=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.SUBPIXEL_TEXT_FLAG);digits.setTypeface(font);digits.setTextSize(small?128:256);digits.setColor(color);
@@ -42,7 +45,20 @@ final class HomeWidgetRenderer {
         Bitmap bitmap=Bitmap.createBitmap(Math.max(1,(int)Math.ceil(bounds.width()*scale/occupancy)+4),Math.max(1,(int)Math.ceil(bounds.height()*scale/occupancy)+4),Bitmap.Config.ARGB_8888);
         bitmap.setDensity(Bitmap.DENSITY_NONE);bitmap.setHasMipMap(true);
         Canvas canvas=new Canvas(bitmap);canvas.translate(2,2);canvas.scale(scale,scale);canvas.translate(-bounds.left,-bounds.top);
-        canvas.drawText(value,0,0,digits);if(!arrow.isEmpty())canvas.drawText(arrow,arrowX,0,trend);
+        canvas.drawText(value,0,0,digits);
+        if(!arrow.isEmpty()) {
+            if(!small) {
+                // Keep the existing bitmap frame and numeral scale. Use its spare
+                // trailing space for the arrow instead of expanding the reference box.
+                float growth=1.3f+.55f*Math.max(0,Math.min(1,(widgetWidthDp-220f)/180f));
+                trend.setTextSize(trend.getTextSize()*growth);trend.getTextBounds(arrow,0,arrow.length(),b);
+                float availableRight=bounds.left+(bitmap.getWidth()-6)/scale;
+                float fit=Math.min(1,Math.min(Math.max(1,availableRight-arrowX)/Math.max(1,b.width()),
+                        zero.height()*.95f/Math.max(1,b.height())));
+                trend.setTextSize(trend.getTextSize()*fit);trend.getTextBounds(arrow,0,arrow.length(),b);
+                canvas.drawText(arrow,arrowX-b.left,zero.exactCenterY()-b.exactCenterY(),trend);
+            } else canvas.drawText(arrow,arrowX,0,trend);
+        }
         return bitmap;
     }
     static int historyMinutes(float width){float chartWidth=(width-8)/2.25f;return chartWidth>=160?120:chartWidth>=100?60:30;}

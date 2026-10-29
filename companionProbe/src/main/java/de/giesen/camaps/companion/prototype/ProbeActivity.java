@@ -253,7 +253,7 @@ public class ProbeActivity extends UiActivity {
         GlucoseUnit unit=UnitPreferences.display(this); readingUnit.setText(unit.label);
         unitHint.setText(AppText.tr("Einheitenkonflikt · Entwickleroptionen öffnen")); unitHint.setVisibility(UnitPreferences.conflict(this)?View.VISIBLE:View.GONE);
         trendValue.setText("CamAPS  "+(current==null?AppText.tr("Warte auf CamAPS"):current.trend!=NotificationParser.Trend.UNKNOWN
-                ?MetricNotification.trendTitle(current.trend):candidate!=null && candidate.current()?AppText.tr("Trend offen"):AppText.tr("Kein Trendpfeil")));
+                ?DisplayTrendPreferences.title(this,current.trend):candidate!=null && candidate.current()?AppText.tr("Trend offen"):AppText.tr("Kein Trendpfeil")));
         value.setText(current == null ? "—" : unit.number(current.value,java.util.Locale.getDefault())+(current.trend==NotificationParser.Trend.UNKNOWN?"":" "+current.trend.symbol));
         value.setContentDescription(current==null?AppText.tr("Noch kein Empfang"):unit.number(current.value,java.util.Locale.getDefault())+" "+unit.label);
         boolean currentFresh=ProbeState.displayFresh(this,current);

@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Deutsch](README.de.md) · [GVA Watch](../companionWear/README.md) · [GVA Dots](../companionWatchFace/README.md)
 
-The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.20.7 Beta**. The phone works without either watch component.
+The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.21.3 Beta**. The phone works without either watch component.
 
 **Experimental research tool; not for medical use or treatment decisions.** Read [SAFETY.md](../SAFETY.md). CamAPS continues to control the sensor and pump.
 
@@ -14,15 +14,15 @@ Synthetic examples. Dashboard and setting images are native app renderings; the 
 
 <details><summary>Example settings</summary>
 
-<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Output"></a><br>Output</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarm levels"></a><br>Alarm levels</td></tr></table>
+<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Output"></a><br>Output</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarm levels"></a><br>Alarm levels</td><td valign="top"><a href="../docs/images/phone-settings-trends.png"><img src="../docs/images/phone-settings-trends.png" width="260" alt="Display trend text"></a><br>Display trend text</td></tr></table>
 
 </details>
 
-The widget has an optional single row of sound, alarm speech, reading speech, vibration and output toggles. Its chart switches between labeled 30-minute, one-hour and two-hour windows as width changes. The reading/arrow and delta use the bundled round font in the launcher. Two- and three-digit readings have comparable sizes and a fixed height limit. The curve uses a medium-weight line; "Received: HH:mm" shows the original receipt time without a date. The entire remaining surface opens the app.
+The widget has an optional single row of sound, alarm speech, reading speech, vibration and output toggles. They switch directly when their prerequisites are met; required setup opens the app. Its chart shows labeled 30-minute, one-hour or two-hour windows as width changes. Rounded numerals keep their size limit while the arrow grows into available space at wider sizes. The receipt caption follows the app language: "Received: HH:mm" in English and "Empfangen: HH:mm" in German. The remaining surface opens the dashboard.
 
 ## Output and settings
 
-Configure multiple alarm levels, individual tone/speech/vibration choices, repeats and snooze where applicable. Routine value announcements have their own interval and can pause after an alarm. Seven individual trend words and complete spoken templates can be edited; unchecked trend words are omitted. Five local profiles store settings. See the [detailed phone reference](../docs/PHONE_REFERENCE.md).
+Configure multiple alarm levels, individual tone/speech/vibration choices, repeats and snooze where applicable. Routine value announcements have their own interval and can pause after an alarm. Spoken templates and all seven spoken trend phrases can be edited; unchecked phrases are omitted. Appearance → Display trend text edits the dashboard/AOD labels separately. Blank labels follow the UI language. Double-arrow defaults are "Rising very fast" and "Falling very fast"; saved speech text is retained. Five local profiles store both text sets independently. See the [detailed phone reference](../docs/PHONE_REFERENCE.md).
 
 The CamAPS arrow is separate from the app's numeric rate calculation. A numeric critical-rate alarm can trigger without a recognized arrow when enough fresh values arrive. The optional data-gap warning uses the last known situation; it never estimates a current value.
 

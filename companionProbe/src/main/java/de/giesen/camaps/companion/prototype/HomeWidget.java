@@ -65,8 +65,8 @@ final class HomeWidget {
         v.setImageViewBitmap(R.id.widget_chart,new HomeWidgetRenderer().image(model.reading,model.fresh,dark,chartWidth,density,HomeWidgetRenderer.historyMinutes(dataWidth),System.currentTimeMillis()));
         WatchSnapshot s=model.reading;GlucoseUnit unit=s!=null&&s.mmol?GlucoseUnit.MMOL:GlucoseUnit.MGDL;
         int ink=model.fresh?colors.ink:colors.muted;
-        v.setImageViewBitmap(R.id.widget_reading,HomeWidgetRenderer.numerals(c,s==null?"—":unit.number(s.value,Locale.getDefault()),s==null?"":arrow(s.trend),ink,false));
-        String stamp=s==null?"—":"Received: "+new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received))+" · "+unit.label;
+        v.setImageViewBitmap(R.id.widget_reading,HomeWidgetRenderer.numerals(c,s==null?"—":unit.number(s.value,Locale.getDefault()),s==null?"":arrow(s.trend),ink,false,width));
+        String stamp=s==null?"—":tr("Empfangen: ","Received: ")+new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received))+" · "+unit.label;
         v.setTextViewText(R.id.widget_stamp,stamp);v.setTextColor(R.id.widget_stamp,s!=null&&!model.fresh?colors.error:colors.muted);
         v.setTextViewText(R.id.widget_period,HomeWidgetRenderer.historyLabel(HomeWidgetRenderer.historyMinutes(dataWidth)));v.setTextColor(R.id.widget_period,colors.muted);
         v.setImageViewBitmap(R.id.widget_delta,HomeWidgetRenderer.numerals(c,s==null||!model.fresh||s.rate==null?"—":unit.rate(s.rate,Locale.getDefault()).replace(" "+unit.label," "),"",ink,true));
@@ -111,8 +111,13 @@ final class HomeWidget {
         return PendingIntent.getActivity(c,0,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
     }
     static PendingIntent control(Context c,int id,int channel,boolean enabled,long revision,boolean expected) {
-        Intent i=new Intent(c,WidgetControlActivity.class).putExtra("widget",id).putExtra("channel",channel).putExtra("enabled",enabled).putExtra("revision",revision).putExtra("expected",expected);
-        return activity(c,id,i,"control/"+channel+"/"+revision+"/"+enabled+"/"+expected);
+        boolean needsUi=WidgetControlReceiver.needsUi(c,channel,enabled);
+        Intent i=new Intent(c,needsUi?WidgetControlActivity.class:WidgetControlReceiver.class)
+                .setAction(WidgetControlReceiver.ACTION).putExtra("widget",id).putExtra("channel",channel).putExtra("enabled",enabled).putExtra("revision",revision).putExtra("expected",expected);
+        String key="control/"+channel+"/"+revision+"/"+enabled+"/"+expected;
+        if(needsUi)return activity(c,id,i,key);
+        i.setData(Uri.parse("gva-widget://"+id+"/"+key));
+        return PendingIntent.getBroadcast(c,0,i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
     }
     private static void update(Context c) {
         int[] ids=ids(c);AlarmManager alarm=c.getSystemService(AlarmManager.class);

@@ -96,6 +96,24 @@ public class LivePlatformTest {
         app.getSharedPreferences("live_controls_v1",Context.MODE_PRIVATE).edit().putInt("consent_version",BuildConfig.VERSION_CODE-1).commit();
         assertFalse(LivePreferences.alarms(app));
     }
+    @Test public void savingDisplayWordsDoesNotInterruptActiveToneOrRewriteAlarmState() throws Exception {
+        LiveAlarmService instance=start(true);receive();
+        AndroidUiTest.TestBellPlayer tone=AndroidUiTest.TestBellPlayer.latest;assertNotNull(tone);assertTrue(tone.playing);
+        Object flow=org.robolectric.util.ReflectionHelpers.getField(instance,"flow");
+        File alarmState=new File(new File(app.getFilesDir(),"live-receipt-runtime-v1"),AlarmStateStore.FILE_NAME);
+        byte[] state=java.nio.file.Files.readAllBytes(alarmState.toPath());
+        File outputFile=new File(app.getFilesDir(),OutputPreferenceStore.FILE_NAME);byte[] output=java.nio.file.Files.readAllBytes(outputFile.toPath());
+        org.robolectric.android.controller.ActivityController<TrendDisplayActivity> controller=Robolectric.buildActivity(TrendDisplayActivity.class).create().start().resume().visible();
+        try {
+            TrendDisplayActivity editor=controller.get();
+            ((EditText)editor.getWindow().getDecorView().findViewWithTag("trend_display_UP")).setText("Rasch aufwärts");
+            editor.getWindow().getDecorView().findViewWithTag("trend_display_save").performClick();shadowOf(Looper.getMainLooper()).idle();
+            assertTrue(editor.isFinishing());assertTrue(tone.playing);assertSame(tone,AndroidUiTest.TestBellPlayer.latest);
+            assertSame(flow,org.robolectric.util.ReflectionHelpers.getField(instance,"flow"));assertTrue(LiveAlarmService.live());
+            assertArrayEquals(state,java.nio.file.Files.readAllBytes(alarmState.toPath()));assertArrayEquals(output,java.nio.file.Files.readAllBytes(outputFile.toPath()));
+            assertEquals("Rasch aufwärts",DisplayTrendPreferences.title(app,NotificationParser.Trend.UP));
+        } finally {controller.pause().stop().destroy();}
+    }
     @Test public void directionChangeInterruptsTheOldToneAndStartsTheSelectedLowAlarm() throws Exception {
         LevelStore store=new LevelStore(app.getFilesDir());
         store.save(store.load().revision,Arrays.asList(new SyntheticAlarmScenario(AlarmEngine.Kind.HIGH).level,

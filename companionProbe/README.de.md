@@ -2,7 +2,7 @@
 
 [Projektübersicht](../README.de.md) · [English](README.md) · [GVA Watch](../companionWear/README.de.md) · [GVA Dots](../companionWatchFace/README.de.md)
 
-Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.20.7 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
+Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.21.3 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
 
 **Experimentelles Forschungswerkzeug; nicht für medizinische Verwendung oder Therapieentscheidungen.** Lies [SAFETY.de.md](../SAFETY.de.md). CamAPS steuert weiterhin Sensor und Pumpe.
 
@@ -14,15 +14,15 @@ Synthetische Beispiele. Dashboard und Einstellungen sind native App-Renderings; 
 
 <details><summary>Einstellungsbeispiele</summary>
 
-<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Ausgabe"></a><br>Ausgabe</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarmstufen"></a><br>Alarmstufen</td></tr></table>
+<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Ausgabe"></a><br>Ausgabe</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarmstufen"></a><br>Alarmstufen</td><td valign="top"><a href="../docs/images/phone-settings-trends.png"><img src="../docs/images/phone-settings-trends.png" width="260" alt="Trendanzeigetexte"></a><br>Trendanzeigetexte</td></tr></table>
 
 </details>
 
-Das Widget bietet optional eine Schalterzeile für Ton, Alarm-Sprache, Wertansagen, Vibration und Ausgabe. Je nach Breite zeigt die beschriftete Kurve 30 Minuten, eine oder zwei Stunden. Wert/Pfeil und Delta verwenden die mitgelieferte runde Schrift auch im Launcher. Zwei- und dreistellige Werte haben eine vergleichbare Schriftgröße mit fester Höhenbegrenzung. Die Kurve hat eine mittlere Linienstärke; „Received: HH:mm“ zeigt die ursprüngliche Empfangsuhrzeit ohne Datum. Die übrige Fläche öffnet die App.
+Das Widget bietet optional eine Schalterzeile für Ton, Alarm-Sprache, Wertansagen, Vibration und Ausgabe. Die Toggles schalten bei erfüllten Voraussetzungen direkt; nötige Einrichtungsschritte öffnen die App. Je nach Breite zeigt die beschriftete Kurve 30 Minuten, eine oder zwei Stunden. Die runden Ziffern behalten ihre Größenbegrenzung, während der Pfeil bei mehr Breite freien Platz nutzt. Die Empfangsbeschriftung folgt der App-Sprache: „Empfangen: HH:mm“ auf Deutsch und „Received: HH:mm“ auf Englisch. Die übrige Fläche öffnet das Dashboard.
 
 ## Ausgabe und Einstellungen
 
-Mehrere Alarmstufen, individuelle Ton-/Sprach-/Vibrationswege sowie Wiederholung und Snooze, soweit für die Alarmart vorgesehen. Normale Wertansagen haben ein eigenes Intervall und können nach Alarmen pausieren. Sieben einzelne Trendwörter und ganze Sprachvorlagen sind anpassbar; abgewählte Trendwörter bleiben stumm. Fünf lokale Profile speichern Einstellungen. Details im [Telefonhandbuch](../docs/PHONE_REFERENCE.de.md).
+Mehrere Alarmstufen, individuelle Ton-/Sprach-/Vibrationswege sowie Wiederholung und Snooze, soweit für die Alarmart vorgesehen. Normale Wertansagen haben ein eigenes Intervall und können nach Alarmen pausieren. Sprachvorlagen und alle sieben gesprochenen Trendwörter sind anpassbar; abgewählte Wörter bleiben stumm. Unter Darstellung → Trendtexte lassen sich die Dashboard-/AOD-Begriffe getrennt ändern. Leere Felder folgen der Oberflächensprache. Doppelpfeil-Standards sind „Sehr schnell steigend“ und „Sehr schnell fallend“; gespeicherte Sprachtexte bleiben erhalten. Fünf lokale Profile speichern beide Textarten getrennt. Details im [Telefonhandbuch](../docs/PHONE_REFERENCE.de.md).
 
 CamAPS-Pfeil und eigene numerische Änderungsrate sind getrennt. Ein kritischer Ratenalarm kann ohne erkannten Pfeil auslösen, wenn genügend frische Werte vorliegen. Die optionale Lückenwarnung beschreibt die letzte bekannte Situation und schätzt keinen aktuellen Wert.
 

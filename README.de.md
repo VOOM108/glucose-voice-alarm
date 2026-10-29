@@ -10,7 +10,7 @@ Glucose Voice Alarm (GVA) liest Glukosewerte und Trendpfeile aus **CamAPS-Benach
 
 | Komponente | Aktueller Quellstand | Aufgabe |
 |---|---|---|
-| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.20.7 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
+| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.21.3 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
 | [GVA Watch](companionWear/README.de.md) | 0.19.0 Beta | Uhrenanzeige, Kachel, sechs Komplikationsquellen und optionale Telefonalarme mit Uhrenvibration |
 | [GVA Dots](companionWatchFace/README.de.md) | 0.1.5 Beta | Rundes Zifferblatt mit Uhrzeitpunkten, Wert/Pfeil, kurzem Verlauf, Alter und Delta |
 
@@ -41,7 +41,7 @@ Alle Beispiele enthalten **synthetische Daten**, keine persönlichen Messwerte. 
 
 - Hoch-, Niedrig-, Dauerhaft-hoch- und kritische Anstiegs-/Fallratenalarme; mehrere Stufen, wo unterstützt, Wiederholung/Snooze und optionale Erholungsunterdrückung.
 - Ton, Alarm-Sprache, normale Wertansagen und Vibration, dazu ein getrennter Hauptschalter. Mindestens ein wirksamer Alarmweg muss konfiguriert bleiben.
-- Ansagevorlagen, jedes der sieben Trendwörter und der Text der Lückenwarnung; einzelne Trendwörter können stumm bleiben.
+- Ansagevorlagen, alle sieben gesprochenen Trendwörter und getrennte Trendanzeigetexte für Dashboard/AOD sowie der Text der Lückenwarnung. Einzelne Sprachwörter können stumm bleiben, während der Trend sichtbar bleibt.
 - Drei Glockentonsets, eigene Android-Töne, Vibrationsmuster, relative Lautstärken, fünf lokale Einstellungsprofile sowie Deutsch/Englisch für Oberfläche und Standardansagen.
 - mg/dl oder mmol/l, Hell/Dunkel/System, getrennte Uhrenfreigaben und Widget-Bedienung. Details im [Telefonhandbuch](docs/PHONE_REFERENCE.de.md).
 

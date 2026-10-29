@@ -39,7 +39,7 @@ final class LiveNotifications {
         if (Build.VERSION.SDK_INT>=31) builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE);
         if (known) {
             builder.setWhen(received).setShowWhen(false).setUsesChronometer(false);
-            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value.doubleValue(),trend,received,UnitPreferences.display(context),fresh);
+            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value.doubleValue(),trend,received,UnitPreferences.display(context),fresh,MetricNotification.displayTitle(context,trend,received,fresh));
         } else builder.setShowWhen(false);
         return builder.build();
     }

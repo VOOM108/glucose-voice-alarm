@@ -15,13 +15,13 @@ final class MetricNotification {
     static String label(long receivedWall) { return new SimpleDateFormat("HH:mm",Locale.GERMANY).format(new Date(receivedWall)); }
     static String trendTitle(NotificationParser.Trend trend) {
         switch (trend) {
-            case DOUBLE_UP: return AppText.tr("Doppelt aufwärts");
+            case DOUBLE_UP: return AppText.tr("Sehr schnell steigend");
             case UP: return AppText.tr("Schnell steigend");
             case UP_RIGHT: return AppText.tr("Steigend");
             case FLAT: return AppText.tr("Stabil");
             case DOWN_RIGHT: return AppText.tr("Fallend");
             case DOWN: return AppText.tr("Schnell fallend");
-            case DOUBLE_DOWN: return AppText.tr("Doppelt abwärts");
+            case DOUBLE_DOWN: return AppText.tr("Sehr schnell fallend");
             default: return AppText.tr("Trend offen");
         }
     }
@@ -48,7 +48,13 @@ final class MetricNotification {
         long age=Math.max(0,(System.currentTimeMillis()-receivedWall)/60000L);
         return age+AppText.tr(" min alt");
     }
+    static String displayTitle(Context context,NotificationParser.Trend trend,long receivedWall,boolean fresh) {
+        return fresh?DisplayTrendPreferences.title(context,trend):ageTitle(receivedWall);
+    }
     static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit,boolean fresh) {
+        return apply(builder,value,trend,receivedWall,unit,fresh,trendTitle(trend));
+    }
+    static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit,boolean fresh,String displayTitle) {
         if (Build.VERSION.SDK_INT<37) return false;
         try {
             Class<?> metric=Class.forName("android.app.Notification$Metric");
@@ -64,7 +70,7 @@ final class MetricNotification {
             builder.setStyle((Notification.Style)renderedStyle);
             // An empty ordinary title becomes the app name on the Pixel. Use a short trend word.
             // The required metric label remains the clock; value/arrow stay in the large metric.
-            builder.setContentTitle(fresh?trendTitle(trend):ageTitle(receivedWall)).setContentText(null).setShowWhen(false).setUsesChronometer(false);
+            builder.setContentTitle(fresh?displayTitle:ageTitle(receivedWall)).setContentText(null).setShowWhen(false).setUsesChronometer(false);
             // Keep the status-bar chip compact; the large metric above retains its arrow.
             Notification.Builder.class.getMethod("setShortCriticalText",String.class).invoke(builder,unit.number(value,Locale.getDefault()));
             Notification.Builder.class.getMethod("setRequestPromotedOngoing",boolean.class).invoke(builder,true);

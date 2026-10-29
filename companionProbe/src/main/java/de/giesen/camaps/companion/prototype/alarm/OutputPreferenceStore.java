@@ -36,7 +36,9 @@ public final class OutputPreferenceStore {
                 long revision=in.readLong(); if (revision<1) throw new IOException(AppText.tr("Ungültige Ausgabe-Revision"));
                 AlarmEngine.OutputMode mode=AlarmEngine.OutputMode.valueOf(in.readUTF()); int minutes=in.readInt(); String template=in.readUTF();
                 int tone=schema>=2?in.readInt():100,speech=schema>=2?in.readInt():100,quiet=schema>=2?in.readInt():5,boost=schema>=3?in.readInt():0;
-                TrendSpeech words=TrendSpeech.defaults();
+                // Schemas 1–3 never stored trend phrases. Keep their historical fallback;
+                // new defaults apply only to new settings or an explicit reset in the editor.
+                TrendSpeech words=new TrendSpeech(Arrays.asList("steigend","schnell steigend","stabil","fallend","schnell fallend"));
                 if(schema>=4) { List<String> entries=new ArrayList<>(); for(int i=0;i<5;i++) entries.add(in.readUTF()); words=new TrendSpeech(entries); }
                 OutputPreferences preferences=schema>=5?new OutputPreferences(mode,minutes,template,tone,speech,quiet,boost,words,in.readBoolean(),in.readBoolean(),in.readBoolean(),schema>=6 && in.readBoolean()):new OutputPreferences(mode,minutes,template,tone,speech,quiet,boost,words);
                 if(schema>=7) preferences=preferences.withGap(GapSettings.read(in));

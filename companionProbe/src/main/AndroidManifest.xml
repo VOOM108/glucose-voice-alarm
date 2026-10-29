@@ -22,6 +22,7 @@
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity android:name=".SafetyActivity" android:exported="false" />
         <activity android:name=".WidgetControlActivity" android:exported="false" android:excludeFromRecents="true" />
+        <receiver android:name=".WidgetControlReceiver" android:exported="false" />
         <activity android:name=".WidgetConfigureActivity" android:exported="true">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter>
         </activity>
@@ -41,6 +42,7 @@
         <activity android:name=".ProfilesActivity" android:exported="false" />
         <activity android:name=".DeveloperOptionsActivity" android:exported="false" />
         <activity android:name=".AppearanceActivity" android:exported="false" />
+        <activity android:name=".TrendDisplayActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".WatchSettingsActivity" android:exported="false" />
         <service android:name=".PhoneWatchRequests" android:exported="true">
             <intent-filter>

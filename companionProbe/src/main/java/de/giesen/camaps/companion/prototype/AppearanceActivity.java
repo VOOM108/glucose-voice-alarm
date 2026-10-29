@@ -12,6 +12,7 @@ public final class AppearanceActivity extends UiActivity {
         }
         modes.check(200+AppAppearance.mode(this).ordinal());
         modes.setOnCheckedChangeListener((group,id) -> { AppAppearance.set(this,AppAppearance.Mode.values()[id-200]); recreate(); });
+        LevelUi.button(body,AppText.tr("Trendtexte"),v -> startActivity(new android.content.Intent(this,TrendDisplayActivity.class)));
         LevelUi.button(body,"de".equals(AppText.language())?"Sicherheit und Bedingungen":"Safety and terms",v -> startActivity(new android.content.Intent(this,SafetyActivity.class)));
         LevelUi.text(body,AppText.tr("Die native Sperrbildschirm-Anzeige gestaltet Android."),14);
         LevelUi.text(body,UnitPreferences.status(this),14);

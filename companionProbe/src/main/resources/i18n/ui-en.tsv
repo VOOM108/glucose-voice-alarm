@@ -407,6 +407,21 @@ Trenddiagnose anzeigen	Show trend diagnostics
 Trenddiagnose ausblenden	Hide trend diagnostics
 Trenddiagnose kopieren	Copy trend diagnostics
 Trendwörter	Trend phrases
+Trendtexte	Display trend text
+Nicht umgeschaltet. Bitte im Dashboard prüfen.	Not changed. Please check the dashboard.
+Für Dashboard und AOD. Sprachtexte änderst Du getrennt unter Ausgabe → Trendwörter.	For the dashboard and AOD. Edit spoken phrases separately under Output → Trend phrases.
+Leer = Standardtext. Kurz halten: Android kann lange AOD-Texte kürzen.	Blank = default text. Keep it short: Android may truncate long AOD text.
+Standardtexte	Default text
+Sieben Anzeigetexte erforderlich	Seven display phrases are required
+Anzeigetexte: höchstens 40 Zeichen, ohne Zeilenumbrüche oder Platzhalter	Display phrases: up to 40 characters, without line breaks or placeholders
+Anzeigetexte nicht lesbar; gespeicherte Daten bleiben erhalten.	Display text could not be read; stored data is retained.
+Anzeigetexte wurden inzwischen geändert. Bitte neu öffnen.	Display text has changed. Please reopen this screen.
+Anzeigetexte können nicht gespeichert werden.	Display text could not be saved.
+Die Anzeigetexte sind noch nicht gespeichert.	The display text has not been saved yet.
+Sehr schnell steigend	Rising very fast
+Sehr schnell fallend	Falling very fast
+⇈ Sehr schnell steigend	⇈ Rising very fast
+⇊ Sehr schnell fallend	⇊ Falling very fast
 Töne	Sounds
 Uhr/Zustand nach Empfangsluecke blockiert	Clock or state blocked after receipt gap
 Ungültiger Glockenton-Boost.	Invalid bell boost.

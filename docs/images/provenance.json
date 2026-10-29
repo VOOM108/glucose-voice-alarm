@@ -3,22 +3,22 @@
   "personal_device_images_included": false,
   "images": {
     "phone-dashboard-dark.png": {
-      "sha256": "5b399b46ca87773bcd6b2dbf7c9f3d85b59d1469798dfdae4adf364bb6508ebd",
+      "sha256": "fdf196a2a4aac3376ab0a164dde32dd3050b1d4882a6f4bbe49af261db7a46ae",
       "width": 411,
       "height": 891,
-      "kind": "Native synthetic app/widget rendering",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe synthetic platform UI tests",
+      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-dashboard-light.png": {
-      "sha256": "fbb5fff9aa44eb1572444afc4a1536dbc64b1b917a3c6ea1c0002987c66e82d5",
+      "sha256": "346b191bd8a6882ce411c5fef3f3eb123b95fa9ce1d8d86b430bdad06379b74f",
       "width": 411,
       "height": 891,
-      "kind": "Native synthetic app/widget rendering",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe synthetic platform UI tests",
+      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
@@ -26,9 +26,9 @@
       "sha256": "003e1fe370a3a97310b3f9e80e6828d9d169068d0d5d64fc0b78b2de6a0c00e3",
       "width": 411,
       "height": 1610,
-      "kind": "Native synthetic app/widget rendering",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe synthetic platform UI tests",
+      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
@@ -36,29 +36,29 @@
       "sha256": "b3ddb8758206121d7025b8de6c454181dde63d996bdf648758387cb367737d45",
       "width": 411,
       "height": 1348,
-      "kind": "Native synthetic app/widget rendering",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe synthetic platform UI tests",
+      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-widget-dark.png": {
-      "sha256": "e8066d4db1a29f04ab5210399e08bc8cc96ae617a2cb003c75ae6e2716c21f4f",
+      "sha256": "20f56064e690ef356e6e747ced66f0a352b14889833aea37457a2801fdd97746",
       "width": 320,
       "height": 160,
-      "kind": "Native synthetic widget rendering with launcher-safe rounded numerals",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe 0.20.7 synthetic platform UI tests; bounded numeral bitmaps survive restricted RemoteViews context",
+      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-widget-light.png": {
-      "sha256": "436302f79a8cfcd42aaa81d9b7e991554cb78621fa64095030fd88d30aa76bc9",
+      "sha256": "8bf55c7af2778b30ec7a12853df0f6eeaee47550259e08a3ae0345da293e22da",
       "width": 1280,
       "height": 640,
-      "kind": "Native synthetic widget rendering with launcher-safe rounded numerals",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe 0.20.7 synthetic platform UI tests; bounded numeral bitmaps survive restricted RemoteViews context",
+      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
@@ -157,6 +157,16 @@
       "kind": "Code-native SVG schematic, not an Android/Pixel screenshot",
       "component": "phone",
       "source": "MetricNotification.java fields: trend title, receipt-time metric label, reading with arrow",
+      "synthetic": true,
+      "device_capture": false
+    },
+    "phone-settings-trends.png": {
+      "sha256": "2d34cbf4e3e89f30b4da0991a311a0253fbb5bf09ae7a2476d33f3fcf92ecec1",
+      "width": 411,
+      "height": 993,
+      "kind": "Native synthetic Android app/widget rendering",
+      "component": "phone",
+      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     }

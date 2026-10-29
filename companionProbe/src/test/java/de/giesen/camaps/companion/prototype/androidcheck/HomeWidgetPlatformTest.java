@@ -52,7 +52,7 @@ public class HomeWidgetPlatformTest {
         ReflectionHelpers.setField(o,"receivedWall",now-age);ProbeState.observed(o);
         try(ObservationStore store=new ObservationStore(c)){/* Database schema exists; no old value is made current. */}
     }
-    private WidgetControlActivity action(PendingIntent p){Intent i=shadowOf(p).getSavedIntent();ActivityController<WidgetControlActivity> a=Robolectric.buildActivity(WidgetControlActivity.class,i).create();activities.add(a);return a.get();}
+    private WidgetControlActivity action(PendingIntent p){Intent i=shadowOf(p).getSavedIntent();if(WidgetControlReceiver.class.getName().equals(i.getComponent().getClassName())){new WidgetControlReceiver().onReceive(c,i);return null;}ActivityController<WidgetControlActivity> a=Robolectric.buildActivity(WidgetControlActivity.class,i).create();activities.add(a);return a.get();}
     private OutputPreferenceStore.Snapshot output()throws Exception{return new OutputPreferenceStore(c.getFilesDir()).load();}
     @Test public void widgetReadsAcceptedDataWithoutEnablingWatchTransfer()throws Exception {
         received(0);assertFalse(WatchPublisher.enabled(c));HomeWidget.Model m=HomeWidget.model(c);
@@ -107,7 +107,7 @@ public class HomeWidgetPlatformTest {
         NotificationManager notifications=c.getSystemService(NotificationManager.class);shadowOf(notifications).setNotificationsEnabled(true);shadowOf(notifications).setNotificationListenerAccessGranted(new ComponentName(c,CamApsListener.class),true);
         shadowOf(c.getSystemService(PowerManager.class)).setIgnoringBatteryOptimizations(c.getPackageName(),true);shadowOf(c.getSystemService(ActivityManager.class)).setBackgroundRestricted(false);
         new LevelStore(c.getFilesDir()).save(0,Collections.singletonList(new SyntheticAlarmScenario(AlarmEngine.Kind.HIGH).level));
-        WidgetControlActivity a=action(HomeWidget.control(c,widget,-1,true,output().revision,false));assertTrue(LivePreferences.alarms(c));assertTrue(a.isFinishing());
+        WidgetControlActivity a=action(HomeWidget.control(c,widget,-1,true,output().revision,false));assertTrue(LivePreferences.alarms(c));assertNull(a);assertNull(shadowOf(c).getNextStartedActivity());
         Intent service=shadowOf(c).getNextStartedService();assertNotNull(service);assertEquals(LiveAlarmService.class.getName(),service.getComponent().getClassName());
     }
     @Test public void vibrationMayBeTheOnlyWidgetEnabledAlarmRoute()throws Exception {
@@ -152,12 +152,60 @@ public class HomeWidgetPlatformTest {
         for(int id:new int[]{R.id.widget_tone,R.id.widget_alarm,R.id.widget_value,R.id.widget_vibration,R.id.widget_master}){View toggle=row.findViewById(id);assertEquals(0,toggle.getTop());assertEquals(44,toggle.getHeight());assertTrue(toggle.getRight()<=row.getWidth());assertNotNull(toggle.getContentDescription());}
         assertEquals(View.GONE,root.findViewById(R.id.widget_master_separator).getVisibility());
         assertEquals(36,root.findViewById(R.id.widget_tone_track).getWidth());assertEquals(18,root.findViewById(R.id.widget_tone_track).getHeight());
-        root.findViewById(R.id.widget_alarm).performClick();Intent intent=shadowOf(c).getNextStartedActivity();assertEquals(WidgetControlActivity.class.getName(),intent.getComponent().getClassName());
+        root.findViewById(R.id.widget_alarm).performClick();assertNull(shadowOf(c).getNextStartedActivity());
+        assertTrue(shadowOf(c).getBroadcastIntents().stream().anyMatch(i->i.getComponent()!=null && WidgetControlReceiver.class.getName().equals(i.getComponent().getClassName())));
     }
-    @Test @Config(sdk=34) public void controlsUseImmutableExplicitPrivateActivityIntents()throws Exception {
-        PendingIntent p=HomeWidget.control(c,widget,0,false,output().revision,false);assertTrue(p.isImmutable());
-        Intent i=shadowOf(p).getSavedIntent();assertEquals(WidgetControlActivity.class.getName(),i.getComponent().getClassName());
-        assertFalse(c.getPackageManager().getActivityInfo(i.getComponent(),0).exported);assertNotNull(i.getData());
+    @Test @Config(sdk=34) public void controlsUseImmutablePrivateBroadcastsAndActivityOnlyForSetup()throws Exception {
+        PendingIntent p=HomeWidget.control(c,widget,1,true,output().revision,false);assertTrue(p.isImmutable());assertTrue(shadowOf(p).isBroadcastIntent());
+        Intent i=shadowOf(p).getSavedIntent();assertEquals(WidgetControlReceiver.class.getName(),i.getComponent().getClassName());
+        assertFalse(c.getPackageManager().getReceiverInfo(i.getComponent(),0).exported);assertNotNull(i.getData());
+        PendingIntent setup=HomeWidget.control(c,widget,2,true,output().revision,false);assertTrue(setup.isImmutable());assertTrue(shadowOf(setup).isActivityIntent());
+        assertEquals(WidgetControlActivity.class.getName(),shadowOf(setup).getSavedIntent().getComponent().getClassName());
+    }
+    @Test @Config(sdk={28,34}) public void directClicksSwitchAllFourChannelsWithoutOpeningAnyActivity()throws Exception {
+        shadowOf((Vibrator)c.getSystemService(Context.VIBRATOR_SERVICE)).setHasVibrator(true);
+        OutputPreferenceStore store=new OutputPreferenceStore(c.getFilesDir());
+        store.save(output().revision,new OutputPreferences(AlarmEngine.OutputMode.SPOKEN_ALARMS_AND_VALUES,5,SpeechTemplate.VALUE_DEFAULT,100,100,5,0,TrendSpeech.defaults(),true,true,true,true));
+        for(int channel=0;channel<4;channel++) {
+            assertNull(action(HomeWidget.control(c,widget,channel,false,output().revision,false)));
+            OutputPreferences p=output().preferences;boolean[] states={p.tonesEnabled,p.alarmSpeechEnabled,p.valueSpeechEnabled,p.vibrationEnabled};assertFalse(states[channel]);
+            assertNull(action(HomeWidget.control(c,widget,channel,true,output().revision,false)));
+            p=output().preferences;states=new boolean[]{p.tonesEnabled,p.alarmSpeechEnabled,p.valueSpeechEnabled,p.vibrationEnabled};assertTrue(states[channel]);
+        }
+        assertNull(shadowOf(c).getNextStartedActivity());assertFalse(LivePreferences.alarms(c));
+    }
+    @Test @Config(sdk={28,34}) public void raceAfterRenderingCannotBypassLastRouteProtectionOrOpenActivity()throws Exception {
+        action(HomeWidget.control(c,widget,1,true,output().revision,false));
+        Intent click=shadowOf(HomeWidget.control(c,widget,0,false,output().revision,false)).getSavedIntent();
+        assertEquals(WidgetControlReceiver.class.getName(),click.getComponent().getClassName());
+        OutputPreferenceStore store=new OutputPreferenceStore(c.getFilesDir());store.save(output().revision,output().preferences.withChannels(true,false,false));
+        click.putExtra("revision",output().revision);long before=output().revision;
+        new WidgetControlReceiver().onReceive(c,click);
+        assertEquals(before,output().revision);assertTrue(output().preferences.tonesEnabled);assertNull(shadowOf(c).getNextStartedActivity());
+    }
+    @Test @Config(sdk={28,34}) public void directReceiverIgnoresWrongActionsConsentLossAndPendingProfile()throws Exception {
+        Intent click=shadowOf(HomeWidget.control(c,widget,1,true,output().revision,false)).getSavedIntent();long revision=output().revision;
+        new WidgetControlReceiver().onReceive(c,new Intent(click).setAction(HomeWidget.REFRESH));assertEquals(revision,output().revision);
+        c.getSharedPreferences(SafetyConsent.PREFS,0).edit().clear().commit();new WidgetControlReceiver().onReceive(c,click);assertEquals(revision,output().revision);
+        ConsentTestSupport.accept(c);ConfigurationSnapshot desired=ProfileController.capture(c);SettingsTransaction.begin(c.getFilesDir(),desired);
+        byte[] pending=java.nio.file.Files.readAllBytes(new File(c.getFilesDir(),SettingsTransaction.FILE_NAME).toPath());
+        new WidgetControlReceiver().onReceive(c,click);
+        assertArrayEquals(pending,java.nio.file.Files.readAllBytes(new File(c.getFilesDir(),SettingsTransaction.FILE_NAME).toPath()));
+        assertFalse(LivePreferences.alarms(c));assertNull(shadowOf(c).getNextStartedActivity());
+    }
+    @Test @Config(sdk={28,34}) public void directReceiverRejectsAnOldClickAfterMasterStateChanges()throws Exception {
+        Intent click=shadowOf(HomeWidget.control(c,widget,1,true,output().revision,false)).getSavedIntent();long revision=output().revision;
+        LivePreferences.set(c,true,true);new WidgetControlReceiver().onReceive(c,click);
+        assertEquals(revision,output().revision);assertFalse(output().preferences.alarmSpeechEnabled);assertTrue(LivePreferences.alarms(c));
+    }
+    @Test @Config(sdk={28,34}) public void directStartFailureDoesNotLeaveOutputArmed()throws Exception {
+        NotificationManager notifications=c.getSystemService(NotificationManager.class);shadowOf(notifications).setNotificationsEnabled(true);shadowOf(notifications).setNotificationListenerAccessGranted(new ComponentName(c,CamApsListener.class),true);
+        shadowOf(c.getSystemService(PowerManager.class)).setIgnoringBatteryOptimizations(c.getPackageName(),true);shadowOf(c.getSystemService(ActivityManager.class)).setBackgroundRestricted(false);
+        new LevelStore(c.getFilesDir()).save(0,Collections.singletonList(new SyntheticAlarmScenario(AlarmEngine.Kind.HIGH).level));
+        Intent click=shadowOf(HomeWidget.control(c,widget,-1,true,output().revision,false)).getSavedIntent();
+        Context blocked=new ContextWrapper(c){@Override public ComponentName startForegroundService(Intent i){throw new IllegalStateException("synthetic start denied");}};
+        new WidgetControlReceiver().onReceive(blocked,click);
+        assertFalse(LivePreferences.alarms(c));assertFalse(LivePreferences.monitor(c));assertNull(shadowOf(c).getNextStartedActivity());assertNull(shadowOf(c).getNextStartedService());
     }
     @Test public void remoteViewsRenderBothThemesAndModesWithoutTouchingOutput()throws Exception {
         WatchSnapshot sample=demo(false);OutputPreferenceStore.Snapshot output=output();
@@ -204,7 +252,7 @@ public class HomeWidgetPlatformTest {
         // Measure visible glyphs rather than the former TextView's em size.
         assertTrue("The visible reading must remain readable without dominating the widget",ink.height()>=30&&ink.height()<=46);
         assertTrue("The reading must begin at the leading edge instead of leaving a blank block",firstInk<18);
-        assertTrue("Leave breathing room after the reading and arrow",ink.width()>number.getWidth()*.5f&&ink.width()<number.getWidth()*.83f);
+        assertTrue("The larger arrow uses spare room but stays inside the reading region",ink.width()>number.getWidth()*.5f&&ink.right<number.getWidth()-1);
         View wide=layout(HomeWidget.view(c,widget,560,180,m),560,180);
         ImageView larger=wide.findViewById(R.id.widget_reading);Bitmap expanded=Bitmap.createBitmap(larger.getWidth(),larger.getHeight(),Bitmap.Config.ARGB_8888);larger.draw(new Canvas(expanded));
         assertTrue("A wider host may enlarge the value only up to its height cap",ink(expanded).height()>=ink.height()&&ink(expanded).height()<=46);
@@ -291,11 +339,40 @@ public class HomeWidgetPlatformTest {
     }
     @Test public void receiptCaptionOmitsDateButKeepsOriginalTimeAndStaleWarning()throws Exception {
         WatchSnapshot s=demo(false);HomeWidget.Model m=new HomeWidget.Model(s,false,false,false,false,true,output());
-        TextView stamp=layout(HomeWidget.view(c,widget,320,160,m),320,160).findViewById(R.id.widget_stamp);
-        String expected="Received: "+new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received))+" · mg/dl";
-        assertEquals(expected,stamp.getText().toString());assertEquals(AppAppearance.colors(c).error,stamp.getCurrentTextColor());
+        String clock=new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received));
+        for(Locale language:new Locale[]{Locale.GERMAN,Locale.ENGLISH}) {
+            AppText.configure(language);
+            TextView stamp=layout(HomeWidget.view(c,widget,320,160,m),320,160).findViewById(R.id.widget_stamp);
+            String expected=(language==Locale.GERMAN?"Empfangen: ":"Received: ")+clock+" · mg/dl";
+            assertEquals(expected,stamp.getText().toString());assertEquals(AppAppearance.colors(c).error,stamp.getCurrentTextColor());
+        }
+        AppText.configure(Locale.GERMAN);
         assertTrue("Screen readers retain the full original timestamp",HomeWidget.description(m).contains(new java.text.SimpleDateFormat("dd.MM. HH:mm",Locale.getDefault()).format(new Date(s.received))));
     }
+    @Test public void responsiveArrowsGrowWithoutRescalingDigitsOrClippingAnyDirection()throws Exception {
+        for(String value:new String[]{"96","196","7,0"})for(WatchSnapshot.Trend trend:WatchSnapshot.Trend.values()) {
+            if(trend==WatchSnapshot.Trend.UNKNOWN)continue;
+            String arrow=HomeWidget.arrow(trend);
+            Bitmap bare=HomeWidgetRenderer.numerals(c,value,"",Color.WHITE,false,220);
+            Bitmap narrow=HomeWidgetRenderer.numerals(c,value,arrow,Color.WHITE,false,220);
+            Bitmap wide=HomeWidgetRenderer.numerals(c,value,arrow,Color.WHITE,false,440);
+            assertEquals(narrow.getWidth(),wide.getWidth());assertEquals(narrow.getHeight(),wide.getHeight());
+            int start=ink(bare).right+1;
+            for(int y=0;y<narrow.getHeight();y++)for(int x=0;x<Math.min(start,narrow.getWidth());x++)
+                assertEquals("Numerals must stay pixel-identical at different arrow scales",narrow.getPixel(x,y),wide.getPixel(x,y));
+            Rect smallArrow=inkAfter(narrow,start),largeArrow=inkAfter(wide,start);
+            assertTrue(largeArrow.width()>0&&largeArrow.height()>0);
+            assertTrue("Arrow stays inside its bitmap",largeArrow.top>0&&largeArrow.bottom<wide.getHeight()&&largeArrow.right<wide.getWidth()-1);
+            assertTrue(largeArrow.width()>=smallArrow.width()-1);assertTrue(largeArrow.height()>=smallArrow.height()-1);
+            if(trend==WatchSnapshot.Trend.FLAT)assertTrue("Extra width should visibly enlarge the horizontal arrow",largeArrow.width()>smallArrow.width()*1.05f);
+        }
+        WatchSnapshot base=demo(false);
+        for(int width:new int[]{220,320,400,560})for(WatchSnapshot.Trend trend:new WatchSnapshot.Trend[]{WatchSnapshot.Trend.FLAT,WatchSnapshot.Trend.UP_RIGHT,WatchSnapshot.Trend.DOUBLE_DOWN}) {
+            WatchSnapshot sample=new WatchSnapshot(base.generated,base.received,126,trend,false,true,base.rate,base.low,base.high,base.points);
+            save("widget-arrow-"+width+"-"+trend.name().toLowerCase(Locale.ROOT)+".png",HomeWidget.view(c,widget,width,160,new HomeWidget.Model(sample,true,false,false,false,true,output())),width,160);
+        }
+    }
+    private Rect inkAfter(Bitmap b,int from){Rect r=new Rect(b.getWidth(),b.getHeight(),0,0);for(int y=0;y<b.getHeight();y++)for(int x=from;x<b.getWidth();x++)if(Color.alpha(b.getPixel(x,y))>100){r.left=Math.min(r.left,x);r.top=Math.min(r.top,y);r.right=Math.max(r.right,x+1);r.bottom=Math.max(r.bottom,y+1);}return r;}
     @Test @Config(sdk=34,qualifiers="de-w411dp-h891dp-xxxhdpi") public void shorterValuesDoNotGrowAndTallHostsRespectTheHeightCap()throws Exception {
         float density=c.getResources().getDisplayMetrics().density;WatchSnapshot base=demo(false);
         for(int width:new int[]{320,400,560})for(int height:new int[]{160,260})for(WatchSnapshot.Trend trend:new WatchSnapshot.Trend[]{WatchSnapshot.Trend.FLAT,WatchSnapshot.Trend.DOWN_RIGHT}){
