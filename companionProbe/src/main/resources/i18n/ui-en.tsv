@@ -690,3 +690,11 @@ Empfang neu verbinden	Reconnect reception
 Verbindung angefordert · Warte auf neues CamAPS-Update	Connection requested · Waiting for a new CamAPS update
 Empfang und Benachrichtigungszugriff prüfen	Check reception and notification access
  min alt	 min old
+Pfeilzuordnung prüfen	Check arrow mapping
+Keine aktuelle, eindeutige Pfeilgrafik verfügbar. Bitte nach dem nächsten CamAPS-Update erneut öffnen.	No current, unambiguous arrow image is available. Please open this again after the next CamAPS update.
+Bisher zugeordnet:	Current mapping:
+Anzeigetext:	Display text:
+Sprachtext:	Speech text:
+Nicht lesbar	Cannot be read
+Pfeilspeicher voll; diese Grafik kann nicht gespeichert werden.	Arrow storage is full; this image cannot be saved.
+Pfeilzuordnung geändert; warte auf ein neues CamAPS-Update	Arrow mapping changed; waiting for a new CamAPS update

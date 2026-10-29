@@ -153,8 +153,8 @@ public class AndroidUiTest {
         View trend=activity.getWindow().getDecorView().findViewWithTag("camaps_trend");
         assertEquals("CamAPS  Kein Trendpfeil",((TextView)trend).getText().toString());
         View button=text(activity,"Pfeilgrafik zuordnen …");
-        ViewGroup parent=(ViewGroup)trend.getParent();
-        assertSame(button,parent.getChildAt(parent.indexOfChild(trend)+1)); assertFalse(button.isEnabled());
+        View row=(View)trend.getParent(); ViewGroup parent=(ViewGroup)row.getParent();
+        assertSame(button,parent.getChildAt(parent.indexOfChild(row)+1)); assertFalse(button.isEnabled());
         assertNotNull(text(activity,"123 mg/dl"));
     }
     @Test public void knownGraphicIsExplicitlyLabeledAsNotNeedingAnotherConfirmation() {

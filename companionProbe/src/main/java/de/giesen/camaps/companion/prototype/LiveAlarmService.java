@@ -19,6 +19,7 @@ public final class LiveAlarmService extends Service {
     private final GapMonitor gap=new GapMonitor();
     private OutputPreferences preferences;
     private boolean sourceValid,gapNotified;
+    private volatile long referenceRevision;
     private final Map<String,AlarmLevel> levels=new LinkedHashMap<>();
     private LiveNotifications notifications;
     private PreviewAudio audio;
@@ -39,7 +40,25 @@ public final class LiveAlarmService extends Service {
     static String audioState() { LiveAlarmService service=current; return service==null?AppText.tr("Audio: kein aktiver Hintergrunddienst"):service.audioStatus; }
     static void receive(String key,long posted,double value,NotificationParser.Trend trend) {
         LiveAlarmService service=current;
-        if (service!=null) service.handler.post(() -> service.received(key,posted,value,trend));
+        if (service!=null) {
+            long revision=service.referenceRevision;
+            service.handler.post(() -> { if(revision==service.referenceRevision)service.received(key,posted,value,trend); });
+        }
+    }
+    /** Drop queued old interpretations without manufacturing another receipt or changing consent. */
+    static void trendReferencesChanged() {
+        LiveAlarmService service=current; if(service==null)return;
+        long revision=++service.referenceRevision;
+        service.handler.post(() -> {
+            if(revision!=service.referenceRevision)return;
+            service.sourceValid=false; service.trend=NotificationParser.Trend.UNKNOWN;
+            service.gap.clear(); service.gapNotified=false;
+            if(service.flow!=null)service.flow.stop();
+            service.audio.stop(); service.notifications.clearAlarm(); service.releaseOutputLock();
+            service.activePlan=null; service.displayedPlan=null; service.displayedAlarmId=null;
+            status=AppText.tr("Pfeilzuordnung geändert; warte auf ein neues CamAPS-Update");
+            service.lastSummary=""; service.updateStatus();
+        });
     }
     static void sourceDisconnected() {
         LiveAlarmService service=current;

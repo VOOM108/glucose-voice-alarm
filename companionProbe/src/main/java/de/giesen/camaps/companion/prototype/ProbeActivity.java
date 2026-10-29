@@ -73,8 +73,11 @@ public class ProbeActivity extends UiActivity {
         readingTime=text(stamp,"",18); readingTime.setTag("dashboard_time"); readingTime.setSingleLine(true); readingTime.setFontFeatureSettings("tnum");
         readingTime.setMinWidth((int)Math.ceil(readingTime.getPaint().measureText("00:00"))+LevelUi.dp(this,2));
         readingTime.setLayoutParams(new LinearLayout.LayoutParams(-2,-2)); DashboardUi.type(readingTime,DashboardUi.muted(this),false); readingUnit=text(stamp,"",13); readingUnit.setTag("dashboard_unit");
-        trendValue=text(reading,AppText.tr("Warte auf CamAPS"),17);
+        LinearLayout trendRow=new LinearLayout(this); trendRow.setGravity(android.view.Gravity.CENTER_VERTICAL); reading.addView(trendRow);
+        trendValue=text(trendRow,AppText.tr("Warte auf CamAPS"),17);
+        trendValue.setLayoutParams(new LinearLayout.LayoutParams(0,-2,1));
         trendValue.setTag("camaps_trend");
+        Button editVector=button(trendRow,AppText.tr("Pfeilzuordnung prüfen"),v -> labelVector()); editVector.setTag("edit_vector");
         confirmVector=button(reading,AppText.tr("Pfeilgrafik zuordnen …"),v -> labelVector());
         vectorStatus=text(reading,"",13);
         calculatedRate=text(reading,"",14); calculatedRate.setTag("calculated_rate"); calculatedRate.setSingleLine(true);
@@ -269,7 +272,11 @@ public class ProbeActivity extends UiActivity {
     }
     private void labelVector() {
         final VectorReference.Candidate captured=ProbeState.vectorCandidate;
-        if (!enabled() || captured==null || !captured.current()) { render(); return; }
+        if (!enabled() || captured==null || !captured.current()) {
+            new AlertDialog.Builder(this).setTitle(AppText.tr("Pfeilzuordnung prüfen"))
+                    .setMessage(AppText.tr("Keine aktuelle, eindeutige Pfeilgrafik verfügbar. Bitte nach dem nächsten CamAPS-Update erneut öffnen."))
+                    .setPositiveButton(AppText.tr("OK"),null).show(); render(); return;
+        }
         ImageView preview=new ImageView(this);
         preview.setImageBitmap(captured.preview);
         preview.setBackgroundColor(0xffb0b0b0);
@@ -279,6 +286,17 @@ public class ProbeActivity extends UiActivity {
         LinearLayout content=new LinearLayout(this); content.setOrientation(LinearLayout.VERTICAL);
         text(content,AppText.tr("Ordne diese Vorschau zu. Bei einer neuen Quellmeldung bitte neu laden."),16);
         content.addView(preview,new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,size));
+        NotificationParser.Trend exact=TrendReference.lookup(getSharedPreferences(VectorReference.PREFS,MODE_PRIVATE).getAll(),captured.key);
+        NotificationParser.Trend shape=TrendReference.lookup(getSharedPreferences(VectorReference.SHAPE_PREFS,MODE_PRIVATE).getAll(),captured.shapeKey);
+        NotificationParser.Trend assigned=ShapeReference.resolve(exact,shape);
+        text(content,AppText.tr("Bisher zugeordnet:")+" "+(assigned==NotificationParser.Trend.UNKNOWN?AppText.tr("Trend offen"):assigned.symbol+" "+MetricNotification.trendTitle(assigned)),16).setTag("vector_assignment");
+        if(assigned!=NotificationParser.Trend.UNKNOWN) {
+            text(content,AppText.tr("Anzeigetext:")+" "+DisplayTrendPreferences.title(this,assigned),14).setTag("vector_display_word");
+            String spoken;
+            try { spoken=new de.giesen.camaps.companion.prototype.alarm.OutputPreferenceStore(getFilesDir()).load().preferences.trendSpeech.word(assigned); }
+            catch(IOException e) { spoken=AppText.tr("Nicht lesbar"); }
+            text(content,AppText.tr("Sprachtext:")+" "+(spoken.isEmpty()?AppText.tr("Aus"):spoken),14).setTag("vector_speech_word");
+        }
         final NotificationParser.Trend[] choices=new NotificationParser.Trend[]{NotificationParser.Trend.DOUBLE_UP,NotificationParser.Trend.UP,NotificationParser.Trend.UP_RIGHT,NotificationParser.Trend.FLAT,NotificationParser.Trend.DOWN_RIGHT,NotificationParser.Trend.DOWN,NotificationParser.Trend.DOUBLE_DOWN};
         String[] labels=new String[choices.length];
         for (int i=0;i<choices.length;i++) labels[i]=choices[i].symbol+"  "+MetricNotification.trendTitle(choices[i]);
@@ -295,8 +313,9 @@ public class ProbeActivity extends UiActivity {
                     android.content.SharedPreferences shapes=getSharedPreferences(VectorReference.SHAPE_PREFS,MODE_PRIVATE);
                     boolean canExact=references.contains(captured.key) || references.getAll().size()<64;
                     boolean canShape=captured.shapeKey!=null && (shapes.contains(captured.shapeKey) || shapes.getAll().size()<64);
-                    if (!canExact && !canShape) {
-                        ProbeState.status=AppText.tr("Referenzspeicher voll; alte Pfeilzuordnungen zuerst löschen"); render(); return;
+                    if (!canExact) {
+                        new AlertDialog.Builder(this).setMessage(AppText.tr("Pfeilspeicher voll; diese Grafik kann nicht gespeichert werden."))
+                                .setPositiveButton(AppText.tr("OK"),null).show(); render(); return;
                     }
                     if (canExact) references.edit().putString(captured.key,choices[selected[0]].name()).apply();
                     if (canShape) shapes.edit().putString(captured.shapeKey,
@@ -307,9 +326,10 @@ public class ProbeActivity extends UiActivity {
                         String encoded=VectorHistory.append(history.getString("entries",""),new VectorHistory.Entry(captured.key,captured.shapeKey,choices[selected[0]]));
                         historySaved=history.edit().putString("entries",encoded).commit();
                     } catch (IllegalArgumentException | ClassCastException e) { /* Preserve unknown history; reference storage is independent. */ }
-                    ProbeState.clear();
+                    ProbeState.forgetTrend();
+                    LiveAlarmService.trendReferencesChanged();
                     HomeWidget.changed(this);
-                    if(WatchPublisher.enabled(this))WatchPublisher.clear(this);
+                    if(WatchPublisher.enabled(this))WatchPublisher.changed(this);
                     if (audio!=null) audio.stop();
                     ProbeState.status=AppText.tr("Pfeilreferenz gespeichert; warte auf ein neues CamAPS-Update")+(historySaved?"":AppText.tr(". Bestätigungshistorie nicht verfügbar."));
                     render();

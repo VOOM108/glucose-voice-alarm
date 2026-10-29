@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Deutsch](README.de.md) · [GVA Watch](../companionWear/README.md) · [GVA Dots](../companionWatchFace/README.md)
 
-The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.21.3 Beta**. The phone works without either watch component.
+The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.21.4 Beta**. The phone works without either watch component.
 
 **Experimental research tool; not for medical use or treatment decisions.** Read [SAFETY.md](../SAFETY.md). CamAPS continues to control the sensor and pump.
 
@@ -25,6 +25,10 @@ The widget has an optional single row of sound, alarm speech, reading speech, vi
 Configure multiple alarm levels, individual tone/speech/vibration choices, repeats and snooze where applicable. Routine value announcements have their own interval and can pause after an alarm. Spoken templates and all seven spoken trend phrases can be edited; unchecked phrases are omitted. Appearance → Display trend text edits the dashboard/AOD labels separately. Blank labels follow the UI language. Double-arrow defaults are "Rising very fast" and "Falling very fast"; saved speech text is retained. Five local profiles store both text sets independently. See the [detailed phone reference](../docs/PHONE_REFERENCE.md).
 
 The CamAPS arrow is separate from the app's numeric rate calculation. A numeric critical-rate alarm can trigger without a recognized arrow when enough fresh values arrive. The optional data-gap warning uses the last known situation; it never estimates a current value.
+
+## Arrow mappings
+
+The pencil beside the dashboard trend remains available for known arrows, so an existing mapping can be checked and corrected. The dialog holds its graphic preview fixed; after a new CamAPS notification, reload it before saving. If no current graphic is available, a message explains that the next update is needed. A correction stops current and pending GVA audio. The last displayed reading and its original receipt time remain available; output waits for new input. Arrow mappings stay in private app storage and are included in neither this source project nor settings profiles.
 
 ## Build and set up
 

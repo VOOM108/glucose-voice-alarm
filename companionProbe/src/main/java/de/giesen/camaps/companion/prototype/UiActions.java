@@ -14,6 +14,7 @@ final class UiActions {
         String icon=null;
         if (title.startsWith(AppText.tr("Zurück"))) icon="back";
         else if (title.equals(AppText.tr("Vorschau stoppen")) || title.equals(AppText.tr("Anhören stoppen")) || title.equals(AppText.tr("Sprache stoppen"))) icon="stop";
+        else if (title.equals(AppText.tr("Pfeilzuordnung prüfen"))) icon="edit";
         else if (title.equals(AppText.tr("Vibration testen")) || title.equals(AppText.tr("Trend anhören")) || title.equals(AppText.tr("Ton anhören")) || title.equals(AppText.tr("Tonlautstärke anhören")) || title.equals(AppText.tr("Sprachlautstärke anhören")) || title.equals(AppText.tr("Werttext mit Testdaten anhören")) || title.equals(AppText.tr("Sprachtext mit Testdaten anhören"))) icon="play";
         if (icon!=null) {
             button.setText(""); button.setCompoundDrawablesRelative(null,null,null,null);
@@ -72,6 +73,7 @@ final class UiActions {
             Path p=new Path();
             if (name.equals("back")) { paint.setStyle(Paint.Style.STROKE); p.moveTo(14,5); p.lineTo(7,12); p.lineTo(14,19); p.moveTo(7,12); p.lineTo(21,12); }
             else if (name.equals("play")) { paint.setStyle(Paint.Style.FILL); p.moveTo(8,5); p.lineTo(19,12); p.lineTo(8,19); p.close(); }
+            else if (name.equals("edit")) { paint.setStyle(Paint.Style.STROKE); p.moveTo(5,15); p.lineTo(15,5); p.lineTo(19,9); p.lineTo(9,19); p.lineTo(4,20); p.close(); p.moveTo(13,7); p.lineTo(17,11); }
             else { paint.setStyle(Paint.Style.FILL); p.addRoundRect(6,6,18,18,2,2,Path.Direction.CW); }
             canvas.drawPath(p,paint); canvas.restore();
         }

@@ -60,7 +60,7 @@ With CamAPS already collecting glucose data and controlling therapy, a companion
 
 ## Scope and limitations
 
-The prepared phone version is 0.21.3 Beta. Development and phone device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor communication or pump control.
+The prepared phone version is 0.21.4 Beta. Development and phone device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor communication or pump control.
 
 Optional [GVA Watch and the GVA Dots face](../companionWear/README.en.md) have been tested in part on a Galaxy Watch5 Pro running Wear OS 6 / One UI 8 Watch. They show readings and a short chart, with optional forwarding of accepted phone alerts. Phone-to-watch transfer starts off. Complication timing, alarm delivery and battery use need further device testing.
 
@@ -70,7 +70,7 @@ The time shown is receipt/processing time, not a verified sensor measurement tim
 
 ## Watch display
 
-GVA Watch 0.19.0 Beta and the code-free GVA Dots 0.1.5 Beta face work with the prepared phone version 0.21.3 Beta. The round display uses Roboto Flex, a one- or two-hour curve and a reduced ambient view. Menus use official Wear Material 3 components. The watch app also supplies a tile with the same data layout, without time dots. Alongside the composite display and age source, separate reading, CamAPS trend, delta per minute and chart sources can be selected in compatible third-party faces. The watch displays data and can relay accepted phone alarms with vibration. It does not calculate glucose alarms independently. See [watch setup and limits](../companionWear/README.en.md). Everyday device testing continues; the new standalone complications and tile still need device acceptance.
+GVA Watch 0.19.0 Beta and the code-free GVA Dots 0.1.5 Beta face work with the prepared phone version 0.21.4 Beta. The round display uses Roboto Flex, a one- or two-hour curve and a reduced ambient view. Menus use official Wear Material 3 components. The watch app also supplies a tile with the same data layout, without time dots. Alongside the composite display and age source, separate reading, CamAPS trend, delta per minute and chart sources can be selected in compatible third-party faces. The watch displays data and can relay accepted phone alarms with vibration. It does not calculate glucose alarms independently. See [watch setup and limits](../companionWear/README.en.md). Everyday device testing continues; the new standalone complications and tile still need device acceptance.
 
 From version 0.18.0, forwarding GVA alarms and data-gap warnings to GVA Watch can be enabled separately from display transfer. The watch creates its own notifications with vibration. Both apps require opt-in; Appearance → Watch includes a labeled test without readings. Forwarding follows accepted phone alarm outputs, without offline replay. Routine readings do not create watch notifications. [Setup and limits](../companionWear/README.en.md#watch-alerts).
 
@@ -97,6 +97,8 @@ The dashboard also shows the app's own signed rate in a separate smaller line, i
 During a data gap, the dashboard and AOD/lock screen retain the last known reading and CamAPS arrow for up to two hours. The reading turns gray and its original time turns red; the notification also shows age in minutes. Android may override colors in the native display. This display cache remains separate from fresh input for alarms and speech. New readings, an app process restart or an explicit reset end the old display state. Stored history is never replayed as a new receipt.
 
 Critical fall rate and Critical rise rate check their configured thresholds independently of arrows and the routine reading speech interval. The latest interval must also qualify. They can trigger without an arrow when enough fresh readings arrive. Missing readings are covered by the separately configured gap warning. Default speech is “Critical fall rate at {value}.” and “Critical rise rate at {value}.” Saved custom speech and level names are preserved.
+
+The pencil beside the dashboard trend remains available for known arrows, so an existing mapping can be checked and corrected. The dialog holds its graphic preview fixed; after a new CamAPS notification, reload it before saving. If no current graphic is available, a message explains that the next update is needed. A correction stops current and pending GVA audio. The last displayed reading and its original receipt time remain available; output waits for new input. Arrow mappings stay in private app storage and are included in neither this source project nor settings profiles.
 
 ## Initial setup
 

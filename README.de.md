@@ -10,7 +10,7 @@ Glucose Voice Alarm (GVA) liest Glukosewerte und Trendpfeile aus **CamAPS-Benach
 
 | Komponente | Aktueller Quellstand | Aufgabe |
 |---|---|---|
-| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.21.3 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
+| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.21.4 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
 | [GVA Watch](companionWear/README.de.md) | 0.19.0 Beta | Uhrenanzeige, Kachel, sechs Komplikationsquellen und optionale Telefonalarme mit Uhrenvibration |
 | [GVA Dots](companionWatchFace/README.de.md) | 0.1.5 Beta | Rundes Zifferblatt mit Uhrzeitpunkten, Wert/Pfeil, kurzem Verlauf, Alter und Delta |
 

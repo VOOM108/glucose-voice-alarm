@@ -25,6 +25,18 @@ final class ProbeState {
             this.notificationKey = key;
             this.postedWall = postedWall;
         }
+        private Observation(Observation original) {
+            value=original.value; trend=NotificationParser.Trend.UNKNOWN; receiptRate=original.receiptRate;
+            receivedElapsed=original.receivedElapsed; receivedWall=original.receivedWall;
+            postedWall=original.postedWall; notificationKey=original.notificationKey;
+        }
+    }
+    /** A changed reference is not a new glucose receipt, and cannot refresh its age. */
+    static void forgetTrend() {
+        Observation old=latest,display=lastDisplay;
+        latest=old==null?null:new Observation(old);
+        lastDisplay=display==null?null:display==old?latest:new Observation(display);
+        vectorCandidate=null;
     }
     static void observed(Observation observation) { lastDisplay=observation; latest=observation; }
     /** A missing source is never fresh input, but does not erase the last known display. */

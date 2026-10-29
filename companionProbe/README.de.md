@@ -2,7 +2,7 @@
 
 [Projektübersicht](../README.de.md) · [English](README.md) · [GVA Watch](../companionWear/README.de.md) · [GVA Dots](../companionWatchFace/README.de.md)
 
-Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.21.3 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
+Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.21.4 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
 
 **Experimentelles Forschungswerkzeug; nicht für medizinische Verwendung oder Therapieentscheidungen.** Lies [SAFETY.de.md](../SAFETY.de.md). CamAPS steuert weiterhin Sensor und Pumpe.
 
@@ -25,6 +25,10 @@ Das Widget bietet optional eine Schalterzeile für Ton, Alarm-Sprache, Wertansag
 Mehrere Alarmstufen, individuelle Ton-/Sprach-/Vibrationswege sowie Wiederholung und Snooze, soweit für die Alarmart vorgesehen. Normale Wertansagen haben ein eigenes Intervall und können nach Alarmen pausieren. Sprachvorlagen und alle sieben gesprochenen Trendwörter sind anpassbar; abgewählte Wörter bleiben stumm. Unter Darstellung → Trendtexte lassen sich die Dashboard-/AOD-Begriffe getrennt ändern. Leere Felder folgen der Oberflächensprache. Doppelpfeil-Standards sind „Sehr schnell steigend“ und „Sehr schnell fallend“; gespeicherte Sprachtexte bleiben erhalten. Fünf lokale Profile speichern beide Textarten getrennt. Details im [Telefonhandbuch](../docs/PHONE_REFERENCE.de.md).
 
 CamAPS-Pfeil und eigene numerische Änderungsrate sind getrennt. Ein kritischer Ratenalarm kann ohne erkannten Pfeil auslösen, wenn genügend frische Werte vorliegen. Die optionale Lückenwarnung beschreibt die letzte bekannte Situation und schätzt keinen aktuellen Wert.
+
+## Pfeilzuordnungen
+
+Der Stift neben dem Dashboard-Trend bleibt auch bei bekannten Pfeilen erreichbar. Damit lässt sich eine bestehende Zuordnung prüfen und korrigieren. Der Dialog zeigt eine feste Grafikvorschau; nach einer neuen CamAPS-Meldung muss sie vor dem Speichern neu geladen werden. Ohne aktuelle Grafik erklärt ein Hinweis, dass die nächste Meldung abgewartet werden muss. Eine Korrektur beendet laufende und ausstehende GVA-Audioausgaben. Der letzte angezeigte Wert und seine ursprüngliche Empfangszeit bleiben erhalten; weitere Ausgabe wartet auf einen neuen Empfang. Pfeilzuordnungen liegen nur im privaten App-Speicher und sind weder im Quellprojekt noch in den Einstellungsprofilen enthalten.
 
 ## Bauen und einrichten
 

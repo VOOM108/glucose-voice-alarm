@@ -3,22 +3,22 @@
   "personal_device_images_included": false,
   "images": {
     "phone-dashboard-dark.png": {
-      "sha256": "fdf196a2a4aac3376ab0a164dde32dd3050b1d4882a6f4bbe49af261db7a46ae",
+      "sha256": "20978917a21a0d47df6ab803a709b5e4282bdc6576cf63cde23834f316547de1",
       "width": 411,
       "height": 891,
-      "kind": "Native synthetic Android app/widget rendering",
+      "kind": "Native synthetic Android app rendering",
       "component": "phone",
-      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.21.4 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-dashboard-light.png": {
-      "sha256": "346b191bd8a6882ce411c5fef3f3eb123b95fa9ce1d8d86b430bdad06379b74f",
+      "sha256": "b8d1651c27ebb0eb1e7837b975949f7d0833ea401393c47dc507feb105a8f26a",
       "width": 411,
       "height": 891,
-      "kind": "Native synthetic Android app/widget rendering",
+      "kind": "Native synthetic Android app rendering",
       "component": "phone",
-      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.21.4 full synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },

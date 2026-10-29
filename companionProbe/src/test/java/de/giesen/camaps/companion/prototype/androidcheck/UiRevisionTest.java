@@ -68,7 +68,7 @@ public class UiRevisionTest {
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(600)); assertFalse(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled());
         assertFalse(app.getSharedPreferences(VectorReference.PREFS,0).contains(captured.key)); dialog.dismiss();
     }
-    @Test public void explicitCorrectionQuarantinesAConflictingShapeAndKnownArrowHidesTheDashboardAssignment() {
+    @Test public void explicitCorrectionQuarantinesAConflictingShapeAndKnownArrowKeepsCompactEditAction() {
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
         VectorReference.Candidate current=candidate(); ProbeState.vectorCandidate=current;
         app.getSharedPreferences(VectorReference.PREFS,0).edit().putString(current.key,NotificationParser.Trend.UP.name()).commit();
@@ -79,6 +79,7 @@ public class UiRevisionTest {
         assertEquals(ShapeReference.CONFLICT,app.getSharedPreferences(VectorReference.SHAPE_PREFS,0).getString(current.shapeKey,""));
         ProbeState.vectorCandidate=current; ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.UP_RIGHT,SystemClock.elapsedRealtime(),System.currentTimeMillis(),"synthetic");
         ProbeActivity home=open(ProbeActivity.class,null).get(); assertFalse(action(home,"Bekannte Pfeilgrafik prüfen/ändern …").isShown());
+        assertTrue(action(home,"Pfeilzuordnung prüfen").isShown());
     }
     @Test public void coverageIsScopedToTheSourceVersionAndUnknownNeverCompletesADirection() {
         for(NotificationParser.Trend trend:new NotificationParser.Trend[]{NotificationParser.Trend.UP_RIGHT,NotificationParser.Trend.UP,NotificationParser.Trend.FLAT,NotificationParser.Trend.DOWN_RIGHT,NotificationParser.Trend.DOWN}) ArrowCoverage.observe(app,"synthetic-v1",trend);
