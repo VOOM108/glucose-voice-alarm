@@ -33,6 +33,9 @@ public final class LiveAlarmService extends Service {
     private boolean foreground;
     private boolean playbackForeground;
     private AlarmOutputFlow.Plan activePlan,displayedPlan;
+    static final long SPEECH_COMPLETION_MS=10000;
+    private AlarmOutputFlow.Plan speechCompletionPlan;
+    private AlarmStateStore.Clock speechCompletionStart;
     private String displayedAlarmId;
     private final Runnable tick=new Runnable() { @Override public void run() { CamApsConnection.ensure(LiveAlarmService.this); runOutputs(); updateStatus(); handler.postDelayed(this,2000); } };
     static boolean running() { return current!=null && current.foreground; }
@@ -143,7 +146,7 @@ public final class LiveAlarmService extends Service {
     }
     private File stateDirectory() { return new File(getFilesDir(),"live-receipt-runtime-v1"); }
     private void reload() {
-        gap.clear(); gapNotified=false; sourceValid=false; preferences=null;
+        gap.clear(); gapNotified=false; sourceValid=false; preferences=null;speechCompletionPlan=null;speechCompletionStart=null;
         if (flow!=null) flow.stop(); flow=null; notifications.clearAlarm(); activePlan=null; displayedAlarmId=null; displayedPlan=null; levels.clear();
         if (!LivePreferences.monitor(this)) { stopSelf(); return; }
         try {
@@ -173,6 +176,8 @@ public final class LiveAlarmService extends Service {
                     catch (RuntimeException e) { status=AppText.tr("Audio-Hintergrundstart abgelehnt"); return false; }
                     boolean accepted=audio.start(plan);
                     activePlan=accepted?plan:null;
+                    speechCompletionPlan=accepted && plan.ruleId!=null && plan.kind!=null && plan.speech!=null?plan:null;
+                    speechCompletionStart=speechCompletionPlan==null?null:RuntimeClock.read(LiveAlarmService.this);
                     if (accepted && plan.ruleId!=null) {
                         LivePreferences.alarmStarted(LiveAlarmService.this);
                         AlarmLevel level=levels.get(plan.ruleId); if (level!=null && value!=null) {
@@ -182,7 +187,7 @@ public final class LiveAlarmService extends Service {
                     }
                     if (!accepted) releaseOutputLock(); return accepted;
                 }
-                @Override public void stop() { audio.stop(); releaseOutputLock(); }
+                @Override public void stop() { speechCompletionPlan=null;speechCompletionStart=null;audio.stop(); releaseOutputLock(); }
             },input -> LivePreferences.pauseUntil(this)>RuntimeClock.read(this).wallMs?OutputGuard.Reason.GLOBAL_PAUSE:OutputGuard.Reason.NONE);
             flow.deferValuesUntil(now.elapsedMs+LivePreferences.valueQuietRemaining(this,output.valueQuietMinutes));
             status=LivePreferences.alarms(this)?AppText.tr("Ausgabe eingeschaltet; warte auf ein neues CamAPS-Update"):AppText.tr("Hintergrundanzeige eingeschaltet; Live-Alarme aus");
@@ -242,9 +247,10 @@ public final class LiveAlarmService extends Service {
         if (!LivePreferences.monitor(this) || !SystemReadiness.read(this).ready()) {
             if (flow!=null) flow.stop(); status=terminalStatus=AppText.tr("Systemfreigabe/Empfang fehlt; Live-Dienst beendet"); stopSelf(); return;
         }
+        AlarmStateStore.Clock now=RuntimeClock.read(this);
+        if(completeAlarmSpeech(now))return;
         if (!audio.busy()) { activePlan=null; releaseOutputLock(); CamApsConnection.ensure(this);
         try { foreground(false); } catch (RuntimeException e) { stopSelf(); return; } }
-        AlarmStateStore.Clock now=RuntimeClock.read(this);
         boolean gapDue=preferences!=null && gap.due(preferences.gap,now);
         if(LivePreferences.alarms(this) && flow!=null && gap.waiting()) {
             if(!gapNotified && (activePlan==null || !"gap_warning".equals(activePlan.ruleId))) { flow.stop(); notifications.clearAlarm(); displayedAlarmId=null; displayedPlan=null; }
@@ -272,6 +278,28 @@ public final class LiveAlarmService extends Service {
             if (outcome==AlarmOutputFlow.Outcome.STORAGE_BLOCKED) { status=AppText.tr("Alarmzustand blockiert; keine Ausgabe"); return; }
         }
         if (!audio.busy()) flow.value(RuntimeClock.read(this));
+    }
+    private boolean completeAlarmSpeech(AlarmStateStore.Clock now){
+        if(speechCompletionPlan==null)return false;
+        long age=speechCompletionStart==null?-1:now.elapsedMs-speechCompletionStart.elapsedMs;
+        boolean clock=speechCompletionStart!=null && now.boot==speechCompletionStart.boot && age>=0 && Math.abs((now.wallMs-speechCompletionStart.wallMs)-age)<=1000;
+        boolean expired=clock && age>SPEECH_COMPLETION_MS;
+        if(!clock || expired || !live() || flow==null || !sourceValid || !fresh() || LivePreferences.pauseUntil(this)>now.wallMs){
+            audio.discardDeferredAlarmSpeech(expired);speechCompletionPlan=null;speechCompletionStart=null;return false;
+        }
+        if(!audio.readyForDeferredAlarmSpeech())return false;
+        AlarmOutputFlow.Plan original=speechCompletionPlan;
+        Calendar calendar=Calendar.getInstance();calendar.setTimeInMillis(now.wallMs);
+        flow.setOutputUnit(UnitPreferences.display(this,preferences));
+        AlarmOutputFlow.Outcome checked=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),now,
+                calendar.get(Calendar.HOUR_OF_DAY)*60+calendar.get(Calendar.MINUTE),window.sessionStart(),trend);
+        AlarmOutputFlow.Plan updated=checked==AlarmOutputFlow.Outcome.ACCEPTED?flow.refreshPending(original,now):null;
+        speechCompletionPlan=null;speechCompletionStart=null;
+        if(updated==null){audio.discardDeferredAlarmSpeech(false);return false;}
+        try{foreground(true);outputLock.acquire(100000);}catch(RuntimeException e){audio.discardDeferredAlarmSpeech(false);return false;}
+        boolean accepted=audio.completeDeferredAlarmSpeech(updated);
+        if(accepted)activePlan=updated;else{audio.discardDeferredAlarmSpeech(false);releaseOutputLock();}
+        return accepted;
     }
     private void startGap(AlarmStateStore.Clock now) {
         AlarmOutputFlow.Plan plan=AlarmOutputFlow.Plan.gap(preferences.gap,preferences,gap.message(now,preferences.speechLanguage,preferences.gap.speechTemplate));

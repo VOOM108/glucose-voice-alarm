@@ -34,6 +34,9 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
     private long requestSequence;
     private String activeSpeechId;
     private AlarmOutputFlow.Plan pendingPlan;
+    private final AlarmOutputDiagnostics alarmDiagnostics;
+    private boolean alarmSpeechWaiting,coldAlarmSpeech,alarmSpeechCompletionAllowed;
+    private String alarmSpeechId;
     private String previewSpeechLanguage;
     void previewLanguage(String language) {
         if(!"de".equals(language) && !"en".equals(language)) throw new IllegalArgumentException();
@@ -48,6 +51,7 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
     }
     PreviewAudio(Context context,Status status,BooleanSupplier livePermission) {
         this.context=context.getApplicationContext(); this.status=status; vibration=new PreviewVibration(this.context);
+        alarmDiagnostics=new AlarmOutputDiagnostics(this.context);
         this.livePermission=livePermission;
         OWNERS.removeIf(reference -> reference.get()==null); OWNERS.add(new WeakReference<>(this));
     }
@@ -106,9 +110,9 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
                 if (ready) {
                     tts.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
                     tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                        @Override public void onStart(String id) { }
-                        @Override public void onDone(String id) { handler.post(() -> { if (id!=null && id.equals(activeSpeechId)) { busyUntil=0; activeSpeechId=null; } }); }
-                        @Override public void onError(String id) { onDone(id); }
+                        @Override public void onStart(String id) { handler.post(() -> {if(id!=null && id.equals(activeSpeechId) && id.equals(alarmSpeechId))alarmDiagnostics.speech(AlarmOutputDiagnostics.Speech.STARTED);}); }
+                        @Override public void onDone(String id) { speechFinished(id,false); }
+                        @Override public void onError(String id) { speechFinished(id,true); }
                     });
                 }
                 status.show(ready?AppText.tr("Offline-Stimme bereit. Vorschauen starten nur auf Knopfdruck."):
@@ -116,6 +120,12 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
             }));
         } catch (RuntimeException e) { releaseSpeech(); status.show(AppText.tr("Sprachausgabe konnte nicht vorbereitet werden.")); }
     }
+    private void speechFinished(String id,boolean failed){handler.post(() -> {
+        if(id==null || !id.equals(activeSpeechId))return;
+        if(id.equals(alarmSpeechId))alarmDiagnostics.speech(failed?AlarmOutputDiagnostics.Speech.FAILED:AlarmOutputDiagnostics.Speech.COMPLETED);
+        busyUntil=0;activeSpeechId=null;alarmSpeechId=null;
+    });}
+    private boolean liveAlarmPlan(){return pendingPlan!=null && !pendingPlan.synthetic && pendingPlan.ruleId!=null;}
     boolean speak(String text) {
         if (!refresh()) return false;
         return speak(text,preferences.speechVolumePercent);
@@ -130,13 +140,15 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
         if (!ready || tts==null) { status.show(AppText.tr("Noch keine Ansage: Offline-Stimme wird vorbereitet oder fehlt. Danach bitte erneut auf Anhören tippen.")); return false; }
         try {
             activeSpeechId="preview-"+(++requestSequence);
+            alarmSpeechId=liveAlarmPlan()?activeSpeechId:null;
             Bundle parameters=new Bundle(); parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME,volumePercent/100f);
             int result=tts.speak(text,TextToSpeech.QUEUE_FLUSH,parameters,activeSpeechId);
-            if (result!=TextToSpeech.SUCCESS) { status.show(AppText.tr("Sprachausgabe hat den Text abgelehnt.")); return false; }
+            if (result!=TextToSpeech.SUCCESS) { if(alarmSpeechId!=null)alarmDiagnostics.speech(AlarmOutputDiagnostics.Speech.FAILED);activeSpeechId=null;alarmSpeechId=null;status.show(AppText.tr("Sprachausgabe hat den Text abgelehnt.")); return false; }
+            if(alarmSpeechId!=null)alarmDiagnostics.speech(AlarmOutputDiagnostics.Speech.SUBMITTED);
             handler.postDelayed(stopSpeech,90000);
             busyUntil=SystemClock.elapsedRealtime()+90000;
             status.show(AppText.tr("Vorschautext an die Sprachausgabe übergeben.")); return true;
-        } catch (RuntimeException e) { stop(); status.show(AppText.tr("Sprachvorschau konnte nicht gestartet werden.")); return false; }
+        } catch (RuntimeException e) { if(liveAlarmPlan())alarmDiagnostics.speech(AlarmOutputDiagnostics.Speech.FAILED);stop(); status.show(AppText.tr("Sprachvorschau konnte nicht gestartet werden.")); return false; }
     }
     boolean tone(String uri) {
         if (!refresh()) return false;
@@ -211,9 +223,12 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
         if (bell!=null) { try { bell.release(); } catch (RuntimeException e) { /* Best-effort release. */ } bell=null; }
         if (ringtone!=null) { try { ringtone.stop(); } catch (RuntimeException e) { /* Best-effort release. */ } ringtone=null; }
     }
-    @Override public void stop() { pendingPlan=null; vibration.stop(); stopAudio(); }
+    @Override public void stop() {
+        if(liveAlarmPlan())alarmDiagnostics.stopped(bell!=null || ringtone!=null,vibration.busy());
+        alarmSpeechWaiting=false;coldAlarmSpeech=false;alarmSpeechCompletionAllowed=false;pendingPlan=null; vibration.stop(); stopAudio();
+    }
     private void stopAudio() {
-        busyUntil=0; activeSpeechId=null;
+        busyUntil=0; activeSpeechId=null;alarmSpeechId=null;
         afterTone=null;
         stopTone(); handler.removeCallbacks(stopSpeech);
         if (tts!=null) try { tts.stop(); } catch (RuntimeException e) { /* Best-effort release. */ }
@@ -235,14 +250,40 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
         if (!takeOutput()) return false;
         stop();
         pendingPlan=plan;
+        boolean trackedAlarm=liveAlarmPlan();
+        if(trackedAlarm)alarmDiagnostics.begin(plan);
+        alarmSpeechCompletionAllowed=trackedAlarm && plan.kind!=null && plan.speech!=null;
+        coldAlarmSpeech=alarmSpeechCompletionAllowed && !ready;
+        if(coldAlarmSpeech)waitForAlarmVoice();
         boolean audioStarted=false;
         if (!plan.toneUris.isEmpty()) audioStarted=playTones(plan.toneUris,0,plan.speech==null?null:() -> {
             AlarmOutputFlow.Plan current=pendingPlan;
-            if(current!=null && current.speech!=null) speak(current.speech,preferences.speechVolumePercent,true);
+            if(current!=null && current.speech!=null && !coldAlarmSpeech){if(!ready)unreadyAlarmVoice();else speak(current.speech,preferences.speechVolumePercent,true);}
         });
-        else if(plan.speech!=null && ready) audioStarted=speak(plan.speech);
+        else if(plan.speech!=null && ready) audioStarted=speak(plan.speech,preferences.speechVolumePercent,true);
+        else if(plan.speech!=null)unreadyAlarmVoice();
         boolean vibrationStarted=!plan.vibrationPatterns.isEmpty() && vibration.startPatterns(plan.vibrationPatterns);
+        if(trackedAlarm){
+            if(!plan.toneUris.isEmpty())alarmDiagnostics.tone(audioStarted);
+            if(!plan.vibrationPatterns.isEmpty())alarmDiagnostics.vibration(vibrationStarted);
+        }
+        if(!audioStarted && !vibrationStarted)discardDeferredAlarmSpeech(false);
         return audioStarted || vibrationStarted;
+    }
+    private boolean deferredEligible(){return alarmSpeechCompletionAllowed && liveAlarmPlan() && pendingPlan.kind!=null && pendingPlan.speech!=null;}
+    private void unreadyAlarmVoice(){if(deferredEligible())waitForAlarmVoice();else if(liveAlarmPlan() && pendingPlan.kind==null)alarmDiagnostics.speech(AlarmOutputDiagnostics.Speech.FAILED);}
+    private void waitForAlarmVoice(){alarmSpeechWaiting=true;alarmDiagnostics.speech(AlarmOutputDiagnostics.Speech.WAITING);}
+    boolean alarmSpeechPending(){return alarmSpeechWaiting && deferredEligible();}
+    boolean readyForDeferredAlarmSpeech(){return alarmSpeechPending() && ready && activeSpeechId==null && bell==null && ringtone==null && afterTone==null;}
+    void discardDeferredAlarmSpeech(boolean expired){
+        if(alarmSpeechWaiting)alarmDiagnostics.speech(expired?AlarmOutputDiagnostics.Speech.EXPIRED:AlarmOutputDiagnostics.Speech.STOPPED);
+        alarmSpeechWaiting=false;alarmSpeechCompletionAllowed=false;
+    }
+    boolean completeDeferredAlarmSpeech(AlarmOutputFlow.Plan refreshed){
+        if(!readyForDeferredAlarmSpeech() || refreshed==null || refreshed.speech==null || !livePermission.getAsBoolean() || !refresh())return false;
+        if(!readyForDeferredAlarmSpeech() || !preferences.alarmSpeechEnabled)return false;
+        alarmSpeechWaiting=false;alarmSpeechCompletionAllowed=false;pendingPlan=refreshed;alarmDiagnostics.deferred();
+        return speak(refreshed.speech,preferences.speechVolumePercent,true);
     }
     boolean refreshPending(AlarmOutputFlow.Plan plan) {
         if(plan==null || pendingPlan==null || activeSpeechId!=null || afterTone==null || !pendingPlan.ruleIds.containsAll(plan.ruleIds)) return false;
@@ -254,7 +295,7 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
     }
     boolean vibrate(String pattern) { if(!SafetyConsent.ready(context) || !takeOutput()) return false; stop(); boolean accepted=vibration.start(pattern); status.show(accepted?AppText.tr("Vibrationsvorschau gestartet."):AppText.tr("Keine Vibration verfügbar.")); return accepted; }
     void pause() { stop(); releaseSpeech(); }
-    boolean busy() { return vibration.busy() || bell!=null || busyUntil>SystemClock.elapsedRealtime() || afterTone!=null; }
+    boolean busy() { return alarmSpeechPending() || vibration.busy() || bell!=null || busyUntil>SystemClock.elapsedRealtime() || afterTone!=null; }
     private void releaseSpeech() {
         ready=false; speechGeneration++;
         if (tts!=null) { try { tts.stop(); tts.shutdown(); } catch (RuntimeException e) { /* Best-effort release. */ } tts=null; }

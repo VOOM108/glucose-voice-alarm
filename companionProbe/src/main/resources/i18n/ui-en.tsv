@@ -698,3 +698,21 @@ Sprachtext:	Speech text:
 Nicht lesbar	Cannot be read
 Pfeilspeicher voll; diese Grafik kann nicht gespeichert werden.	Arrow storage is full; this image cannot be saved.
 Pfeilzuordnung geändert; warte auf ein neues CamAPS-Update	Arrow mapping changed; waiting for a new CamAPS update
+Letzter Alarm: noch kein Ausgabestatus	Last alarm: no output status yet
+Letzter Alarm	Last alarm
+Sprache:	Speech:
+Ton:	Sound:
+Vibration:	Vibration:
+Ansage nach Stimmenstart ergänzt	Speech completed after voice initialization
+Technischer Status; Hör- und Spürbarkeit bleiben am Gerät zu prüfen.	Technical status; audibility and vibration must be checked on the device.
+Letzter Alarm: Ausgabestatus nicht verfügbar	Last alarm: output status unavailable
+nicht ausgewählt	not selected
+angefordert	requested
+wartet auf Stimme, höchstens 10 Sekunden	waiting for voice, up to 10 seconds
+an Stimme übergeben	submitted to voice engine
+gestartet	started
+von Stimme abgeschlossen	completed by voice engine
+fehlgeschlagen	failed
+abgebrochen	stopped
+Stimme nicht rechtzeitig bereit	voice not ready in time
+an Android übergeben	submitted to Android

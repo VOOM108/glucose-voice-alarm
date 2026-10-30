@@ -10,7 +10,7 @@ Glucose Voice Alarm (GVA) reads glucose values and trend arrows from **CamAPS no
 
 | Component | Current source version | Role |
 |---|---|---|
-| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.21.4 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
+| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.21.5 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
 | [GVA Watch](companionWear/README.md) | 0.19.0 Beta | Watch display, tile, six complication sources, and optional relayed phone alarms with vibration |
 | [GVA Dots](companionWatchFace/README.md) | 0.1.5 Beta | Round watch face with time dots, value/arrow, short history, age and delta |
 
@@ -44,6 +44,8 @@ All examples contain **synthetic data**, not a person's measurements. The galler
 - Spoken templates, all seven spoken trend phrases and separate dashboard/AOD trend labels, plus the data-gap warning text. Individual spoken trend phrases can be muted without hiding displayed trends.
 - Three bell-tone sets, custom Android sounds, vibration patterns, relative output volumes, five local settings profiles, German/English UI and default speech.
 - mg/dl or mmol/l, light/dark/system appearance, watch display/alert opt-ins, and widget controls. See the [phone reference](docs/PHONE_REFERENCE.md).
+
+An already-started live reading alarm may complete missing speech once the voice is ready, within ten seconds of alarm start and after rechecking its condition and fresh data. Sound and vibration are not repeated. A separate last-alarm output status supports diagnosis; it does not prove audibility or vibration.
 
 ## Build and set up
 
