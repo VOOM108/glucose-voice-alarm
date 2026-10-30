@@ -56,10 +56,20 @@ public final class PersistentAlarmSession {
             if (row!=null) rows.put(rule.id,row.withTimer(since)); else if (since>0) rows.put(rule.id,Entry.idle(rule,since));
         }
         if (result.status==Status.EVALUATED) {
+            double latest=window.get(window.size()-1).mgdl;
+            // GVA episode policy: only a fresh, numerical return across this level's
+            // boundary resets its automatic repeat. Schedule changes and data gaps
+            // are not recovery; an explicitly snoozed row keeps its deadline.
+            for(Decision d:result.decisions) {
+                Entry row=rows.get(d.rule.id);
+                boolean normalized=latest>14 && (d.rule.kind==Kind.HIGH && latest<d.rule.threshold
+                        || d.rule.kind==Kind.LOW && latest>d.rule.threshold);
+                if(row!=null && row.active && !row.snoozed && normalized)rows.put(row.id,row.clearActive());
+            }
             for(Decision d:result.decisions) if(!d.conditionMet && rows.containsKey(d.rule.id)) rows.put(d.rule.id,rows.get(d.rule.id).accepted(false));
             for (Decision decision:result.decisions) if (decision.resetNotificationState && rows.containsKey(decision.rule.id))
                 rows.put(decision.rule.id,rows.get(decision.rule.id).clearActive());
-            // Original threshold path keeps a still-running pause even if no threshold currently matches.
+            // Explicit snooze and unexpired repeats without numerical recovery survive.
             if (result.selectedThresholdRule==null) for (Entry row:new ArrayList<>(rows.values()))
                 if (row.active && LevelForm.hasSnooze(row.kind) && ready(row,now)) rows.put(row.id,row.clearActive());
         }
@@ -142,7 +152,7 @@ public final class PersistentAlarmSession {
             value.updateNextAlertAt(next); return value;
         });
         if (LevelForm.hasSnooze(rule.kind)) for (Entry other:new ArrayList<>(rows.values()))
-            if (!other.id.equals(id) && LevelForm.hasSnooze(other.kind)) rows.put(other.id,other.clearActive());
+            if (!other.id.equals(id) && LevelForm.hasSnooze(other.kind) && other.kind!=rule.kind) rows.put(other.id,other.clearActive());
         rows.put(id,new Entry(id,AlarmStateStore.fingerprint(rule),rule.kind,row==null?0:row.highSince,true,false,
                 core.alert_started_at,core.next_alert_at,now.wallMs,row!=null && row.acceptedInEpisode));
         pruneEmpty(rows); Snapshot saved=store.save(before.revision,now,rows.values()); verifiedRevision=saved.revision;

@@ -58,6 +58,14 @@ Wenn CamAPS bereits die Glukosedaten empfängt und die Therapie steuert, kann si
 - Sieben zuordenbare Pfeilzustände einschließlich Doppelpfeilen. Unbekannte oder widersprüchliche Grafiken bleiben offen. Eine neue Quellmeldung macht die geöffnete Zuordnungsvorschau ungültig.
 - Sperrbildschirm- und Statusbenachrichtigungen. Ab Android 17 wird die native große Live-Anzeige versucht. Hervorhebung, Platzierung und Konkurrenz mit anderen Apps bestimmt Android.
 
+## Neue Hoch-/Niedrig-Episoden
+
+Bei Hoch-/Niedrigalarmen gilt die automatische Wiederholungszeit innerhalb einer durchgehenden Alarmepisode je Stufe. Ein frischer gültiger Wert unter der Hochgrenze bzw. über der Niedriggrenze beendet diese Episode. Beim nächsten Grenzübertritt darf wieder ein erster Alarm über die eingeschalteten Sprach-, Ton- und Vibrationswege kommen. Exakt auf der Grenze bleibt die bisherige Alarmbedingung erfüllt.
+
+Diese numerische Erholung hebt manuelles Snooze oder die globale Pause nicht auf. Datenlücken, ungültige oder veraltete Werte sowie ein bloß geschlossenes Zeitfenster setzen die Wiederholung nicht zurück. Ein fehlender Trendpfeil ändert die Bewertung eines gültigen Zahlenwerts nicht. Mehrere gleichgerichtete Stufen behalten ihre eigenen Fristen beim Wechsel zu einer höheren Stufe. Dadurch wird eine bereits gemeldete, durchgehend überschrittene untere Stufe beim Abklingen der höheren Stufe nicht vorzeitig neu alarmiert.
+
+Bestehende Fristen werden beim Update nicht rückwirkend gelöscht. Die neue Regel benötigt einen neu empfangenen gültigen Wert zurück innerhalb der jeweiligen Grenze. Eine zusätzliche dauerhafte Bedingungsbenachrichtigung mit Sperrgrund und Restzeit ist noch nicht umgesetzt.
+
 ## Alarmansage nach Stimmenstart
 
 Wird die Offline-Stimme erst vorbereitet, während ein Live-Messwertalarm bereits über Ton oder Vibration startet, darf die fehlende Ansage einmal innerhalb von zehn Sekunden nach Alarmstart folgen. GVA prüft vorher die aktuelle Alarmbedingung, das Zeitfenster und die Frische der vorhandenen Daten erneut und setzt den Text mit dem aktuellen Wert zusammen. Ton und Vibration werden nicht wiederholt. Bei abgelaufener Frist oder nicht mehr gültiger Bedingung entfällt die Ansage. Ausschalten, Pause, Quellenverlust sowie Änderungen an Einstellungen oder Pfeilzuordnungen verwerfen die wartende Ansage. Ein Dienstneustart stellt sie nicht wieder her. Manuelle und synthetische Vorschauen sowie Datenlückenwarnungen verwenden diese Nachreichung nicht.
@@ -66,7 +74,7 @@ Unter „Hintergrund & AOD → Details und Systemfreigaben“ steht der letzte A
 
 ## Umfang und Grenzen
 
-Vorbereitet ist die Telefonversion 0.21.5 Beta. Entwicklung und Telefonprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl oder mmol/l**. Andere CGM-Quellen, direkte Sensoranbindung und Pumpensteuerung sind nicht enthalten.
+Vorbereitet ist die Telefonversion 0.22.0 Beta. Entwicklung und Telefonprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl oder mmol/l**. Andere CGM-Quellen, direkte Sensoranbindung und Pumpensteuerung sind nicht enthalten.
 
 Optional sind [GVA Watch und das Zifferblatt GVA Dots](../companionWear/README.de.md) teilweise auf der Galaxy Watch5 Pro mit Wear OS 6 / One UI 8 Watch erprobt. Sie zeigen Werte und einen kurzen Verlauf; angenommene Telefonalarme lassen sich zusätzlich weiterleiten. Die Telefonübertragung ist zunächst aus. Aktualisierung der Komplikationen, Alarmzustellung und Akkuverbrauch benötigen weitere Geräteprüfungen.
 
@@ -76,7 +84,7 @@ Die angezeigte Zeit ist Empfangs-/Verarbeitungszeit, kein bestätigter Sensor-Me
 
 ## Anzeige auf der Uhr
 
-GVA Watch 0.19.0 Beta und das codefreie Zifferblatt GVA Dots 0.1.5 Beta passen zur vorbereiteten Telefonversion 0.21.5 Beta. Die runde Anzeige verwendet Roboto Flex, eine Kurve über eine oder zwei Stunden und eine reduzierte gedimmte Ansicht. Menüs nutzen die offiziellen Wear-Material-3-Komponenten. Die Uhren-App bietet zusätzlich eine Kachel im selben Aufbau ohne Uhrzeit-Punkte. Neben Sammelfeld und Alter lassen sich Wert, CamAPS-Trend, Delta pro Minute und Kurve einzeln in passenden fremden Zifferblättern auswählen. Die Uhr zeigt Daten und kann angenommene Telefonalarme mit Vibration weitergeben. Eine eigene Glukosealarmberechnung ist nicht enthalten. [Einrichtung und Grenzen](../companionWear/README.de.md). Die Alltagserprobung läuft; neue Einzelkomplikationen und Kachel müssen noch am Gerät geprüft werden.
+GVA Watch 0.19.0 Beta und das codefreie Zifferblatt GVA Dots 0.1.5 Beta passen zur vorbereiteten Telefonversion 0.22.0 Beta. Die runde Anzeige verwendet Roboto Flex, eine Kurve über eine oder zwei Stunden und eine reduzierte gedimmte Ansicht. Menüs nutzen die offiziellen Wear-Material-3-Komponenten. Die Uhren-App bietet zusätzlich eine Kachel im selben Aufbau ohne Uhrzeit-Punkte. Neben Sammelfeld und Alter lassen sich Wert, CamAPS-Trend, Delta pro Minute und Kurve einzeln in passenden fremden Zifferblättern auswählen. Die Uhr zeigt Daten und kann angenommene Telefonalarme mit Vibration weitergeben. Eine eigene Glukosealarmberechnung ist nicht enthalten. [Einrichtung und Grenzen](../companionWear/README.de.md). Die Alltagserprobung läuft; neue Einzelkomplikationen und Kachel müssen noch am Gerät geprüft werden.
 
 Die optionale Weiterleitung eigener Alarme und Datenlückenwarnungen an GVA Watch ist ab 0.18.0 getrennt von den Anzeigedaten einschaltbar. Auf der Uhr erscheinen eigene Benachrichtigungen mit Vibration. Beide Apps benötigen eine Freigabe; unter Darstellung → Uhr gibt es einen ausdrücklich bezeichneten Test ohne Messwerte. Die Weiterleitung folgt angenommenen Telefonalarm-Ausgaben und arbeitet ohne Offline-Nachholung. Normale Werte erzeugen keine Uhrenbenachrichtigung. [Einrichtung und Grenzen](../companionWear/README.de.md#einrichtung-und-alarme).
 

@@ -19,6 +19,12 @@ The complete xDrip application, database, collectors, cloud integrations and wat
 
 Inputs use accepted receipt time instead of a verified sensor measurement time. Rate alarms require four distinct receipt minutes and additional exact-time guards. Stale/out-of-order notifications and gaps restrict evaluation. The strongest applicable rate level covers weaker levels in the same phase; a due boundary alarm can be combined with a rate alarm. Pending speech can follow a newer reading without restarting its tones. Optional recovery suppression affects repeats only; optional gap warnings do not extrapolate glucose. These changes mean that unchanged imported methods do not establish full behavioral equivalence to xDrip+.
 
+## Threshold repeat episodes
+
+GVA 0.22.0 resets an automatic high/low repeat when a fresh valid numerical reading returns across that level's boundary: high < threshold, low > threshold. Equality still meets the imported condition. Manual snooze and the global pause are not cancelled by recovery. Missing/invalid data and schedule closure alone do not establish numerical recovery. Same-direction levels retain their own repeat deadlines when a higher level starts; the existing priority and opposite-direction selection rules remain in place.
+
+This is a GVA policy in `PersistentAlarmSession`, outside the 23 verbatim imported methods. Runtime storage schema 3 permits several same-direction threshold states. It reads legacy schemas 1 and 2 while retaining their single-active-threshold validation. The migrated state does not infer a recovery that was not observed in valid input. Rate and persistent-high rules are unchanged.
+
 ## Numeric dashboard rate
 
 `ReceiptRate` computes the signed change between the first and last of four accepted receipt-minute points over the actual elapsed time. It displays a number only. CamAPS supplies all displayed and spoken arrows; this module contains no calculated-arrow classifier. Numerical alarm evaluation remains in the isolated xDrip rules and the companion's receipt-time guards described above.

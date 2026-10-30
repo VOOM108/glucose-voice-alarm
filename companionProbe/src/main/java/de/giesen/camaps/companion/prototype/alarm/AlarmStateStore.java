@@ -66,14 +66,16 @@ public final class AlarmStateStore {
         public Snapshot(long revision,Clock clock,Collection<Entry> values) {
             if (revision<0 || values==null || values.size()>LevelStore.MAX_LEVELS || (revision>0 && clock==null))
                 throw new IllegalArgumentException("Invalid runtime snapshot");
-            Map<String,Entry> rows=new LinkedHashMap<>(); int thresholdActive=0;
+            Map<String,Entry> rows=new LinkedHashMap<>(); AlarmEngine.Kind activeDirection=null;
             for (Entry value:values) {
                 if (value==null || rows.put(value.id,value)!=null) throw new IllegalArgumentException("Duplicate runtime id");
-                if (value.active && LevelForm.hasSnooze(value.kind)) thresholdActive++;
+                if (value.active && LevelForm.hasSnooze(value.kind)) {
+                    if(activeDirection!=null && activeDirection!=value.kind)throw new IllegalArgumentException("Opposite threshold directions active");
+                    activeDirection=value.kind;
+                }
                 if (clock!=null && (value.highSince>clock.wallMs || value.startedAt>clock.wallMs || value.lastDeliveredAt>clock.wallMs))
                     throw new IllegalArgumentException("Future runtime origin");
             }
-            if (thresholdActive>1) throw new IllegalArgumentException("Multiple threshold alarms active");
             this.revision=revision; this.clock=clock; entries=Collections.unmodifiableMap(rows);
         }
     }
@@ -103,12 +105,14 @@ public final class AlarmStateStore {
                 throw new IOException(AppText.tr("Prüfsummenfehler; Alarmzustände unverändert erhalten"));
             try (DataInputStream in=new DataInputStream(new ByteArrayInputStream(body))) {
                 if (!"XCAM_ALARM_RUNTIME".equals(in.readUTF())) throw new IOException(AppText.tr("Unbekanntes Alarmzustandsformat"));
-                int schema=in.readInt(); if(schema<1 || schema>2) throw new IOException(AppText.tr("Unbekanntes Alarmzustandsformat"));
+                int schema=in.readInt(); if(schema<1 || schema>3) throw new IOException(AppText.tr("Unbekanntes Alarmzustandsformat"));
                 long revision=in.readLong(); Clock clock=new Clock(in.readLong(),in.readLong(),in.readLong());
                 int count=in.readInt(); if (revision<1 || count<0 || count>LevelStore.MAX_LEVELS) throw new IOException(AppText.tr("Ungültige Alarmzustandsliste"));
                 List<Entry> rows=new ArrayList<>();
                 for (int i=0;i<count;i++) rows.add(new Entry(in.readUTF(),in.readUTF(),AlarmEngine.Kind.valueOf(in.readUTF()),
                         in.readLong(),in.readBoolean(),in.readBoolean(),in.readLong(),in.readLong(),in.readLong(),schema>=2 && in.readBoolean()));
+                if(schema<3 && rows.stream().filter(row -> row.active && LevelForm.hasSnooze(row.kind)).count()>1)
+                    throw new IOException(AppText.tr("Ungültige Alarmzustände; unverändert erhalten"));
                 if (in.read()!=-1) throw new IOException(AppText.tr("Zusätzliche Alarmzustandsdaten"));
                 return new Snapshot(revision,clock,rows);
             } catch (IllegalArgumentException e) { throw new IOException(AppText.tr("Ungültige Alarmzustände; unverändert erhalten"),e); }
@@ -121,7 +125,7 @@ public final class AlarmStateStore {
             Snapshot next=new Snapshot(revision+1,clock,entries);
             ByteArrayOutputStream buffer=new ByteArrayOutputStream();
             try (DataOutputStream out=new DataOutputStream(buffer)) {
-                out.writeUTF("XCAM_ALARM_RUNTIME"); out.writeInt(2); out.writeLong(next.revision);
+                out.writeUTF("XCAM_ALARM_RUNTIME"); out.writeInt(3); out.writeLong(next.revision);
                 out.writeLong(clock.wallMs); out.writeLong(clock.elapsedMs); out.writeLong(clock.boot); out.writeInt(next.entries.size());
                 for (Entry row:next.entries.values()) {
                     out.writeUTF(row.id); out.writeUTF(row.fingerprint); out.writeUTF(row.kind.name()); out.writeLong(row.highSince);

@@ -10,7 +10,7 @@ Glucose Voice Alarm (GVA) reads glucose values and trend arrows from **CamAPS no
 
 | Component | Current source version | Role |
 |---|---|---|
-| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.21.5 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
+| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.22.0 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
 | [GVA Watch](companionWear/README.md) | 0.19.0 Beta | Watch display, tile, six complication sources, and optional relayed phone alarms with vibration |
 | [GVA Dots](companionWatchFace/README.md) | 0.1.5 Beta | Round watch face with time dots, value/arrow, short history, age and delta |
 
@@ -46,6 +46,8 @@ All examples contain **synthetic data**, not a person's measurements. The galler
 - mg/dl or mmol/l, light/dark/system appearance, watch display/alert opt-ins, and widget controls. See the [phone reference](docs/PHONE_REFERENCE.md).
 
 An already-started live reading alarm may complete missing speech once the voice is ready, within ten seconds of alarm start and after rechecking its condition and fresh data. Sound and vibration are not repeated. A separate last-alarm output status supports diagnosis; it does not prove audibility or vibration.
+
+A fresh valid reading back inside a high/low threshold ends that level's automatic repeat episode. The next crossing can trigger its enabled output routes immediately. Manual snooze and the global pause remain in effect; gaps do not reset the repeat. [Episode rules](docs/PHONE_REFERENCE.md#new-highlow-alarm-episodes).
 
 ## Build and set up
 

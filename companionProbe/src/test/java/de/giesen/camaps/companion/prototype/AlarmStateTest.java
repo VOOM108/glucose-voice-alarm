@@ -145,7 +145,7 @@ public class AlarmStateTest {
             PersistentAlarmSession after=session(store,low,high,higher);
             evaluate(after,M,120); blocked(() -> after.recordDelivered("a",clock(M)));
             evaluate(after,2*M,190); after.recordDelivered("c",clock(2*M));
-            assertTrue(store.load().entries.get("c").active); assertFalse(store.load().entries.containsKey("b"));
+            assertTrue(store.load().entries.get("c").active); assertTrue(store.load().entries.get("b").snoozed);
         });
     }
     @Test public void directionChangeCanReplaceAPausedThresholdAlarm() throws Exception {

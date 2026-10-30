@@ -10,7 +10,7 @@ Glucose Voice Alarm (GVA) liest Glukosewerte und Trendpfeile aus **CamAPS-Benach
 
 | Komponente | Aktueller Quellstand | Aufgabe |
 |---|---|---|
-| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.21.5 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
+| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.22.0 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
 | [GVA Watch](companionWear/README.de.md) | 0.19.0 Beta | Uhrenanzeige, Kachel, sechs Komplikationsquellen und optionale Telefonalarme mit Uhrenvibration |
 | [GVA Dots](companionWatchFace/README.de.md) | 0.1.5 Beta | Rundes Zifferblatt mit Uhrzeitpunkten, Wert/Pfeil, kurzem Verlauf, Alter und Delta |
 
@@ -46,6 +46,8 @@ Alle Beispiele enthalten **synthetische Daten**, keine persönlichen Messwerte. 
 - mg/dl oder mmol/l, Hell/Dunkel/System, getrennte Uhrenfreigaben und Widget-Bedienung. Details im [Telefonhandbuch](docs/PHONE_REFERENCE.de.md).
 
 Bei einem Live-Messwertalarm kann die beim Stimmenstart fehlende Ansage innerhalb von zehn Sekunden nach Alarmstart folgen, nach erneuter Prüfung von Bedingung und frischen Daten. Ton und Vibration werden nicht wiederholt. Ein eigener letzter Alarm-Ausgabestatus hilft bei der Diagnose; er belegt keine Hör- oder Spürbarkeit.
+
+Ein frischer gültiger Wert zurück innerhalb einer Hoch-/Niedriggrenze beendet die automatische Wiederholung dieser Stufe. Beim nächsten Grenzübertritt sind ihre eingeschalteten Ausgabewege sofort wieder alarmfähig. Manuelles Snooze und globale Pause bleiben bestehen; Lücken setzen nichts zurück. [Episodenregel](docs/PHONE_REFERENCE.de.md#neue-hoch-niedrig-episoden).
 
 ## Bauen und einrichten
 
