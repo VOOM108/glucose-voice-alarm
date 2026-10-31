@@ -117,6 +117,11 @@ public final class AlarmEngine {
     }
     public synchronized Result evaluate(List<HistoryAnalysis.Point> window,long nowMs,int minuteOfDay,
                                         Long confirmedSourceSessionStart,DecisionSink sink) {
+        return evaluate(window,window,nowMs,minuteOfDay,confirmedSourceSessionStart,sink);
+    }
+    /** Separate observed episode history must never be used for a cross-gap rate. */
+    public synchronized Result evaluate(List<HistoryAnalysis.Point> window,List<HistoryAnalysis.Point> episodeWindow,long nowMs,int minuteOfDay,
+                                        Long confirmedSourceSessionStart,DecisionSink sink) {
         if (window==null || nowMs<=0 || minuteOfDay<0 || minuteOfDay>=1440
                 || (confirmedSourceSessionStart!=null && (confirmedSourceSessionStart<=0 || confirmedSourceSessionStart>nowMs)))
             throw new IllegalArgumentException("Invalid decision context");
@@ -134,6 +139,24 @@ public final class AlarmEngine {
             BgReading converted=new BgReading(); converted.timestamp=point.timestampMs;
             converted.calculated_value=point.mgdl; converted.hide_slope=!quality.usable(); data.add(converted);
         }
+        List<BgReading> persistentData=data; boolean episodeUsable=true;
+        if(timeBasis==HistoryAnalysis.TimeBasis.RECEIPT && episodeWindow!=window) {
+            episodeUsable=episodeWindow!=null && !episodeWindow.isEmpty() && episodeWindow.size()<=2000;
+            if(episodeUsable) {
+                HistoryAnalysis.Quality q=HistoryAnalysis.analyze(episodeWindow,nowMs,limits,timeBasis).quality;
+                HistoryAnalysis.Point end=episodeWindow.get(episodeWindow.size()-1),latest=window.get(window.size()-1);
+                episodeUsable=(q==HistoryAnalysis.Quality.VALID || q==HistoryAnalysis.Quality.TOO_SHORT || q==HistoryAnalysis.Quality.DATA_GAP)
+                        && end.timestampMs.equals(latest.timestampMs) && end.mgdl==latest.mgdl;
+            }
+            if(episodeUsable) {
+                persistentData=new ArrayList<>();
+                for(HistoryAnalysis.Point point:episodeWindow) {
+                    if(!persistentData.isEmpty() && persistentData.get(persistentData.size()-1).timestamp==point.timestampMs)continue;
+                    BgReading converted=new BgReading();converted.timestamp=point.timestampMs;converted.calculated_value=point.mgdl;
+                    converted.hide_slope=!quality.usable();persistentData.add(converted);
+                }
+            }
+        }
         List<BgReading> rateData=timeBasis==HistoryAnalysis.TimeBasis.RECEIPT?ReceiptRateHistory.samples(data):data;
         boolean rateReady=quality.usable() && rateData.size()>=4;
         List<Decision> decisions=new ArrayList<>();
@@ -144,7 +167,18 @@ public final class AlarmEngine {
                 Map<String,Long> state=states.get(rule.id);
                 if (state==null) { state=new HashMap<>(); states.put(rule.id,state); }
                 boolean rateRule=LevelForm.isRate(rule.kind);
-                XDripRuntime.Environment env=new XDripRuntime.Environment(nowMs,minuteOfDay,confirmedSourceSessionStart,rateRule?rateData:data,state);
+                Long sourceStart=confirmedSourceSessionStart;
+                if(rule.kind==Kind.PERSISTENT_HIGH && timeBasis==HistoryAnalysis.TimeBasis.RECEIPT && episodeUsable && sourceStart!=null) {
+                    // GVA elapsed episode: first fresh high receipt, regardless of its direction.
+                    // The original check still controls whether a rising sample may raise the alarm.
+                    Long since=state.get("persistent_high_since");
+                    if(data.get(data.size()-1).calculated_value>rule.threshold && (since==null || since==0)) {
+                        since=nowMs;state.put("persistent_high_since",since);
+                    }
+                    if(since!=null && since>0 && since<=nowMs)sourceStart=Math.min(sourceStart,since);
+                }
+                XDripRuntime.Environment env=new XDripRuntime.Environment(nowMs,minuteOfDay,sourceStart,
+                        rule.kind==Kind.PERSISTENT_HIGH?persistentData:rateRule?rateData:data,state);
                 env.preferences.put("alerts_disabled_until",0L);
                 env.preferences.put("persistent_high_alert_enabled",rule.kind==Kind.PERSISTENT_HIGH);
                 env.preferences.put("high_value_is_persistent_high_threshold",false);
@@ -172,7 +206,7 @@ public final class AlarmEngine {
                     } else if (rule.kind==Kind.PERSISTENT_HIGH) {
                         PersistentHigh.persistentHighThreshold=rule.threshold;
                         // The imported reset/timer path runs even when an optional outer schedule is closed.
-                        PersistentHigh.checkForPersistentHigh(); condition=inTime && env.persistentRaised;
+                        if(episodeUsable)PersistentHigh.checkForPersistentHigh(); condition=inTime && env.persistentRaised;
                         resetNotification=env.persistentCancelled || data.get(data.size()-1).calculated_value<=rule.threshold;
                     } else if (rule.kind==Kind.RISING) {
                         BgReading.checkForRisingAllert(new XDripRuntime.Context()); condition=inTime && env.risingRaised

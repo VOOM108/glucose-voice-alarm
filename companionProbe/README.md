@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Deutsch](README.de.md) · [GVA Watch](../companionWear/README.md) · [GVA Dots](../companionWatchFace/README.md)
 
-The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.22.0 Beta**. The phone works without either watch component.
+The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.23.0 Beta**. The phone works without either watch component.
 
 **Experimental research tool; not for medical use or treatment decisions.** Read [SAFETY.md](../SAFETY.md). CamAPS continues to control the sensor and pump.
 
@@ -26,6 +26,16 @@ Configure multiple alarm levels, individual tone/speech/vibration choices, repea
 
 The CamAPS arrow is separate from the app's numeric rate calculation. A numeric critical-rate alarm can trigger without a recognized arrow when enough fresh values arrive. The optional data-gap warning uses the last known situation; it never estimates a current value.
 
+## Persistent-high duration
+
+Duration starts with the first valid received reading above this persistent-high level's threshold. It includes stable or falling readings and time without data. A fresh reading at or below that threshold ends the episode. Missing, invalid or stale data does not confirm that it has ended.
+
+Once GVA detects a data gap or receipt is stale, it does not issue a current reading-based alarm. The persistent-high trigger still requires a fresh rising reading and the imported xDrip data-quality check, which includes a minimum sampling density and a one-day limit. Elapsed duration alone therefore does not guarantee output. The alarm repeat deadline remains separate.
+
+After a gap, rate calculations use only new contiguous readings. For persistent-high quality checks, GVA separately retains up to 500 actual receipts within the running service. It does not estimate missing readings. Chart gaps remain visible even if CamAPS later fills its own history; those retrospective points are not imported from the notification.
+
+Reloading settings or restarting the service within the same phone boot does not discard the saved beginning solely because receipt was interrupted. A real clock or boot discontinuity starts the check again conservatively. Changed alarm conditions are reconciled with stored state as before. An update does not reconstruct a beginning already discarded by an older version.
+
 ## New high/low alarm episodes
 
 For high/low alarms, the automatic repeat interval applies within one continuous alarm episode per level. A fresh valid reading below the high threshold or above the low threshold ends that episode. Crossing the threshold again can trigger a new first alarm through the enabled speech, sound and vibration routes. A reading exactly on the threshold still meets the existing alarm condition.
@@ -34,11 +44,15 @@ This numerical recovery does not cancel manual snooze or the global pause. Data 
 
 Updates do not retrospectively clear stored deadlines. The new policy needs a newly received valid reading back inside the relevant threshold. A separate persistent condition notification with the suppression reason and remaining time is not yet implemented.
 
+## Processing diagnostics
+
+Under Background & AOD → Details and permissions, the last new input, last alarm attempt and last output attempt are shown separately. The input snapshot distinguishes a new alarm start from a silent notification refresh. For a threshold alarm that is not yet due, it identifies the repeat interval, snooze or another level's deadline where readable. The last output attempt distinguishes routine value speech, an alarm and a data-gap warning, with the requested channels and acceptance or rejection.
+
+The separate last-alarm status lists speech, sound and vibration. Input and attempt numbers link it to the processing records within one service run. Timer checks do not overwrite the last input snapshot, and routine value speech does not replace the last alarm attempt. The bounded private caches contain only fixed technical states and counters, without readings, spoken text, alarm-level identifiers or timestamps. They reset when the service starts and do not form an event history. Acceptance or a completed callback does not prove that output was audible or perceptible.
+
 ## Speech after voice initialization
 
 If the offline voice is still initializing when a live reading alarm starts through sound or vibration, its missing speech may follow once within ten seconds of alarm start. GVA first rechecks the current alarm condition, schedule and freshness of the available data, then renders the text with the current reading. Sound and vibration are not repeated. Speech is omitted when the deadline has passed or the condition no longer holds. Switching output off, pausing, losing the source, or changing settings or arrow mappings discards the pending speech. A service restart does not restore it. Manual and synthetic previews and data-gap warnings do not use this deferred speech path.
-
-Under Background & AOD → Details and permissions, the last alarm status lists speech, sound and vibration separately. Routine reading announcements do not overwrite it. Its private cache contains fixed technical states without readings, spoken text, alarm identifiers or timestamps. Submission to Android or the voice engine does not confirm that an output was audible or perceptible.
 
 ## Arrow mappings
 

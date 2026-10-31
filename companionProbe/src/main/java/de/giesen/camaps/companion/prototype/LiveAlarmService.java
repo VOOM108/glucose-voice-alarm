@@ -23,6 +23,7 @@ public final class LiveAlarmService extends Service {
     private final Map<String,AlarmLevel> levels=new LinkedHashMap<>();
     private LiveNotifications notifications;
     private PreviewAudio audio;
+    private ProcessingDiagnostics processing;
     private PowerManager.WakeLock outputLock;
     private AlarmOutputFlow flow;
     private Double value;
@@ -112,6 +113,7 @@ public final class LiveAlarmService extends Service {
         AppText.configure(getResources().getConfiguration().getLocales().get(0));
         super.onCreate(); if(!SafetyConsent.ready(this)){SafetyConsent.disarm(this);stopSelf();return;} try { ProfileController.recover(this); } catch(IOException e) { LivePreferences.set(this,LivePreferences.monitor(this),false); } current=this; notifications=new LiveNotifications(this);
         audio=new PreviewAudio(this,message -> audioStatus=message,() -> foreground && LivePreferences.alarms(this) && SystemReadiness.read(this).ready());
+        processing=new ProcessingDiagnostics(this);
         outputLock=getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,getPackageName()+":alarm-output");
         outputLock.setReferenceCounted(false);
     }
@@ -158,9 +160,9 @@ public final class LiveAlarmService extends Service {
             List<AlarmEngine.Rule> rules=settings.rules(); AlarmStateStore store=new AlarmStateStore(stateDirectory());
             AlarmStateStore.Clock now=RuntimeClock.read(this); AlarmStateStore.Snapshot old=store.load();
             AlarmStateStore.Snapshot restored=AlarmStateStore.restore(old,rules,now);
-            boolean longGap=old.clock!=null && (old.clock.boot!=now.boot || now.wallMs-old.clock.wallMs>ReceiptWindow.MAX_AGE_MS);
+            boolean clockReset=old.clock!=null && old.clock.boot!=now.boot;
             List<AlarmStateStore.Entry> rows=new ArrayList<>();
-            for (AlarmStateStore.Entry entry:restored.entries.values()) rows.add(longGap?entry.withTimer(0):entry);
+            for (AlarmStateStore.Entry entry:restored.entries.values()) rows.add(clockReset?entry.withTimer(0):entry);
             if (old.revision>0 || !rows.isEmpty()) store.save(old.revision,now,rows);
             flow=AlarmOutputFlow.liveReceipts(store,new ArrayList<>(levels.values()),ReceiptWindow.limits(),output,new AlarmOutputFlow.Port() {
                 @Override public boolean available(AlarmOutputFlow.Plan plan) {
@@ -171,10 +173,12 @@ public final class LiveAlarmService extends Service {
                     return live() && !plan.synthetic && !audio.busy() && audio.available(plan);
                 }
                 @Override public boolean start(AlarmOutputFlow.Plan plan) {
-                    if (!live() || plan.synthetic || !fresh()) return false;
+                    if (!live() || plan.synthetic || !fresh()) { processing.dispatched(plan,false); return false; }
                     try { foreground(plan.toneUri!=null || plan.speech!=null); outputLock.acquire(100000); }
-                    catch (RuntimeException e) { status=AppText.tr("Audio-Hintergrundstart abgelehnt"); return false; }
+                    catch (RuntimeException e) { processing.dispatched(plan,false); status=AppText.tr("Audio-Hintergrundstart abgelehnt"); return false; }
+                    audio.diagnosticCorrelation(processing.receiptNumber(),processing.nextDispatchNumber());
                     boolean accepted=audio.start(plan);
+                    processing.dispatched(plan,accepted);
                     activePlan=accepted?plan:null;
                     speechCompletionPlan=accepted && plan.ruleId!=null && plan.kind!=null && plan.speech!=null?plan:null;
                     speechCompletionStart=speechCompletionPlan==null?null:RuntimeClock.read(LiveAlarmService.this);
@@ -183,6 +187,7 @@ public final class LiveAlarmService extends Service {
                         AlarmLevel level=levels.get(plan.ruleId); if (level!=null && value!=null) {
                             AlarmLevel extra=plan.ruleIds.size()>1?levels.get(plan.ruleIds.get(1)):null;
                             notifications.alarm(level,value,trend,extra==null?null:LevelForm.kindLabel(extra.rule.kind)); displayedAlarmId=plan.ruleId; displayedPlan=plan;
+                            processing.card(ProcessingDiagnostics.Card.STARTED);
                         }
                     }
                     if (!accepted) releaseOutputLock(); return accepted;
@@ -201,9 +206,11 @@ public final class LiveAlarmService extends Service {
         AlarmStateStore.Clock now=RuntimeClock.read(this);
         ReceiptWindow.Intake intake=window.receive(key,posted,mgdl,now);
         if (intake!=ReceiptWindow.Intake.ACCEPTED && intake!=ReceiptWindow.Intake.CLOCK_RESET) return;
+        processing.beginReceipt();
+        try {
         if(gap.waiting() || gapNotified) { audio.stop(); notifications.clearAlarm(); activePlan=null; displayedAlarmId=null; displayedPlan=null; gapNotified=false; }
         sourceValid=true; value=mgdl; trend=sourceTrend; received=now;
-        if (intake==ReceiptWindow.Intake.CLOCK_RESET && flow!=null && LivePreferences.alarms(this)) {
+        if (intake==ReceiptWindow.Intake.CLOCK_RESET && window.clockChanged() && flow!=null && LivePreferences.alarms(this)) {
             try {
                 AlarmStateStore store=new AlarmStateStore(stateDirectory()); AlarmStateStore.Snapshot saved=store.load();
                 List<AlarmEngine.Rule> rules=new ArrayList<>(); for (AlarmLevel level:levels.values()) rules.add(level.effectiveRule());
@@ -215,26 +222,28 @@ public final class LiveAlarmService extends Service {
         if (flow!=null && LivePreferences.alarms(this)) {
             Calendar calendar=Calendar.getInstance();
             flow.setOutputUnit(UnitPreferences.display(this,preferences));
-            AlarmOutputFlow.Outcome result=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),now,
+            AlarmOutputFlow.Outcome result=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),window.episodePoints(),now,
                     calendar.get(Calendar.HOUR_OF_DAY)*60+calendar.get(Calendar.MINUTE),window.sessionStart(),trend);
             if (result==AlarmOutputFlow.Outcome.STORAGE_BLOCKED) status=AppText.tr("Alarmzustand nicht verfügbar; keine Ausgabe");
             else if (result==AlarmOutputFlow.Outcome.ACCEPTED) status=AppText.tr("Ausgabe aktiv · Zeitbasis Empfang");
             AlarmEngine.Result checked=flow.lastDecision();
+            processing.evaluated(result,checked);
             if (displayedAlarmId!=null && checked!=null) {
                 boolean stillMet=false; for (AlarmEngine.Decision decision:checked.decisions) if ((displayedPlan!=null?displayedPlan.ruleIds.contains(decision.rule.id):displayedAlarmId.equals(decision.rule.id)) && decision.conditionMet) stillMet=true;
-                if (!stillMet) { audio.stop(); activePlan=null; notifications.clearAlarm(); displayedAlarmId=null; displayedPlan=null; }
+                if (!stillMet) { audio.stop(); activePlan=null; notifications.clearAlarm(); displayedAlarmId=null; displayedPlan=null; processing.card(ProcessingDiagnostics.Card.CLEARED); }
                 else {
                     List<AlarmLevel> matching=new ArrayList<>();
                     for(AlarmEngine.Decision d:checked.decisions) if(d.conditionMet && (displayedPlan!=null?displayedPlan.ruleIds.contains(d.rule.id):displayedAlarmId.equals(d.rule.id))) matching.add(levels.get(d.rule.id));
                     AlarmLevel primary=matching.isEmpty()?null:matching.get(0),extra=matching.size()>1?matching.get(1):null;
                     if(primary!=null) displayedAlarmId=primary.rule.id;
-                    if(primary!=null) notifications.alarm(primary,value,trend,extra==null?null:LevelForm.kindLabel(extra.rule.kind),true);
+                    if(primary!=null) { notifications.alarm(primary,value,trend,extra==null?null:LevelForm.kindLabel(extra.rule.kind),true); processing.card(ProcessingDiagnostics.Card.REFRESHED); }
                 }
                 if(activePlan!=null) { AlarmOutputFlow.Plan refreshed=flow.refreshPending(activePlan,now); if(audio.refreshPending(refreshed)) activePlan=refreshed; }
             }
         } else status=AppText.tr("Wertempfang aktiv; Live-Alarme aus");
         gap.receive(window.points(),now,sourceTrend,flow==null?null:flow.lastDecision());
         runOutputs(); updateStatus();
+        } finally { processing.finishReceipt(); }
     }
     private boolean fresh() {
         if (!sourceValid || received==null || value==null) return false;
@@ -270,6 +279,8 @@ public final class LiveAlarmService extends Service {
             for (AlarmEngine.Decision decision:result.decisions) if (decision.conditionMet && decision.rule.kind==kind) candidates.add(decision.rule.id);
         for (String id:candidates) {
             AlarmOutputFlow.Outcome outcome=flow.alarm(id,RuntimeClock.read(this));
+            if(processing.capturing() && id.equals(result.selectedThresholdRule))
+                processing.threshold(outcome,outcome==AlarmOutputFlow.Outcome.NOT_DUE?flow.diagnosticWait(id,RuntimeClock.read(this)):AlarmOutputFlow.WaitReason.NONE,flow.suppressionReason());
             if (outcome==AlarmOutputFlow.Outcome.ACCEPTED) return;
             if (outcome==AlarmOutputFlow.Outcome.SUPPRESSED) {
                 if(flow.suppressionReason()==OutputGuard.Reason.RECOVERING_TREND) { status=AppText.tr("Wiederholung bei Erholung ausgesetzt"); continue; }
@@ -277,7 +288,7 @@ public final class LiveAlarmService extends Service {
             }
             if (outcome==AlarmOutputFlow.Outcome.STORAGE_BLOCKED) { status=AppText.tr("Alarmzustand blockiert; keine Ausgabe"); return; }
         }
-        if (!audio.busy()) flow.value(RuntimeClock.read(this));
+        if (!audio.busy()) processing.value(flow.value(RuntimeClock.read(this)));
     }
     private boolean completeAlarmSpeech(AlarmStateStore.Clock now){
         if(speechCompletionPlan==null)return false;
@@ -291,7 +302,7 @@ public final class LiveAlarmService extends Service {
         AlarmOutputFlow.Plan original=speechCompletionPlan;
         Calendar calendar=Calendar.getInstance();calendar.setTimeInMillis(now.wallMs);
         flow.setOutputUnit(UnitPreferences.display(this,preferences));
-        AlarmOutputFlow.Outcome checked=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),now,
+        AlarmOutputFlow.Outcome checked=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),window.episodePoints(),now,
                 calendar.get(Calendar.HOUR_OF_DAY)*60+calendar.get(Calendar.MINUTE),window.sessionStart(),trend);
         AlarmOutputFlow.Plan updated=checked==AlarmOutputFlow.Outcome.ACCEPTED?flow.refreshPending(original,now):null;
         speechCompletionPlan=null;speechCompletionStart=null;
@@ -306,8 +317,10 @@ public final class LiveAlarmService extends Service {
         if(!live() || !audio.available(plan)) return;
         gap.reserve(preferences.gap,now); // Finite attempt; no catch-up loop after failures.
         try { foreground(plan.toneUri!=null || plan.speech!=null); outputLock.acquire(100000); }
-        catch(RuntimeException e) { status=AppText.tr("Lückenwarnung: Ausgabe nicht verfügbar"); return; }
-        if(audio.start(plan)) {
+        catch(RuntimeException e) { processing.dispatched(plan,false); status=AppText.tr("Lückenwarnung: Ausgabe nicht verfügbar"); return; }
+        audio.diagnosticCorrelation(processing.receiptNumber(),processing.nextDispatchNumber());
+        boolean accepted=audio.start(plan); processing.dispatched(plan,accepted);
+        if(accepted) {
             activePlan=plan; gapNotified=true; notifications.gap(gap.message(now,preferences.speechLanguage,preferences.gap.speechTemplate)); LivePreferences.alarmStarted(this);
             if(flow!=null) flow.deferValuesUntil(now.elapsedMs+preferences.valueQuietMinutes*60000L);
         } else releaseOutputLock();

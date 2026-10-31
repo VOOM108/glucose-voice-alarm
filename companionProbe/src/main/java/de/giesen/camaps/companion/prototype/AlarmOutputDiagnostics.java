@@ -18,8 +18,13 @@ final class AlarmOutputDiagnostics {
     private Speech speech=Speech.NOT_SELECTED;
     private Signal tone=Signal.NOT_SELECTED,vibration=Signal.NOT_SELECTED;
     private boolean deferred;
+    private long receipt,attempt,nextReceipt,nextAttempt;
     AlarmOutputDiagnostics(Context context){this.context=context.getApplicationContext();}
+    /** New service run: old sequence numbers must not appear to match new attempts. */
+    static void reset(Context context){try{Files.deleteIfExists(new File(context.getCacheDir(),FILE).toPath());}catch(IOException | RuntimeException ignored){}}
+    void correlation(long receipt,long attempt){nextReceipt=receipt;nextAttempt=attempt;}
     void begin(AlarmOutputFlow.Plan plan) {
+        receipt=nextReceipt;attempt=nextAttempt;nextReceipt=0;nextAttempt=0;
         kind=plan.kind==null?"GAP":plan.kind.name();deferred=false;
         speech=plan.speech==null?Speech.NOT_SELECTED:Speech.REQUESTED;
         tone=plan.toneUris.isEmpty()?Signal.NOT_SELECTED:Signal.REQUESTED;
@@ -37,7 +42,7 @@ final class AlarmOutputDiagnostics {
     }
     private void write(){
         if(kind==null)return;
-        String data="GVA_ALARM_OUTPUT_V1\nversion="+BuildConfig.VERSION_CODE+"\nkind="+kind+"\nspeech="+speech.name()+"\ntone="+tone.name()+"\nvibration="+vibration.name()+"\ndeferred="+deferred+"\ndata_basis=fixed_codes_only\n";
+        String data="GVA_ALARM_OUTPUT_V2\nversion="+BuildConfig.VERSION_CODE+"\nkind="+kind+"\nspeech="+speech.name()+"\ntone="+tone.name()+"\nvibration="+vibration.name()+"\ndeferred="+deferred+"\ndata_basis=fixed_codes_only\nreceipt="+receipt+"\nattempt="+attempt+"\n";
         Path target=new File(context.getCacheDir(),FILE).toPath(),temp=new File(context.getCacheDir(),FILE+".new").toPath();
         try{Files.write(temp,data.getBytes(StandardCharsets.UTF_8));Files.move(temp,target,StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);}
         catch(IOException | RuntimeException ignored){}finally{try{Files.deleteIfExists(temp);}catch(IOException | RuntimeException ignored){}}
@@ -46,10 +51,12 @@ final class AlarmOutputDiagnostics {
         try{
             File file=new File(context.getCacheDir(),FILE);if(!file.isFile() || file.length()>1024)return AppText.tr("Letzter Alarm: noch kein Ausgabestatus");
             List<String> lines=Files.readAllLines(file.toPath(),StandardCharsets.UTF_8);
-            if(lines.size()!=8 || !lines.get(0).equals("GVA_ALARM_OUTPUT_V1") || !lines.get(1).equals("version="+BuildConfig.VERSION_CODE)
-                    || !lines.get(2).matches("kind=(HIGH|LOW|FALLING|RISING|PERSISTENT_HIGH|GAP)") || !lines.get(6).matches("deferred=(true|false)") || !lines.get(7).equals("data_basis=fixed_codes_only"))throw new IOException();
+            if(lines.size()!=10 || !lines.get(0).equals("GVA_ALARM_OUTPUT_V2") || !lines.get(1).equals("version="+BuildConfig.VERSION_CODE)
+                    || !lines.get(2).matches("kind=(HIGH|LOW|FALLING|RISING|PERSISTENT_HIGH|GAP)") || !lines.get(6).matches("deferred=(true|false)") || !lines.get(7).equals("data_basis=fixed_codes_only")
+                    || !lines.get(8).matches("receipt=(0|[1-9][0-9]{0,18})") || !lines.get(9).matches("attempt=(0|[1-9][0-9]{0,18})"))throw new IOException();
+            long receipt=Long.parseLong(value(lines.get(8),"receipt=")),attempt=Long.parseLong(value(lines.get(9),"attempt="));
             Speech speech=Speech.valueOf(value(lines.get(3),"speech="));Signal tone=Signal.valueOf(value(lines.get(4),"tone=")),vibration=Signal.valueOf(value(lines.get(5),"vibration="));
-            return AppText.tr("Letzter Alarm")+"\n"+AppText.tr("Sprache:")+" "+speechText(speech)+"\n"+AppText.tr("Ton:")+" "+signalText(tone)+"\n"+AppText.tr("Vibration:")+" "+signalText(vibration)
+            return AppText.tr("Letzter Alarm")+(attempt>0?" #"+attempt+" · "+AppText.tr("Eingang")+" #"+receipt:"")+"\n"+AppText.tr("Sprache:")+" "+speechText(speech)+"\n"+AppText.tr("Ton:")+" "+signalText(tone)+"\n"+AppText.tr("Vibration:")+" "+signalText(vibration)
                     +(lines.get(6).equals("deferred=true")?"\n"+AppText.tr("Ansage nach Stimmenstart ergänzt"):"")+"\n"+AppText.tr("Technischer Status; Hör- und Spürbarkeit bleiben am Gerät zu prüfen.");
         }catch(IOException | IllegalArgumentException e){return AppText.tr("Letzter Alarm: Ausgabestatus nicht verfügbar");}
     }

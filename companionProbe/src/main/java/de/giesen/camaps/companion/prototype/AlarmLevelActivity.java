@@ -63,12 +63,12 @@ public final class AlarmLevelActivity extends UiActivity {
             threshold=LevelUi.field(body,limitLabel,initialThreshold,InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
             threshold.setFilters(new InputFilter[]{new InputFilter.LengthFilter(24)});
             if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) {
-                duration=LevelUi.field(body,AppText.tr("Länger als … Minuten (xDrip-Regel)"),r==null?"":Integer.toString(r.durationMinutes),InputType.TYPE_CLASS_NUMBER);
-                LevelUi.text(body,AppText.tr("Prüfung bei steigenden Werten. Gleichbleibende und fallende Phasen oberhalb der Grenze zählen zur verstrichenen Dauer mit."),14);
+                duration=LevelUi.field(body,AppText.tr("Länger als … Minuten"),r==null?"":Integer.toString(r.durationMinutes),InputType.TYPE_CLASS_NUMBER);
+                LevelUi.text(body,AppText.tr("Die Zeit zählt ab dem ersten empfangenen Wert über der Grenze, auch über Datenlücken hinweg. Neue Alarme brauchen einen frischen steigenden Wert. Ein Wert an oder unter der Grenze beendet die Phase. Für Lücken wird kein Wert angenommen."),14);
             }
             allDay=LevelUi.check(body,AppText.tr("Ganztägig"),r==null || r.allDay);
             start=LevelUi.button(body,"",v -> chooseTime(true)); end=LevelUi.button(body,"",v -> chooseTime(false));
-            if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) LevelUi.text(body,AppText.tr("Ein Zeitfenster begrenzt die spätere Ausgabe; die Dauerberechnung bleibt nach der xDrip-Regel."),14);
+            if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) LevelUi.text(body,AppText.tr("Das Zeitfenster begrenzt die Ausgabe, nicht die gezählte Dauer."),14);
             LevelUi.text(body,AppText.tr("Ausgabe dieser Stufe"),21);
             tone=LevelUi.check(body,AppText.tr("Ton für diese Stufe"),r!=null && r.outputs.tone);
             toneName=LevelUi.text(body,"",14);

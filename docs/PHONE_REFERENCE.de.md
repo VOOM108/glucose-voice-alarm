@@ -58,6 +58,16 @@ Wenn CamAPS bereits die Glukosedaten empfängt und die Therapie steuert, kann si
 - Sieben zuordenbare Pfeilzustände einschließlich Doppelpfeilen. Unbekannte oder widersprüchliche Grafiken bleiben offen. Eine neue Quellmeldung macht die geöffnete Zuordnungsvorschau ungültig.
 - Sperrbildschirm- und Statusbenachrichtigungen. Ab Android 17 wird die native große Live-Anzeige versucht. Hervorhebung, Platzierung und Konkurrenz mit anderen Apps bestimmt Android.
 
+## Dauerhoch-Zeit
+
+Die Dauer beginnt mit dem ersten empfangenen gültigen Wert über der Grenze dieser Dauerhoch-Stufe. Sie läuft über gleichbleibende oder fallende Werte und über Datenlücken hinweg weiter. Ein frischer Wert an oder unter dieser Grenze beendet die Phase. Fehlende, ungültige oder veraltete Daten bestätigen kein Ende.
+
+Bei einer erkannten Datenlücke oder veraltetem Empfang gibt GVA keinen aktuellen wertbasierten Alarm aus. Die eigentliche Dauerhoch-Auslöseprüfung verlangt weiterhin einen frischen steigenden Wert und die übernommene xDrip-Datenqualität; diese enthält eine Mindestdatendichte und ein Ein-Tages-Limit. Eine lange Dauer allein garantiert daher keine Ausgabe. Die Alarm-Wiederholungsfrist bleibt unabhängig davon erhalten.
+
+Die Ratenberechnung benutzt nach einer Lücke nur neue zusammenhängende Werte. Für die Dauerhoch-Qualitätsprüfung hält GVA getrennt bis zu 500 tatsächlich empfangene Punkte im laufenden Dienst vor. Es schätzt keine fehlenden Werte. Die Kurvenlücken bleiben sichtbar, auch wenn CamAPS seine eigene Kurve später auffüllt; diese rückwirkenden Punkte werden nicht aus der Benachrichtigung übernommen.
+
+Ein Neuladen von Einstellungen oder ein Dienstneustart im selben Telefon-Boot löscht den gespeicherten Beginn nicht allein wegen einer längeren Empfangspause. Bei echter Uhr- oder Bootdiskontinuität beginnt die Prüfung konservativ neu. Geänderte Alarmbedingungen werden wie bisher mit den gespeicherten Zuständen abgeglichen. Bereits von einer früheren Version verworfene Startzeiten werden beim Update nicht rückwirkend geschätzt.
+
 ## Neue Hoch-/Niedrig-Episoden
 
 Bei Hoch-/Niedrigalarmen gilt die automatische Wiederholungszeit innerhalb einer durchgehenden Alarmepisode je Stufe. Ein frischer gültiger Wert unter der Hochgrenze bzw. über der Niedriggrenze beendet diese Episode. Beim nächsten Grenzübertritt darf wieder ein erster Alarm über die eingeschalteten Sprach-, Ton- und Vibrationswege kommen. Exakt auf der Grenze bleibt die bisherige Alarmbedingung erfüllt.
@@ -66,15 +76,19 @@ Diese numerische Erholung hebt manuelles Snooze oder die globale Pause nicht auf
 
 Bestehende Fristen werden beim Update nicht rückwirkend gelöscht. Die neue Regel benötigt einen neu empfangenen gültigen Wert zurück innerhalb der jeweiligen Grenze. Eine zusätzliche dauerhafte Bedingungsbenachrichtigung mit Sperrgrund und Restzeit ist noch nicht umgesetzt.
 
+## Verarbeitungsdiagnose
+
+Unter „Hintergrund & AOD → Details und Systemfreigaben“ stehen der letzte neue Eingang, der letzte Alarmversuch und der letzte Ausgabeversuch getrennt. Die Eingangsangaben unterscheiden einen neuen Alarmstart von einer stillen Kartenaktualisierung. Bei einer noch nicht fälligen Grenzalarm-Ausgabe nennen sie Wiederholungsfrist, Snooze oder die Frist einer anderen Stufe, soweit lesbar. Der letzte Ausgabeversuch unterscheidet normale Wertansage, Alarm und Lückenwarnung und zeigt die angeforderten Kanäle sowie die Annahme oder Ablehnung.
+
+Der separate letzte Alarmstatus listet Sprache, Ton und Vibration. Dienstlokale Eingangs- und Versuchsnummern verbinden ihn mit den Verarbeitungsangaben. Prüfticks überschreiben die letzte Eingangsaufnahme nicht; normale Wertansagen ersetzen den letzten Alarmversuch nicht. Die begrenzten privaten Caches enthalten nur feste technische Zustände und Zähler, keine Messwerte, Ansagetexte, Alarmstufenkennungen oder Zeitstempel. Sie werden beim Dienststart zurückgesetzt und bilden keine Ereignishistorie. Eine Annahme oder ein „abgeschlossen“-Rückruf beweist keine Hör- oder Spürbarkeit.
+
 ## Alarmansage nach Stimmenstart
 
 Wird die Offline-Stimme erst vorbereitet, während ein Live-Messwertalarm bereits über Ton oder Vibration startet, darf die fehlende Ansage einmal innerhalb von zehn Sekunden nach Alarmstart folgen. GVA prüft vorher die aktuelle Alarmbedingung, das Zeitfenster und die Frische der vorhandenen Daten erneut und setzt den Text mit dem aktuellen Wert zusammen. Ton und Vibration werden nicht wiederholt. Bei abgelaufener Frist oder nicht mehr gültiger Bedingung entfällt die Ansage. Ausschalten, Pause, Quellenverlust sowie Änderungen an Einstellungen oder Pfeilzuordnungen verwerfen die wartende Ansage. Ein Dienstneustart stellt sie nicht wieder her. Manuelle und synthetische Vorschauen sowie Datenlückenwarnungen verwenden diese Nachreichung nicht.
 
-Unter „Hintergrund & AOD → Details und Systemfreigaben“ steht der letzte Alarmstatus getrennt für Sprache, Ton und Vibration. Normale Wertansagen überschreiben ihn nicht. Der private Cache enthält nur feste technische Zustände, keine Messwerte, Ansagetexte, Alarmkennungen oder Zeiten. Eine an Android oder die Stimme übergebene Ausgabe bestätigt nicht, dass sie hörbar oder spürbar war.
-
 ## Umfang und Grenzen
 
-Vorbereitet ist die Telefonversion 0.22.0 Beta. Entwicklung und Telefonprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl oder mmol/l**. Andere CGM-Quellen, direkte Sensoranbindung und Pumpensteuerung sind nicht enthalten.
+Vorbereitet ist die Telefonversion 0.23.0 Beta. Entwicklung und Telefonprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl oder mmol/l**. Andere CGM-Quellen, direkte Sensoranbindung und Pumpensteuerung sind nicht enthalten.
 
 Optional sind [GVA Watch und das Zifferblatt GVA Dots](../companionWear/README.de.md) teilweise auf der Galaxy Watch5 Pro mit Wear OS 6 / One UI 8 Watch erprobt. Sie zeigen Werte und einen kurzen Verlauf; angenommene Telefonalarme lassen sich zusätzlich weiterleiten. Die Telefonübertragung ist zunächst aus. Aktualisierung der Komplikationen, Alarmzustellung und Akkuverbrauch benötigen weitere Geräteprüfungen.
 
@@ -84,7 +98,7 @@ Die angezeigte Zeit ist Empfangs-/Verarbeitungszeit, kein bestätigter Sensor-Me
 
 ## Anzeige auf der Uhr
 
-GVA Watch 0.19.0 Beta und das codefreie Zifferblatt GVA Dots 0.1.5 Beta passen zur vorbereiteten Telefonversion 0.22.0 Beta. Die runde Anzeige verwendet Roboto Flex, eine Kurve über eine oder zwei Stunden und eine reduzierte gedimmte Ansicht. Menüs nutzen die offiziellen Wear-Material-3-Komponenten. Die Uhren-App bietet zusätzlich eine Kachel im selben Aufbau ohne Uhrzeit-Punkte. Neben Sammelfeld und Alter lassen sich Wert, CamAPS-Trend, Delta pro Minute und Kurve einzeln in passenden fremden Zifferblättern auswählen. Die Uhr zeigt Daten und kann angenommene Telefonalarme mit Vibration weitergeben. Eine eigene Glukosealarmberechnung ist nicht enthalten. [Einrichtung und Grenzen](../companionWear/README.de.md). Die Alltagserprobung läuft; neue Einzelkomplikationen und Kachel müssen noch am Gerät geprüft werden.
+GVA Watch 0.19.0 Beta und das codefreie Zifferblatt GVA Dots 0.1.5 Beta passen zur vorbereiteten Telefonversion 0.23.0 Beta. Die runde Anzeige verwendet Roboto Flex, eine Kurve über eine oder zwei Stunden und eine reduzierte gedimmte Ansicht. Menüs nutzen die offiziellen Wear-Material-3-Komponenten. Die Uhren-App bietet zusätzlich eine Kachel im selben Aufbau ohne Uhrzeit-Punkte. Neben Sammelfeld und Alter lassen sich Wert, CamAPS-Trend, Delta pro Minute und Kurve einzeln in passenden fremden Zifferblättern auswählen. Die Uhr zeigt Daten und kann angenommene Telefonalarme mit Vibration weitergeben. Eine eigene Glukosealarmberechnung ist nicht enthalten. [Einrichtung und Grenzen](../companionWear/README.de.md). Die Alltagserprobung läuft; neue Einzelkomplikationen und Kachel müssen noch am Gerät geprüft werden.
 
 Die optionale Weiterleitung eigener Alarme und Datenlückenwarnungen an GVA Watch ist ab 0.18.0 getrennt von den Anzeigedaten einschaltbar. Auf der Uhr erscheinen eigene Benachrichtigungen mit Vibration. Beide Apps benötigen eine Freigabe; unter Darstellung → Uhr gibt es einen ausdrücklich bezeichneten Test ohne Messwerte. Die Weiterleitung folgt angenommenen Telefonalarm-Ausgaben und arbeitet ohne Offline-Nachholung. Normale Werte erzeugen keine Uhrenbenachrichtigung. [Einrichtung und Grenzen](../companionWear/README.de.md#einrichtung-und-alarme).
 

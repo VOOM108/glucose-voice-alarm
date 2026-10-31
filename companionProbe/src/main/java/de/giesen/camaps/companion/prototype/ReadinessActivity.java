@@ -123,7 +123,7 @@ public final class ReadinessActivity extends UiActivity {
         enable.setEnabled(true);
         pauseButton.setVisibility(live && !paused?View.VISIBLE:View.GONE); resume.setVisibility(paused?View.VISIBLE:View.GONE);
         stop.setVisibility(LiveAlarmService.running() || LivePreferences.monitor(this)?View.VISIBLE:View.GONE);
-        details.setText(CamApsConnection.summary()+"\n\n"+ready.summary()+"\n\n"+MetricNotification.capability(this)+"\n\n"+LiveAlarmService.audioState()+"\n\n"+AlarmOutputDiagnostics.summary(this));
+        details.setText(CamApsConnection.summary()+"\n\n"+ready.summary()+"\n\n"+MetricNotification.capability(this)+"\n\n"+LiveAlarmService.audioState()+"\n\n"+ProcessingDiagnostics.summary(this)+"\n\n"+AlarmOutputDiagnostics.summary(this));
         nativeStatus.setText(DisplayDiagnostics.status(this)); DisplayDiagnostics.write(this);
     }
     @Override public void onResume() { super.onResume(); if(!SafetyConsent.ready(this))return; handler.post(refresh); }

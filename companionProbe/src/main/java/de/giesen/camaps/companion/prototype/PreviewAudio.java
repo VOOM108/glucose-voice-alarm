@@ -38,6 +38,7 @@ final class PreviewAudio implements AlarmOutputFlow.Port {
     private boolean alarmSpeechWaiting,coldAlarmSpeech,alarmSpeechCompletionAllowed;
     private String alarmSpeechId;
     private String previewSpeechLanguage;
+    void diagnosticCorrelation(long receipt,long attempt){alarmDiagnostics.correlation(receipt,attempt);}
     void previewLanguage(String language) {
         if(!"de".equals(language) && !"en".equals(language)) throw new IllegalArgumentException();
         if(!language.equals(previewSpeechLanguage)) { stop(); releaseSpeech(); previewSpeechLanguage=language; }

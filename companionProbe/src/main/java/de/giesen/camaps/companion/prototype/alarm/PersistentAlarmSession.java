@@ -44,14 +44,18 @@ public final class PersistentAlarmSession {
     }
     public synchronized Result evaluate(List<HistoryAnalysis.Point> window,Clock now,int minuteOfDay,
                                         Long confirmedSourceSessionStart,DecisionSink sink) throws IOException {
+        return evaluate(window,window,now,minuteOfDay,confirmedSourceSessionStart,sink);
+    }
+    public synchronized Result evaluate(List<HistoryAnalysis.Point> window,List<HistoryAnalysis.Point> episodeWindow,Clock now,int minuteOfDay,
+                                        Long confirmedSourceSessionStart,DecisionSink sink) throws IOException {
         verified=null;
         Snapshot before=restored(now); Map<String,Entry> rows=new LinkedHashMap<>(before.entries);
         AlarmEngine engine=new AlarmEngine(rules,limits,mode,timeBasis); Map<String,Long> timers=new HashMap<>();
         for (Entry row:rows.values()) if (row.highSince>0) timers.put(row.id,row.highSince);
         engine.restorePersistentTimers(timers);
-        Result result=engine.evaluate(window,now.wallMs,minuteOfDay,confirmedSourceSessionStart,null);
+        Result result=engine.evaluate(window,episodeWindow,now.wallMs,minuteOfDay,confirmedSourceSessionStart,null);
         Map<String,Long> updated=engine.persistentTimers();
-        for (Rule rule:rules) if (rule.enabled && rule.kind==Kind.PERSISTENT_HIGH) {
+        for (Rule rule:rules) if ((result.status==Status.EVALUATED || timeBasis!=HistoryAnalysis.TimeBasis.RECEIPT) && rule.enabled && rule.kind==Kind.PERSISTENT_HIGH) {
             Entry row=rows.get(rule.id); long since=updated.containsKey(rule.id)?updated.get(rule.id):0;
             if (row!=null) rows.put(rule.id,row.withTimer(since)); else if (since>0) rows.put(rule.id,Entry.idle(rule,since));
         }

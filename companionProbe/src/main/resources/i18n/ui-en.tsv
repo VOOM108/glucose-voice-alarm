@@ -718,3 +718,48 @@ Stimme nicht rechtzeitig bereit	voice not ready in time
 an Android übergeben	submitted to Android
 Wann beginnt ein neuer Alarm?	When does a new alarm start?
 Ein frischer gültiger Wert unter der Hochgrenze bzw. über der Niedriggrenze beendet die automatische Wiederholung. Beim nächsten Grenzübertritt ist wieder ein erster Alarm möglich. Snooze und globale Pause bleiben bestehen. Eine Datenlücke setzt die Wiederholung nicht zurück.	A fresh valid reading below the high threshold or above the low threshold ends the automatic repeat episode. Crossing the threshold again can trigger a new first alarm. Snooze and the global pause remain in effect. A data gap does not reset the repeat.
+Verarbeitung: wartet auf neuen Eingang	Processing: waiting for new input
+Letzter neuer Eingang	Last new input
+Prüfung:	Evaluation:
+Grenzalarm:	Threshold alarm:
+globale Pause	global pause
+Erholungstrend	recovering trend
+Alarmkarte:	Alarm notification:
+Wertansage:	Value speech:
+Letzter Alarmversuch	Last alarm attempt
+Letzter Ausgabeversuch	Last output attempt
+Eingangsnummern verknüpfen die Angaben innerhalb dieses Dienststarts. Keine Messwerte oder Ansagetexte gespeichert. Annahme bestätigt keine Hörbarkeit.	Input numbers link the records within this service run. No readings or speech texts are stored. Acceptance does not confirm audibility.
+Verarbeitung: Diagnose nicht verfügbar	Processing: diagnostics unavailable
+noch keiner	none yet
+Eingang	Input
+normale Wertansage	ordinary value speech
+Lückenwarnung	Data gap warning
+Alarm	Alarm
+Ausgabe angenommen	output accepted
+Ausgabe abgelehnt	output rejected
+Angefordert:	Requested:
+ja	yes
+nein	no
+keiner	none
+neuer Alarmstart	new alarm start
+still aktualisiert	silently refreshed
+entfernt	removed
+unverändert	unchanged
+Wiederholungsfrist	repeat interval
+Snooze	Snooze
+Frist einer anderen Stufe	another level's interval
+Fristgrund nicht lesbar	interval reason unavailable
+nicht aufgerufen	not called
+angenommen	accepted
+noch nicht fällig	not due yet
+Ausgabe nicht bereit oder belegt	output not ready or busy
+Ausgabeversuch fehlgeschlagen	output attempt failed
+Zustandsspeicher blockiert	state storage blocked
+Daten nicht verwendbar	data unusable
+Live-Ausgabe gesperrt	live output blocked
+Bedingung nicht erfüllt	condition not met
+pausiert	paused
+durch Regel ausgesetzt	suppressed by policy
+Länger als … Minuten	Longer than … minutes
+Die Zeit zählt ab dem ersten empfangenen Wert über der Grenze, auch über Datenlücken hinweg. Neue Alarme brauchen einen frischen steigenden Wert. Ein Wert an oder unter der Grenze beendet die Phase. Für Lücken wird kein Wert angenommen.	Time starts with the first received reading above the threshold and includes data gaps. New alarms require a fresh rising reading. A reading at or below the threshold ends the episode. No readings are assumed during gaps.
+Das Zeitfenster begrenzt die Ausgabe, nicht die gezählte Dauer.	The schedule limits output, not the elapsed duration.

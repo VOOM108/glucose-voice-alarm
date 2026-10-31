@@ -11,6 +11,7 @@ import java.util.*;
 public final class AlarmOutputFlow {
     public enum Origin { SYNTHETIC, LIVE }
     public enum Outcome { ACCEPTED, LIVE_BLOCKED, DATA_BLOCKED, DISABLED, CONDITION_FALSE, PAUSED, SUPPRESSED, NOT_DUE, OUTPUT_UNAVAILABLE, STORAGE_BLOCKED, ATTEMPT_FAILED }
+    public enum WaitReason { NONE, REPEAT, SNOOZE, OTHER_LEVEL, UNAVAILABLE }
     public interface Port {
         boolean available(Plan plan);
         boolean start(Plan plan);
@@ -47,6 +48,7 @@ public final class AlarmOutputFlow {
     private NotificationParser.Trend trend=NotificationParser.Trend.UNKNOWN;
     private Clock checked;
     private List<HistoryAnalysis.Point> checkedPoints;
+    private List<HistoryAnalysis.Point> checkedEpisodePoints;
     private Long sourceStart;
     private int minuteOffset;
     private long nextValueElapsed=-1;
@@ -82,14 +84,18 @@ public final class AlarmOutputFlow {
     }
     public OutputGuard.Reason suppressionReason() { return suppression; }
     public Outcome evaluate(Origin origin,List<HistoryAnalysis.Point> points,Clock now,int minuteOfDay,Long sourceStart,NotificationParser.Trend trend) {
+        return evaluate(origin,points,points,now,minuteOfDay,sourceStart,trend);
+    }
+    public Outcome evaluate(Origin origin,List<HistoryAnalysis.Point> points,List<HistoryAnalysis.Point> episodePoints,Clock now,int minuteOfDay,Long sourceStart,NotificationParser.Trend trend) {
         decision=null; latest=null; checked=null;
         if (origin!=allowedOrigin) { port.stop(); return Outcome.LIVE_BLOCKED; }
         try {
-            Result result=session.evaluate(points,now,minuteOfDay,sourceStart,null);
+            Result result=session.evaluate(points,episodePoints,now,minuteOfDay,sourceStart,null);
             if (result.status==Status.DISABLED) { port.stop(); return Outcome.DISABLED; }
             if (result.status!=Status.EVALUATED) { port.stop(); return Outcome.DATA_BLOCKED; }
             this.decision=result; this.latest=points.get(points.size()-1); this.checked=now;
             checkedPoints=new ArrayList<>(points); this.sourceStart=sourceStart; minuteOffset=minuteOfDay-calendarMinute(now.wallMs);
+            checkedEpisodePoints=episodePoints==null?null:new ArrayList<>(episodePoints);
             this.trend=trend==null?NotificationParser.Trend.UNKNOWN:trend;
             if (preferences.periodicAllowed() && nextValueElapsed<0) nextValueElapsed=Math.addExact(now.elapsedMs,preferences.valueIntervalMinutes*60000L);
             return Outcome.ACCEPTED;
@@ -148,7 +154,7 @@ public final class AlarmOutputFlow {
             if (!port.available(plan)) return Outcome.OUTPUT_UNAVAILABLE;
             if (!session.deliveryReady(id,now)) return Outcome.NOT_DUE;
             // Recheck schedules/conditions at actual delivery, without writing on every background tick.
-            Result current=session.evaluate(checkedPoints,now,Math.floorMod(calendarMinute(now.wallMs)+minuteOffset,1440),sourceStart,null);
+            Result current=session.evaluate(checkedPoints,checkedEpisodePoints,now,Math.floorMod(calendarMinute(now.wallMs)+minuteOffset,1440),sourceStart,null);
             decision=current; checked=now;
             boolean stillEligible=false;
             for (Decision candidate:current.decisions) if (candidate.rule.id.equals(id) && candidate.conditionMet
@@ -246,4 +252,13 @@ public final class AlarmOutputFlow {
     public void pause(boolean value) { paused=value; port.stop(); if (!value) { decision=null; checked=null; nextValueElapsed=-1; } }
     public void stop() { port.stop(); decision=null; checked=null; nextValueElapsed=-1; }
     public Result lastDecision() { return decision; }
+    /** Read-only explanation after NOT_DUE. No deadline, decision or output is changed. */
+    public WaitReason diagnosticWait(String id,Clock now) {
+        try {
+            AlarmStateStore.Entry row=session.view(now).entries.get(id);
+            if(row!=null && row.active && (LevelForm.hasSnooze(row.kind)?now.wallMs<=row.nextAt:now.wallMs<row.nextAt))
+                return row.snoozed?WaitReason.SNOOZE:WaitReason.REPEAT;
+            return WaitReason.OTHER_LEVEL;
+        }catch(IOException | RuntimeException e){return WaitReason.UNAVAILABLE;}
+    }
 }

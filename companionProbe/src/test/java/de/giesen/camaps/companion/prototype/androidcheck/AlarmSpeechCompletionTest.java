@@ -111,7 +111,8 @@ public class AlarmSpeechCompletionTest {
         OutputPreferenceStore s=new OutputPreferenceStore(app.getFilesDir());s.save(s.load().revision,new OutputPreferences(AlarmEngine.OutputMode.SPOKEN_ALARMS_AND_VALUES,1,"Wert {wert}",100,100,0).withChannels(false,true,true,true));
         start();ready();receive(200);String id=ReflectionHelpers.getField(audio(),"activeSpeechId");shadowOf(speech).getUtteranceProgressListener().onDone(id);idle();String report=status();
         advance(61000);assertTrue(TestSpeech.texts.contains("Wert 200"));assertEquals(report,status());
-        assertFalse(report.contains("200"));assertFalse(report.contains("Alarmtest"));assertFalse(report.contains("synthetic_high"));assertFalse(report.contains("Private synthetic name"));assertEquals(8,report.split("\n").length);
+        assertFalse(report.contains("200"));assertFalse(report.contains("Alarmtest"));assertFalse(report.contains("synthetic_high"));assertFalse(report.contains("Private synthetic name"));assertEquals(10,report.split("\n").length);
+        assertTrue(report.startsWith("GVA_ALARM_OUTPUT_V2\n"));assertTrue(report.contains("\nreceipt=1\n"));assertTrue(report.contains("\nattempt=1\n"));
         AppText.configure(Locale.ENGLISH);assertTrue(AlarmOutputDiagnostics.summary(app).startsWith("Last alarm"));
     }
     @Test public void manualAndSyntheticPreviewsNeverQueueAnUnreadyVoice()throws Exception {
