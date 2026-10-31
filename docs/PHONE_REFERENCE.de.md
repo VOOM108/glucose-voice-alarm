@@ -58,6 +58,24 @@ Wenn CamAPS bereits die Glukosedaten empfängt und die Therapie steuert, kann si
 - Sieben zuordenbare Pfeilzustände einschließlich Doppelpfeilen. Unbekannte oder widersprüchliche Grafiken bleiben offen. Eine neue Quellmeldung macht die geöffnete Zuordnungsvorschau ungültig.
 - Sperrbildschirm- und Statusbenachrichtigungen. Ab Android 17 wird die native große Live-Anzeige versucht. Hervorhebung, Platzierung und Konkurrenz mit anderen Apps bestimmt Android.
 
+## Farbige Pfeile und eigene Trendtexte
+
+Die Pfeilzuordnung zeigt sieben Richtungen mit je drei Farben in einem kompakten Raster. Das aktuelle Quellbild bleibt darüber sichtbar; die Auswahl scrollt getrennt von den Aktionen. Rot und Gelb müssen ausdrücklich für die konkrete Grafik zugeordnet werden. Eine ähnliche Form allein bestätigt keine Farbe. Vorhandene Zuordnungen bleiben normal, bis Du die betreffende Grafik neu zuordnest.
+
+CamAPS verwendet einen farbigen Hintergrund um den weißen Pfeil. GVA färbt stattdessen den Pfeil selbst. Frische Pfeile können normal, rot oder gelb sein; veraltete Daten bleiben grau. Die Trendzeile verwendet „Pfeil:“ statt eines festen Quellnamens.
+
+Unter Darstellung → Trendtexte bearbeitest Du die sichtbaren Wörter, unter Ausgabe → Trendwörter getrennt davon die gesprochenen Wörter. Für jede der sieben Richtungen übernehmen Rot und Gelb zunächst den normalen/grauen Text. Mit der jeweiligen Farb-Checkbox aktivierst Du einen eigenen Text. Beim ersten Einschalten wird ein leeres Feld mit dem aktuellen Basistext vorbelegt. Ausschalten bewahrt den eigenen Text und folgt wieder dem Basistext; ein aktives leeres Feld folgt ebenfalls der Basis. Anzeigetexte erlauben bis zu 40, Sprachtexte bis zu 80 Zeichen, jeweils einzeilig und ohne Platzhalter. Die Sprach-Schalter für eine Richtung gelten für alle ihre Farben. Profile speichern beide Textgruppen samt Farbaktivierung.
+
+Der optionale Platzhalter `{farbe}` (auch `{color}`) ergänzt in unterstützten Ansagetexten „rot“ oder „gelb“; bei normalen oder unbekannten Pfeilen bleibt er leer. Beispiel: `{wert} {trend} {farbe}`. Die Farbe wird nicht automatisch an das Trendwort angehängt; vorhandene Ansagetexte bleiben erhalten. Eigene Farbtexte und dieser Platzhalter sind unabhängig voneinander.
+
+## Bald niedrig
+
+Unter Alarmstufen → Bald niedrig → Stufe hinzufügen legst Du eine eigene Warnstufe an. Neue Stufen sind ausgeschaltet. Der Grundtext lautet „Laut Datenquelle bald niedrig“ und lässt sich ändern. Du wählst Zeitfenster, Ton, Sprache und Vibration; es gibt keine eigene Zahlengrenze, Wiederholung oder Snooze-Einstellung.
+
+Diese Warnung verwendet ausschließlich einen frisch empfangenen, erkannten roten Pfeil beliebiger Richtung als Quellhinweis. Zusätzlich muss der Wert strikt oberhalb der höchsten eingeschalteten Niedrig-Grenze liegen, deren Zeitfenster gerade gilt. Ohne aktive Niedrig-Stufe gibt es keine Ersatzgrenze. An oder unter dieser Grenze ist der vorhandene Niedrig-Alarm zuständig. GVA berechnet dafür keine eigene Vorhersage aus Änderungsrate oder Pumpendaten.
+
+Die Warnung kommt einmal pro roter Phase. Ein neuer eindeutig normaler oder gelber Pfeil gibt sie für die nächste rote Phase wieder frei. Unbekannte Pfeile, Datenlücken, ein niedriger Wert oder ein Neustart setzen diese Sperre nicht zurück. Es gibt keine zeitgesteuerte Wiederholung. Die üblichen Frischeprüfungen, Ausgabeschalter, Pausen und Zeitfenster gelten weiterhin. Wird die Warnung wegen eines aktuell gesperrten Ausgabewegs noch nicht gestartet, kann sie bei später erfüllten Bedingungen innerhalb derselben roten Phase starten.
+
 ## Dauerhoch-Zeit
 
 Die Dauer beginnt mit dem ersten empfangenen gültigen Wert über der Grenze dieser Dauerhoch-Stufe. Sie läuft über gleichbleibende oder fallende Werte und über Datenlücken hinweg weiter. Ein frischer Wert an oder unter dieser Grenze beendet die Phase. Fehlende, ungültige oder veraltete Daten bestätigen kein Ende.
@@ -88,7 +106,7 @@ Wird die Offline-Stimme erst vorbereitet, während ein Live-Messwertalarm bereit
 
 ## Umfang und Grenzen
 
-Vorbereitet ist die Telefonversion 0.23.0 Beta. Entwicklung und Telefonprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl oder mmol/l**. Andere CGM-Quellen, direkte Sensoranbindung und Pumpensteuerung sind nicht enthalten.
+Vorbereitet ist die Telefonversion 0.27.0 Beta. Entwicklung und Telefonprüfungen konzentrierten sich auf Pixel 7 Pro mit Android 17 und CamAPS FX 1.4(194).111. Andere Geräte, Android-Varianten und CamAPS-Versionen müssen gesondert geprüft werden. Die App verarbeitet unterstützte CamAPS-Benachrichtigungen in **mg/dl oder mmol/l**. Andere CGM-Quellen, direkte Sensoranbindung und Pumpensteuerung sind nicht enthalten.
 
 Optional sind [GVA Watch und das Zifferblatt GVA Dots](../companionWear/README.de.md) teilweise auf der Galaxy Watch5 Pro mit Wear OS 6 / One UI 8 Watch erprobt. Sie zeigen Werte und einen kurzen Verlauf; angenommene Telefonalarme lassen sich zusätzlich weiterleiten. Die Telefonübertragung ist zunächst aus. Aktualisierung der Komplikationen, Alarmzustellung und Akkuverbrauch benötigen weitere Geräteprüfungen.
 
@@ -98,7 +116,7 @@ Die angezeigte Zeit ist Empfangs-/Verarbeitungszeit, kein bestätigter Sensor-Me
 
 ## Anzeige auf der Uhr
 
-GVA Watch 0.19.0 Beta und das codefreie Zifferblatt GVA Dots 0.1.5 Beta passen zur vorbereiteten Telefonversion 0.23.0 Beta. Die runde Anzeige verwendet Roboto Flex, eine Kurve über eine oder zwei Stunden und eine reduzierte gedimmte Ansicht. Menüs nutzen die offiziellen Wear-Material-3-Komponenten. Die Uhren-App bietet zusätzlich eine Kachel im selben Aufbau ohne Uhrzeit-Punkte. Neben Sammelfeld und Alter lassen sich Wert, CamAPS-Trend, Delta pro Minute und Kurve einzeln in passenden fremden Zifferblättern auswählen. Die Uhr zeigt Daten und kann angenommene Telefonalarme mit Vibration weitergeben. Eine eigene Glukosealarmberechnung ist nicht enthalten. [Einrichtung und Grenzen](../companionWear/README.de.md). Die Alltagserprobung läuft; neue Einzelkomplikationen und Kachel müssen noch am Gerät geprüft werden.
+GVA Watch 0.20.0 Beta und das codefreie Zifferblatt GVA Dots 0.1.5 Beta passen zur vorbereiteten Telefonversion 0.27.0 Beta. Die runde Anzeige verwendet Roboto Flex, eine Kurve über eine oder zwei Stunden und eine reduzierte gedimmte Ansicht. Menüs nutzen die offiziellen Wear-Material-3-Komponenten. Die Uhren-App bietet zusätzlich eine Kachel im selben Aufbau ohne Uhrzeit-Punkte. Neben Sammelfeld und Alter lassen sich Wert, CamAPS-Trend, Delta pro Minute und Kurve einzeln in passenden fremden Zifferblättern auswählen. Die Uhr zeigt Daten und kann angenommene Telefonalarme mit Vibration weitergeben. Eine eigene Glukosealarmberechnung ist nicht enthalten. [Einrichtung und Grenzen](../companionWear/README.de.md). Die Alltagserprobung läuft; neue Einzelkomplikationen und Kachel müssen noch am Gerät geprüft werden.
 
 Die optionale Weiterleitung eigener Alarme und Datenlückenwarnungen an GVA Watch ist ab 0.18.0 getrennt von den Anzeigedaten einschaltbar. Auf der Uhr erscheinen eigene Benachrichtigungen mit Vibration. Beide Apps benötigen eine Freigabe; unter Darstellung → Uhr gibt es einen ausdrücklich bezeichneten Test ohne Messwerte. Die Weiterleitung folgt angenommenen Telefonalarm-Ausgaben und arbeitet ohne Offline-Nachholung. Normale Werte erzeugen keine Uhrenbenachrichtigung. [Einrichtung und Grenzen](../companionWear/README.de.md#einrichtung-und-alarme).
 

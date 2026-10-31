@@ -26,7 +26,7 @@ public class BetaLocalizationTest {
     @Test public void allEnglishAlarmDefaultsRenderWithoutChangingStoredCustomVariants() {
         for(AlarmEngine.Kind kind:AlarmEngine.Kind.values()) {
             AlarmLevel base=new SyntheticAlarmScenario(kind).level;
-            assertTrue(base.speechText(0,"en").startsWith(kind==AlarmEngine.Kind.RISING || kind==AlarmEngine.Kind.FALLING?"Critical":"The value"));
+            assertTrue(base.speechText(0,"en").startsWith(kind==AlarmEngine.Kind.RISING || kind==AlarmEngine.Kind.FALLING?"Critical":kind==AlarmEngine.Kind.SOURCE_LOW?"According to":"The value"));
             AlarmLevel custom=new AlarmLevel(base.rule,base.name,base.toneUri,Collections.singletonList("Mein Alarm {wert}")); assertEquals("Mein Alarm {wert}",custom.speechText(0,"en"));
             SpeechTemplate.render(base.speechText(0,"en"),base,new SpeechTemplate.Values(123,NotificationParser.Trend.UP,0,10,TrendSpeech.defaults("en"),"en"),false,false);
         }

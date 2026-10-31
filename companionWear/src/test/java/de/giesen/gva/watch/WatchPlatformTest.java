@@ -33,5 +33,27 @@ public class WatchPlatformTest {
             if(mode.equals("active"))assertNotEquals(Color.BLACK,b.getPixel(300,250));
         }
     }
+    @Test public void everyConfirmedRedArrowIsRedInActiveAmbientAndTileButGreyWhenStale()throws Exception {
+        long now=1800000000000L;WatchSnapshot d=WatchRenderer.demo(now);WatchRenderer renderer=new WatchRenderer(c);
+        File folder=new File(System.getProperty("gva.watch.renders"));assertTrue(folder.isDirectory()||folder.mkdirs());
+        for(ArrowColor color:new ArrowColor[]{ArrowColor.RED,ArrowColor.YELLOW})for(WatchSnapshot.Trend trend:WatchSnapshot.Trend.values())if(trend!=WatchSnapshot.Trend.UNKNOWN){
+            WatchSnapshot s=new WatchSnapshot(d.generated,d.received,d.value,trend,d.mmol,true,d.rate,d.low,d.high,d.points,color);
+            for(boolean ambient:new boolean[]{false,true}){
+                Bitmap b=Bitmap.createBitmap(600,600,Bitmap.Config.ARGB_8888);renderer.draw(new Canvas(b),600,s,true,ambient,1,true,false,now);
+                int red=0;for(int y=100;y<230;y++)for(int x=350;x<478;x++)if(b.getPixel(x,y)==(ambient?color.ambient:color.watch))red++;
+                assertTrue(trend.name(),red>150);
+                try(FileOutputStream out=new FileOutputStream(new File(folder,color.name().toLowerCase(java.util.Locale.ROOT)+"-"+trend.name()+"-"+(ambient?"ambient":"active")+".png"))){assertTrue(b.compress(Bitmap.CompressFormat.PNG,100,out));}
+            }
+            Bitmap tile=renderer.tileImage(s,true,1,now);int tileRed=0;for(int y=75;y<173;y++)for(int x=262;x<359;x++)if(tile.getPixel(x,y)==color.watch)tileRed++;assertTrue(tileRed>50);
+            Bitmap stale=Bitmap.createBitmap(600,600,Bitmap.Config.ARGB_8888);renderer.draw(new Canvas(stale),600,s,false,false,1,true,false,now);
+            int gray=0;for(int y=100;y<230;y++)for(int x=350;x<478;x++){assertNotEquals(color.watch,stale.getPixel(x,y));if(stale.getPixel(x,y)==0xff899298)gray++;}assertTrue(gray>150);
+        }
+    }
+    @Test public void translatedClockAndCachePreserveRedWithoutRenewingTheReceipt()throws Exception {
+        WatchConsent.accept(c,1);WatchConsent.accept(c,2);long now=System.currentTimeMillis();WatchSnapshot d=WatchRenderer.demo(now+3000);
+        WatchSnapshot s=new WatchSnapshot(d.generated,d.generated-1000,d.value,d.trend,d.mmol,true,d.rate,d.low,d.high,d.points,ArrowColor.RED);
+        assertTrue(WatchStore.accept(c,s.encode()));WatchStore.Entry e=WatchStore.read(c);assertEquals(ArrowColor.RED,e.snapshot.arrowColor);assertEquals(s.trend,e.snapshot.trend);
+        assertEquals(1000,e.snapshot.generated-e.snapshot.received);assertEquals(s.generated,e.sourceGenerated);
+    }
     @Test public void existingUnitChoiceIsUsedForNumbersAndDelta(){assertEquals("7,0",WatchRenderer.number(126.1274,true,false).replace('.',','));assertEquals("+0,07",WatchRenderer.number(1.2,true,true).replace('.',','));}
 }

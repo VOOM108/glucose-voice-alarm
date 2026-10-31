@@ -42,11 +42,7 @@ public class ReceiptRateTest {
         assertNull(c.at(NOW+240001));assertNull(c.at(NOW-1));assertNull(ReceiptRate.unavailable().at(NOW));
     }
     private byte[] legacySources(OutputPreferences p,String first,String second) throws Exception {
-        byte[] body=ConfigurationFiles.open(OutputPreferenceStore.encode(new OutputPreferenceStore.Snapshot(3,p)),8192);
-        body=Arrays.copyOf(body,body.length-7-6);body[2+"XCAM_OUTPUT".length()+3]=9;
-        ByteArrayOutputStream tail=new ByteArrayOutputStream();try(DataOutputStream out=new DataOutputStream(tail)){out.writeUTF("CAMAPS");out.writeUTF("CAMAPS");}
-        ByteArrayOutputStream replaced=new ByteArrayOutputStream();replaced.write(body,0,body.length-tail.size());
-        try(DataOutputStream out=new DataOutputStream(replaced)){out.writeUTF(first);out.writeUTF(second);}return ConfigurationFiles.seal(replaced.toByteArray());
+        return LegacyOutputFixture.encode(9,3,p,first,second);
     }
     @Test public void retiredSourceChoicesReadWithoutRewritingCustomProfileData() throws Exception {
         OutputPreferences p=new OutputPreferences(AlarmEngine.OutputMode.SPOKEN_ALARMS_AND_VALUES,3,"Custom {wert} {trend}",65,80,7,3,new TrendSpeech(Arrays.asList("up","fast up","level","down","fast down","double up","double down")),true,true,true,true)
@@ -62,10 +58,7 @@ public class ReceiptRateTest {
     }
     @Test public void oldSchemaEightPreservesCustomData() throws Exception {
         OutputPreferences p=OutputPreferences.defaults().withSpeechLanguage("en").withGap(GapSettings.defaults().withTemplate("Custom gap {minutes}"));
-        byte[] body=ConfigurationFiles.open(legacySources(p,"CAMAPS","CAMAPS"),8192);
-        ByteArrayOutputStream tail=new ByteArrayOutputStream();try(DataOutputStream out=new DataOutputStream(tail)){out.writeUTF("CAMAPS");out.writeUTF("CAMAPS");}
-        body=Arrays.copyOf(body,body.length-tail.size());body[2+"XCAM_OUTPUT".length()+3]=8;
-        OutputPreferences saved=OutputPreferenceStore.decode(ConfigurationFiles.seal(body)).preferences;
+        OutputPreferences saved=OutputPreferenceStore.decode(LegacyOutputFixture.encode(8,3,p,"CAMAPS","CAMAPS")).preferences;
         assertEquals("en",saved.speechLanguage);assertEquals(p.gap.speechTemplate,saved.gap.speechTemplate);
     }
     private AlarmOutputFlow.Port collect(List<AlarmOutputFlow.Plan> plans) { return new AlarmOutputFlow.Port(){public boolean available(AlarmOutputFlow.Plan p){return true;}public boolean start(AlarmOutputFlow.Plan p){plans.add(p);return true;}public void stop(){}}; }

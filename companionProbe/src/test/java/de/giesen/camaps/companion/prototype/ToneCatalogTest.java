@@ -8,11 +8,12 @@ import static org.junit.Assert.*;
 public class ToneCatalogTest {
     @Test public void allFifteenCuesHaveStableDistinctUrisAndCorrectKindLabels() {
         Set<String> uris=new HashSet<>();
-        for (String set:ToneCatalog.SETS) for (AlarmEngine.Kind kind:AlarmEngine.Kind.values()) {
+        for (String set:ToneCatalog.SETS) for (AlarmEngine.Kind kind:new AlarmEngine.Kind[]{AlarmEngine.Kind.HIGH,AlarmEngine.Kind.LOW,AlarmEngine.Kind.PERSISTENT_HIGH,AlarmEngine.Kind.RISING,AlarmEngine.Kind.FALLING}) {
             String uri=ToneCatalog.uri(set,kind); assertTrue(uris.add(uri)); assertEquals(set,ToneCatalog.setOf(uri));
             assertTrue(ToneCatalog.title(uri).contains(LevelForm.kindLabel(kind)));
             assertTrue(ToneCatalog.durationMs(uri)>0); assertTrue(ToneCatalog.durationMs(uri)<1000);
         }
+        assertEquals(ToneCatalog.uri("samt",AlarmEngine.Kind.LOW),ToneCatalog.uri("samt",AlarmEngine.Kind.SOURCE_LOW));
         assertEquals(15,uris.size()); assertNull(ToneCatalog.setOf(AlarmLevel.DEFAULT_TONE));
         assertNull(ToneCatalog.setOf("android.resource://foreign.app/raw/xcam_samt_high"));
     }

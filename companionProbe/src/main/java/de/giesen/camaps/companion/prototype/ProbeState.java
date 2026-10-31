@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 
 /** Process-local observations expire on process restart; no fake measurement freshness. */
 final class ProbeState {
@@ -12,6 +13,7 @@ final class ProbeState {
     static final class Observation {
         final double value;
         final NotificationParser.Trend trend;
+        final ArrowColor arrowColor;
         final ReceiptRate.Result receiptRate;
         final long receivedElapsed, postedWall,receivedWall;
         final String notificationKey;
@@ -19,6 +21,10 @@ final class ProbeState {
             this(value,trend,receivedElapsed,postedWall,key,ReceiptRate.unavailable());
         }
         Observation(double value, NotificationParser.Trend trend, long receivedElapsed, long postedWall, String key,ReceiptRate.Result receiptRate) {
+            this(value,trend,receivedElapsed,postedWall,key,receiptRate,ArrowColor.NORMAL);
+        }
+        Observation(double value, NotificationParser.Trend trend, long receivedElapsed, long postedWall, String key,ReceiptRate.Result receiptRate,ArrowColor color) {
+            this.arrowColor=trend==NotificationParser.Trend.UNKNOWN?ArrowColor.NORMAL:java.util.Objects.requireNonNull(color);
             this.receiptRate=receiptRate;
             this.value = value; this.trend = trend; this.receivedElapsed = receivedElapsed;
             this.receivedWall=System.currentTimeMillis();
@@ -26,7 +32,7 @@ final class ProbeState {
             this.postedWall = postedWall;
         }
         private Observation(Observation original) {
-            value=original.value; trend=NotificationParser.Trend.UNKNOWN; receiptRate=original.receiptRate;
+            value=original.value; trend=NotificationParser.Trend.UNKNOWN; arrowColor=ArrowColor.NORMAL; receiptRate=original.receiptRate;
             receivedElapsed=original.receivedElapsed; receivedWall=original.receivedWall;
             postedWall=original.postedWall; notificationKey=original.notificationKey;
         }

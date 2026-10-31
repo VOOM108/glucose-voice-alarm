@@ -18,6 +18,7 @@ public final class OutputSettingsActivity extends UiActivity {
     private final List<EditText> trendWords=new ArrayList<>();
     private final List<CheckBox> trendEnabled=new ArrayList<>();
     private LinearLayout trendPanel;
+    private TrendColorEditor trendColors;
     private DisclosureRow trendDisclosure;
     private Button volumeSpeechPreview;
     private TextView status;
@@ -66,27 +67,32 @@ public final class OutputSettingsActivity extends UiActivity {
             template=LevelUi.field(body,AppText.tr("Text der Wertansage"),p.valueTemplate,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
             template.setSingleLine(false); template.setMinLines(2); template.setMaxLines(4); template.setHorizontallyScrolling(false); template.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
             template.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(500)});
-            TokenButtons.add(body,template,"{wert}","{einheit}","{trend}","{alter_sekunden}");
+            TokenButtons.add(body,template,"{wert}","{einheit}","{trend}","{farbe}","{alter_sekunden}");
             valueQuiet=LevelUi.field(body,AppText.tr("Wertansagen nach einem Alarm pausieren (Minuten, 0 = aus)"),Integer.toString(p.valueQuietMinutes),InputType.TYPE_CLASS_NUMBER);
             trendPanel=new LinearLayout(this); trendPanel.setOrientation(LinearLayout.VERTICAL);
             trendDisclosure=DisclosureRow.add(body,AppText.tr("Trendwörter"),trendPanel);
             LevelUi.text(trendPanel,AppText.tr("Haken aus: dieses Trendwort nicht ansagen. Pfeil und Alarmprüfung bleiben unverändert."),14);
+            LevelUi.text(trendPanel,AppText.tr("Rot und Gelb übernehmen den normalen Text. Eigene Farbtexte sind je Richtung zuschaltbar. Der Ansageschalter einer Richtung gilt für alle Farben; {farbe} bleibt ein eigener optionaler Platzhalter."),14);
+            trendColors=new TrendColorEditor(p.trendSpeech.colors,80,"trend_speech_color");
             String[] trendLabels={AppText.tr("↗ Steigend"),AppText.tr("↑ Schnell steigend"),AppText.tr("→ Stabil"),AppText.tr("↘ Fallend"),AppText.tr("↓ Schnell fallend"),AppText.tr("⇈ Sehr schnell steigend"),AppText.tr("⇊ Sehr schnell fallend")};
             for(int i=0;i<TrendSpeech.COUNT;i++) {
-                EditText field=LevelUi.field(trendPanel,trendLabels[i],p.trendSpeech.words.get(i),InputType.TYPE_CLASS_TEXT);
-                field.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(80)}); trendWords.add(field);
-                trendPanel.removeView(field); LinearLayout row=new LinearLayout(this); row.setGravity(android.view.Gravity.CENTER_VERTICAL); trendPanel.addView(row);
+                LinearLayout card=DashboardUi.card(this,trendPanel);card.setTag("trend_speech_card_"+TrendDisplayWords.TRENDS.get(i).name());
+                EditText field=LevelUi.field(card,trendLabels[i],p.trendSpeech.words.get(i),InputType.TYPE_CLASS_TEXT);
+                field.setTag("trend_speech_word_"+TrendDisplayWords.TRENDS.get(i).name());field.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(80)}); trendWords.add(field);
+                card.removeView(field); LinearLayout row=new LinearLayout(this); row.setGravity(android.view.Gravity.CENTER_VERTICAL); card.addView(row);
                 CheckBox enabled=new CheckBox(this); enabled.setTag("trend_speech_"+i); enabled.setContentDescription(trendLabels[i]+" "+AppText.tr("ansagen"));
                 enabled.setChecked(p.trendSpeech.enabled.get(i)); enabled.setMinHeight(LevelUi.dp(this,48)); row.addView(enabled,new LinearLayout.LayoutParams(LevelUi.dp(this,48),-2)); trendEnabled.add(enabled);
                 row.addView(field,new LinearLayout.LayoutParams(0,-2,1));
                 Button sample=LevelUi.button(row,AppText.tr("Trend anhören"),v -> audio.speak(field.getText().toString())); sample.setContentDescription(trendLabels[i]+AppText.tr(" anhören"));
-                sample.setEnabled(enabled.isChecked()); enabled.setOnCheckedChangeListener((view,checked) -> { sample.setEnabled(checked); audio.stop(); });
+                sample.setEnabled(enabled.isChecked()); final int at=i;
+                trendColors.add(card,i,TrendDisplayWords.TRENDS.get(i),field,()->field.getText().toString(),text->audio.speak(text),()->enabled.isChecked(),()->audio.stop());
+                enabled.setOnCheckedChangeListener((view,checked) -> { sample.setEnabled(checked);trendColors.refresh(at);audio.stop(); });
             }
             LevelUi.button(body,AppText.tr("Standardtexte einsetzen"),v -> new android.app.AlertDialog.Builder(this).setTitle(AppText.tr("Standardtexte einsetzen?"))
                     .setMessage(AppText.tr("Wert- und Trendtexte werden ersetzt. Eigene Alarmtexte bleiben erhalten."))
                     .setNegativeButton(AppText.tr("Abbrechen"),null).setPositiveButton(AppText.tr("Ersetzen"),(d,w) -> {
                         template.setText(SpeechTemplate.valueDefault(draftSpeechLanguage)); TrendSpeech defaults=TrendSpeech.defaults(draftSpeechLanguage);
-                        for(int i=0;i<TrendSpeech.COUNT;i++) trendWords.get(i).setText(defaults.words.get(i));
+                        for(int i=0;i<TrendSpeech.COUNT;i++) trendWords.get(i).setText(defaults.words.get(i));trendColors.reset();
                     }).show());
             LevelUi.text(body,AppText.tr("Werttext mit Testwert anhören"),14);
             LinearLayout samples=new LinearLayout(this); samples.setGravity(android.view.Gravity.CENTER_VERTICAL); body.addView(samples);
@@ -100,7 +106,7 @@ public final class OutputSettingsActivity extends UiActivity {
             if (state!=null) {
                 trendDisclosure.setExpanded(state.getBoolean("trend_open"));
                 ArrayList<String> fields=state.getStringArrayList("fields");
-                if (fields!=null && (fields.size()==3 || fields.size()==5 || fields.size()==6 || fields.size()==7 || fields.size()==12 || fields.size()==15 || fields.size()==16 || fields.size()==19 || fields.size()==21 || fields.size()==26)) {
+                if (fields!=null && (fields.size()==3 || fields.size()==5 || fields.size()==6 || fields.size()==7 || fields.size()==12 || fields.size()==15 || fields.size()==16 || fields.size()==19 || fields.size()==21 || fields.size()==26 || fields.size()==54)) {
                     restoreMode(AlarmEngine.OutputMode.valueOf(fields.get(0))); interval.setText(fields.get(1)); template.setText(fields.get(2));
                     if (fields.size()>=5) { toneVolume.setProgress(Integer.parseInt(fields.get(3))); speechVolume.setProgress(Integer.parseInt(fields.get(4))); }
                     if (fields.size()>=6) valueQuiet.setText(fields.get(5));
@@ -110,10 +116,11 @@ public final class OutputSettingsActivity extends UiActivity {
                     if (fields.size()>=flags+3) { tonesEnabled.setChecked(Boolean.parseBoolean(fields.get(flags))); alarmSpeechEnabled.setChecked(Boolean.parseBoolean(fields.get(flags+1))); valueSpeechEnabled.setChecked(Boolean.parseBoolean(fields.get(flags+2))); }
                     if(fields.size()>=flags+4) vibrationEnabled.setChecked(Boolean.parseBoolean(fields.get(flags+3)));
                     if(fields.size()>=19) { draftSpeechLanguage=fields.get(18); language.setSelection("en".equals(draftSpeechLanguage)?1:0); }
-                    if(fields.size()==26) for(int i=0;i<TrendSpeech.COUNT;i++) trendEnabled.get(i).setChecked(Boolean.parseBoolean(fields.get(19+i)));
+                    if(fields.size()>=26) for(int i=0;i<TrendSpeech.COUNT;i++) trendEnabled.get(i).setChecked(Boolean.parseBoolean(fields.get(19+i)));
+                    if(fields.size()==54)trendColors.restore(fields.subList(26,54));
                 }
                 ArrayList<String> original=state.getStringArrayList("initial");
-                if(original!=null) { initial=original.size()==21?new ArrayList<>(original.subList(0,19)):original; if(initial.size()==19) for(int i=0;i<TrendSpeech.COUNT;i++) initial.add("true"); }
+                if(original!=null) { initial=original.size()==21?new ArrayList<>(original.subList(0,19)):original; if(initial.size()==19) for(int i=0;i<TrendSpeech.COUNT;i++) initial.add("true"); if(initial.size()==26)initial.addAll(TrendColorEditor.defaultValues()); }
             } else if (getIntent().hasExtra("mode")) restoreMode(AlarmEngine.OutputMode.valueOf(getIntent().getStringExtra("mode")));
             if(state==null && getIntent().getBooleanExtra("enable_values",false)) valueSpeechEnabled.setChecked(true);
             CompoundButton.OnCheckedChangeListener changed=(view,checked) -> { audio.stop(); controls(); };
@@ -154,10 +161,10 @@ public final class OutputSettingsActivity extends UiActivity {
         TokenButtons.enabled(template);
         volumeSpeechPreview.setEnabled(speech);
     }
-    private TrendSpeech words() { List<String> words=new ArrayList<>(); List<Boolean> enabled=new ArrayList<>(); for(EditText field:trendWords) words.add(field.getText().toString()); for(CheckBox box:trendEnabled) enabled.add(box.isChecked()); return new TrendSpeech(words,enabled); }
+    private TrendSpeech words() { List<String> words=new ArrayList<>(); List<Boolean> enabled=new ArrayList<>(); for(EditText field:trendWords) words.add(field.getText().toString()); for(CheckBox box:trendEnabled) enabled.add(box.isChecked()); return new TrendSpeech(words,enabled,trendColors.words()); }
     private ArrayList<String> values() {
         ArrayList<String> result=new ArrayList<>(Arrays.asList(mode().name(),interval.getText().toString(),template.getText().toString(),Integer.toString(toneVolume.getProgress()),Integer.toString(speechVolume.getProgress()),valueQuiet.getText().toString(),Integer.toString(bellBoost.getProgress())));
-        for(EditText field:trendWords) result.add(field.getText().toString()); result.add(Boolean.toString(tonesEnabled.isChecked())); result.add(Boolean.toString(alarmSpeechEnabled.isChecked())); result.add(Boolean.toString(valueSpeechEnabled.isChecked())); result.add(Boolean.toString(vibrationEnabled.isChecked())); result.add(draftSpeechLanguage); for(CheckBox box:trendEnabled) result.add(Boolean.toString(box.isChecked())); return result;
+        for(EditText field:trendWords) result.add(field.getText().toString()); result.add(Boolean.toString(tonesEnabled.isChecked())); result.add(Boolean.toString(alarmSpeechEnabled.isChecked())); result.add(Boolean.toString(valueSpeechEnabled.isChecked())); result.add(Boolean.toString(vibrationEnabled.isChecked())); result.add(draftSpeechLanguage); for(CheckBox box:trendEnabled) result.add(Boolean.toString(box.isChecked())); result.addAll(trendColors.values());return result;
     }
     private void save() {
         if (!ready) return;

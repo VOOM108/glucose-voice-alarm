@@ -32,7 +32,7 @@ public final class OutputPreferenceStore {
             byte[] body=ConfigurationFiles.open(encoded,8192);
             try (DataInputStream in=new DataInputStream(new ByteArrayInputStream(body))) {
                 if (!"XCAM_OUTPUT".equals(in.readUTF())) throw new IOException(AppText.tr("Unbekannte Ausgabe-Einstellungen"));
-                int schema=in.readInt(); if (schema<1 || schema>11) throw new IOException(AppText.tr("Unbekannte Ausgabe-Einstellungen"));
+                int schema=in.readInt(); if (schema<1 || schema>12) throw new IOException(AppText.tr("Unbekannte Ausgabe-Einstellungen"));
                 long revision=in.readLong(); if (revision<1) throw new IOException(AppText.tr("Ungültige Ausgabe-Revision"));
                 AlarmEngine.OutputMode mode=AlarmEngine.OutputMode.valueOf(in.readUTF()); int minutes=in.readInt(); String template=in.readUTF();
                 int tone=schema>=2?in.readInt():100,speech=schema>=2?in.readInt():100,quiet=schema>=2?in.readInt():5,boost=schema>=3?in.readInt():0;
@@ -52,6 +52,7 @@ public final class OutputPreferenceStore {
                     preferences=preferences.withTrendSpeech(new TrendSpeech(preferences.trendSpeech.words,enabled));
                 }
                 if(schema>=11) preferences=preferences.withUnitMode(de.giesen.camaps.companion.prototype.GlucoseUnit.Mode.valueOf(in.readUTF()));
+                if(schema>=12) preferences=preferences.withTrendSpeech(new TrendSpeech(preferences.trendSpeech.words,preferences.trendSpeech.enabled,de.giesen.camaps.companion.prototype.TrendColorOverrides.read(in,80)));
                 if (in.read()!=-1) throw new IOException(AppText.tr("Zusätzliche Ausgabe-Einstellungen"));
                 return new Snapshot(revision,preferences);
             } catch (IllegalArgumentException e) { throw new IOException(AppText.tr("Ungültige Ausgabe-Einstellungen"),e); }
@@ -75,7 +76,7 @@ public final class OutputPreferenceStore {
             OutputPreferences preferences=snapshot.preferences;
             ByteArrayOutputStream buffer=new ByteArrayOutputStream();
             try (DataOutputStream out=new DataOutputStream(buffer)) {
-                out.writeUTF("XCAM_OUTPUT"); out.writeInt(11); out.writeLong(snapshot.revision); out.writeUTF(preferences.mode.name());
+                out.writeUTF("XCAM_OUTPUT"); out.writeInt(12); out.writeLong(snapshot.revision); out.writeUTF(preferences.mode.name());
                 out.writeInt(preferences.valueIntervalMinutes); out.writeUTF(preferences.valueTemplate);
                 out.writeInt(preferences.toneVolumePercent); out.writeInt(preferences.speechVolumePercent);
                 out.writeInt(preferences.valueQuietMinutes);
@@ -88,6 +89,7 @@ public final class OutputPreferenceStore {
                 out.writeUTF("CAMAPS"); out.writeUTF("CAMAPS");
                 for(boolean enabled:preferences.trendSpeech.enabled) out.writeBoolean(enabled);
                 out.writeUTF(preferences.unitMode.name());
+                preferences.trendSpeech.colors.write(out);
             }
             byte[] encoded=ConfigurationFiles.seal(buffer.toByteArray()); if(encoded.length>8192) throw new IOException(AppText.tr("Ausgabe-Einstellungen zu groß")); return encoded;
     }

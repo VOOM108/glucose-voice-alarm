@@ -10,8 +10,8 @@ Glucose Voice Alarm (GVA) reads glucose values and trend arrows from **CamAPS no
 
 | Component | Current source version | Role |
 |---|---|---|
-| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.23.0 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
-| [GVA Watch](companionWear/README.md) | 0.19.0 Beta | Watch display, tile, six complication sources, and optional relayed phone alarms with vibration |
+| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.27.0 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
+| [GVA Watch](companionWear/README.md) | 0.20.0 Beta | Watch display, tile, six complication sources, and optional relayed phone alarms with vibration |
 | [GVA Dots](companionWatchFace/README.md) | 0.1.5 Beta | Round watch face with time dots, value/arrow, short history, age and delta |
 
 The tile and complications are included in **GVA Watch**. They are not separate apps. The phone works without a watch; GVA Dots needs GVA Watch for its data. Shared source keeps the display and alert protocols together. Phone and watch builds must use the same application ID and signing key.
@@ -50,6 +50,8 @@ An already-started live reading alarm may complete missing speech once the voice
 A fresh valid reading back inside a high/low threshold ends that level's automatic repeat episode. The next crossing can trigger its enabled output routes immediately. Manual snooze and the global pause remain in effect; gaps do not reset the repeat. [Episode rules](docs/PHONE_REFERENCE.md#new-highlow-alarm-episodes).
 
 Persistent-high duration includes gaps from the first received high reading; chart gaps stay visible. Fresh rising input and the imported quality checks still govern the alarm. [Duration and limits](docs/PHONE_REFERENCE.md#persistent-high-duration). [Processing diagnostics](docs/PHONE_REFERENCE.md#processing-diagnostics) distinguish alarm starts, silent refreshes and routine speech without storing readings or spoken text.
+
+All seven arrow directions support normal, red and yellow assignments. Displayed and spoken words inherit the normal word by default, with optional per-color text. The optional `{color}` speech variable names the color. A separate, configurable [Low soon warning](docs/PHONE_REFERENCE.md#low-soon) uses a fresh red arrow only while the reading remains above the active low boundary, once per red phase. [Arrow colors and words](docs/PHONE_REFERENCE.md#colored-arrows-and-custom-trend-words).
 
 ## Build and set up
 

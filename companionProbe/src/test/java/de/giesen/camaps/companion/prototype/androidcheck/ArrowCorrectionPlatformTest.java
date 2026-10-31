@@ -102,10 +102,10 @@ public class ArrowCorrectionPlatformTest {
         assertEquals(NotificationParser.Trend.DOUBLE_UP,ProbeState.latest.trend);
         ProbeState.Observation previous=ProbeState.latest;ProbeActivity activity=home();assertTrue(tag(activity,"edit_vector").isShown());tag(activity,"edit_vector").performClick();
         AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog();assertTrue(dialog.isShowing());
-        assertTrue(((TextView)dialog.findViewById(android.R.id.custom).findViewWithTag("vector_assignment")).getText().toString().contains("⇈"));
+        assertTrue(dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_0").isSelected());
         render((View)tag(activity,"camaps_trend").getParent().getParent(),"arrow-correction-dashboard",480);
-        render((View)dialog.findViewById(android.R.id.custom).findViewWithTag("vector_assignment").getParent(),"arrow-correction-dialog",340);
-        dialog.getListView().performItemClick(null,6,6);dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick();shadowOf(Looper.getMainLooper()).idle();
+        render(dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_panel"),"arrow-correction-dialog",340);
+        dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_6").performClick();dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick();shadowOf(Looper.getMainLooper()).idle();
         assertEquals(NotificationParser.Trend.DOUBLE_DOWN,TrendReference.lookup(app.getSharedPreferences(VectorReference.PREFS,0).getAll(),captured.key));
         assertEquals(ShapeReference.CONFLICT,app.getSharedPreferences(VectorReference.SHAPE_PREFS,0).getString(captured.shapeKey,""));
         assertEquals(123,ProbeState.latest.value,0);assertEquals(NotificationParser.Trend.UNKNOWN,ProbeState.latest.trend);

@@ -53,8 +53,8 @@ public final class AlarmLevelsActivity extends UiActivity {
         LevelUi.text(card,level.name,19);
         AlarmEngine.Rule r=level.rule;
         GlucoseUnit unit=UnitPreferences.display(this);
-        String summary=(LevelForm.isRate(r.kind)?AppText.tr("Änderungsrate: "):AppText.tr("Grenze: "))+unit.threshold(r.threshold,LevelForm.isRate(r.kind))
-                +" "+unit.label+(LevelForm.isRate(r.kind)?AppText.tr(" pro Minute"):"")
+        String summary=(r.kind==AlarmEngine.Kind.SOURCE_LOW?AppText.tr("Roter Quellpfeil · Wert oberhalb der aktiven Niedrig-Grenzen"):(LevelForm.isRate(r.kind)?AppText.tr("Änderungsrate: "):AppText.tr("Grenze: "))+unit.threshold(r.threshold,LevelForm.isRate(r.kind))
+                +" "+unit.label+(LevelForm.isRate(r.kind)?AppText.tr(" pro Minute"):""))
                 +(r.kind==AlarmEngine.Kind.PERSISTENT_HIGH?AppText.tr(" · länger als ")+r.durationMinutes+" Minuten":"")
                 +"\nTon "+(r.outputs.tone?AppText.tr("ein"):AppText.tr("aus"))+" · Sprache "+(r.outputs.speech?AppText.tr("ein"):AppText.tr("aus"))
                 +" · Vibration "+(level.vibrationPattern==null?AppText.tr("aus"):AppText.tr(VibrationCatalog.valueOf(level.vibrationPattern).label))

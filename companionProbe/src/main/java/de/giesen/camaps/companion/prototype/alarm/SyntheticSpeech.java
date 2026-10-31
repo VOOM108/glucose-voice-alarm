@@ -2,6 +2,7 @@
 package de.giesen.camaps.companion.prototype.alarm;
 
 import de.giesen.camaps.companion.prototype.NotificationParser.Trend;
+import de.giesen.gva.watch.ArrowColor;
 import java.util.*;
 
 /** Fixed speech fixtures only: never copied into rule forms or used for live decisions. */
@@ -23,7 +24,7 @@ public final class SyntheticSpeech {
         AlarmLevel level=new AlarmLevel(rule,name==null || name.trim().isEmpty()?"Teststufe":name,AlarmLevel.DEFAULT_TONE,variants);
         boolean low=kind==AlarmEngine.Kind.LOW || kind==AlarmEngine.Kind.FALLING;
         return SpeechTemplate.render(level.speechText((int)Math.floorMod(variant,Math.max(1,variants.size())),language),level,
-                new SpeechTemplate.Values(low?65:230,low?Trend.DOWN:Trend.UP,0,11,words,language,unit),false,true);
+                new SpeechTemplate.Values(kind==AlarmEngine.Kind.SOURCE_LOW?123:low?65:230,kind==AlarmEngine.Kind.SOURCE_LOW?Trend.DOWN_RIGHT:low?Trend.DOWN:Trend.UP,0,11,words,language,unit,low || kind==AlarmEngine.Kind.SOURCE_LOW?ArrowColor.RED:ArrowColor.YELLOW),false,true);
     }
     public static String value(String template) {
         return value(template,TrendSpeech.defaults());
@@ -35,7 +36,7 @@ public final class SyntheticSpeech {
         return value(template,words,language,de.giesen.camaps.companion.prototype.GlucoseUnit.MGDL);
     }
     public static String value(String template,TrendSpeech words,String language,de.giesen.camaps.companion.prototype.GlucoseUnit unit) {
-        return SpeechTemplate.render(template,null,new SpeechTemplate.Values(123,Trend.FLAT,10,0,words,language,unit),true,true);
+        return SpeechTemplate.render(template,null,new SpeechTemplate.Values(123,Trend.FLAT,10,0,words,language,unit,ArrowColor.RED),true,true);
     }
     private SyntheticSpeech() {}
 }

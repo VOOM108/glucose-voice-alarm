@@ -59,7 +59,14 @@ public class GlucoseUnitTest {
     }
     @Test public void oldSchemaTenPreservesTextAndFlagsAndDefaultsToAuto() throws Exception {
         OutputPreferences p=OutputPreferences.defaults().withTrendSpeech(new TrendSpeech(TrendSpeech.defaults().words,Arrays.asList(false,true,false,true,true,true,false)));
-        byte[] body=ConfigurationFiles.open(OutputPreferenceStore.encode(new OutputPreferenceStore.Snapshot(1,p)),8192);body=Arrays.copyOf(body,body.length-6);body[2+"XCAM_OUTPUT".length()+3]=10;
+        java.io.ByteArrayOutputStream bytes=new java.io.ByteArrayOutputStream();
+        try(java.io.DataOutputStream o=new java.io.DataOutputStream(bytes)){
+            o.writeUTF("XCAM_OUTPUT");o.writeInt(10);o.writeLong(1);o.writeUTF(p.mode.name());o.writeInt(0);o.writeUTF(p.valueTemplate);
+            o.writeInt(p.toneVolumePercent);o.writeInt(p.speechVolumePercent);o.writeInt(p.valueQuietMinutes);o.writeInt(p.bellBoostDb);
+            for(String word:p.trendSpeech.words.subList(0,5))o.writeUTF(word);o.writeBoolean(p.tonesEnabled);o.writeBoolean(p.alarmSpeechEnabled);o.writeBoolean(p.valueSpeechEnabled);o.writeBoolean(p.vibrationEnabled);p.gap.write(o);
+            o.writeUTF(p.speechLanguage);o.writeUTF(p.trendSpeech.words.get(5));o.writeUTF(p.trendSpeech.words.get(6));o.writeUTF(p.gap.speechTemplate);o.writeUTF("CAMAPS");o.writeUTF("CAMAPS");for(boolean flag:p.trendSpeech.enabled)o.writeBoolean(flag);
+        }
+        byte[] body=bytes.toByteArray();
         OutputPreferences saved=OutputPreferenceStore.decode(ConfigurationFiles.seal(body)).preferences;assertEquals(GlucoseUnit.Mode.AUTO,saved.unitMode);assertEquals(p.trendSpeech.enabled,saved.trendSpeech.enabled);
     }
     @Test public void templatesUseTheChosenValueAndUnitButPreserveLiteralText(){

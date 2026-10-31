@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 
 import android.app.*;
 import android.content.*;
@@ -28,6 +29,7 @@ public final class LiveAlarmService extends Service {
     private AlarmOutputFlow flow;
     private Double value;
     private NotificationParser.Trend trend=NotificationParser.Trend.UNKNOWN;
+    private ArrowColor arrowColor=ArrowColor.NORMAL;
     private AlarmStateStore.Clock received;
     private String audioStatus="",lastSummary="";
     private String terminalStatus;
@@ -43,10 +45,13 @@ public final class LiveAlarmService extends Service {
     static boolean live() { LiveAlarmService service=current; return service!=null && service.foreground && service.flow!=null && LivePreferences.alarms(service); }
     static String audioState() { LiveAlarmService service=current; return service==null?AppText.tr("Audio: kein aktiver Hintergrunddienst"):service.audioStatus; }
     static void receive(String key,long posted,double value,NotificationParser.Trend trend) {
+        receive(key,posted,value,trend,ArrowColor.NORMAL);
+    }
+    static void receive(String key,long posted,double value,NotificationParser.Trend trend,ArrowColor color) {
         LiveAlarmService service=current;
         if (service!=null) {
             long revision=service.referenceRevision;
-            service.handler.post(() -> { if(revision==service.referenceRevision)service.received(key,posted,value,trend); });
+            service.handler.post(() -> { if(revision==service.referenceRevision)service.received(key,posted,value,trend,color); });
         }
     }
     /** Drop queued old interpretations without manufacturing another receipt or changing consent. */
@@ -55,7 +60,7 @@ public final class LiveAlarmService extends Service {
         long revision=++service.referenceRevision;
         service.handler.post(() -> {
             if(revision!=service.referenceRevision)return;
-            service.sourceValid=false; service.trend=NotificationParser.Trend.UNKNOWN;
+            service.sourceValid=false; service.trend=NotificationParser.Trend.UNKNOWN; service.arrowColor=ArrowColor.NORMAL;
             service.gap.clear(); service.gapNotified=false;
             if(service.flow!=null)service.flow.stop();
             service.audio.stop(); service.notifications.clearAlarm(); service.releaseOutputLock();
@@ -140,7 +145,7 @@ public final class LiveAlarmService extends Service {
     private void foreground(boolean playback) {
         if (foreground && playbackForeground==playback) return;
         DisplayStatus shown=displayStatus();
-        Notification notification=notifications.status(shown.value,shown.trend,shown.received,shown.fresh,status);
+        Notification notification=notifications.status(shown.value,shown.trend,shown.received,shown.fresh,status,shown.arrowColor);
         if (Build.VERSION.SDK_INT>=34) startForeground(LiveNotifications.STATUS_ID,notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE|(playback?ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:0));
         else startForeground(LiveNotifications.STATUS_ID,notification);
@@ -186,7 +191,7 @@ public final class LiveAlarmService extends Service {
                         LivePreferences.alarmStarted(LiveAlarmService.this);
                         AlarmLevel level=levels.get(plan.ruleId); if (level!=null && value!=null) {
                             AlarmLevel extra=plan.ruleIds.size()>1?levels.get(plan.ruleIds.get(1)):null;
-                            notifications.alarm(level,value,trend,extra==null?null:LevelForm.kindLabel(extra.rule.kind)); displayedAlarmId=plan.ruleId; displayedPlan=plan;
+                            notifications.alarm(level,value,trend,extra==null?null:LevelForm.kindLabel(extra.rule.kind),false,arrowColor); displayedAlarmId=plan.ruleId; displayedPlan=plan;
                             processing.card(ProcessingDiagnostics.Card.STARTED);
                         }
                     }
@@ -201,7 +206,7 @@ public final class LiveAlarmService extends Service {
             audio.stop(); status=AppText.tr("Alarmzustand/Einstellungen nicht lesbar; Alarmausgabe gesperrt");
         }
     }
-    private void received(String key,long posted,double mgdl,NotificationParser.Trend sourceTrend) {
+    private void received(String key,long posted,double mgdl,NotificationParser.Trend sourceTrend,ArrowColor color) {
         if (!foreground || !LivePreferences.monitor(this)) return;
         AlarmStateStore.Clock now=RuntimeClock.read(this);
         ReceiptWindow.Intake intake=window.receive(key,posted,mgdl,now);
@@ -209,7 +214,7 @@ public final class LiveAlarmService extends Service {
         processing.beginReceipt();
         try {
         if(gap.waiting() || gapNotified) { audio.stop(); notifications.clearAlarm(); activePlan=null; displayedAlarmId=null; displayedPlan=null; gapNotified=false; }
-        sourceValid=true; value=mgdl; trend=sourceTrend; received=now;
+        sourceValid=true; value=mgdl; trend=sourceTrend; arrowColor=sourceTrend==NotificationParser.Trend.UNKNOWN?ArrowColor.NORMAL:java.util.Objects.requireNonNull(color); received=now;
         if (intake==ReceiptWindow.Intake.CLOCK_RESET && window.clockChanged() && flow!=null && LivePreferences.alarms(this)) {
             try {
                 AlarmStateStore store=new AlarmStateStore(stateDirectory()); AlarmStateStore.Snapshot saved=store.load();
@@ -222,6 +227,7 @@ public final class LiveAlarmService extends Service {
         if (flow!=null && LivePreferences.alarms(this)) {
             Calendar calendar=Calendar.getInstance();
             flow.setOutputUnit(UnitPreferences.display(this,preferences));
+        flow.setArrowColor(arrowColor);
             AlarmOutputFlow.Outcome result=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),window.episodePoints(),now,
                     calendar.get(Calendar.HOUR_OF_DAY)*60+calendar.get(Calendar.MINUTE),window.sessionStart(),trend);
             if (result==AlarmOutputFlow.Outcome.STORAGE_BLOCKED) status=AppText.tr("Alarmzustand nicht verfügbar; keine Ausgabe");
@@ -236,7 +242,7 @@ public final class LiveAlarmService extends Service {
                     for(AlarmEngine.Decision d:checked.decisions) if(d.conditionMet && (displayedPlan!=null?displayedPlan.ruleIds.contains(d.rule.id):displayedAlarmId.equals(d.rule.id))) matching.add(levels.get(d.rule.id));
                     AlarmLevel primary=matching.isEmpty()?null:matching.get(0),extra=matching.size()>1?matching.get(1):null;
                     if(primary!=null) displayedAlarmId=primary.rule.id;
-                    if(primary!=null) { notifications.alarm(primary,value,trend,extra==null?null:LevelForm.kindLabel(extra.rule.kind),true); processing.card(ProcessingDiagnostics.Card.REFRESHED); }
+                    if(primary!=null) { notifications.alarm(primary,value,trend,extra==null?null:LevelForm.kindLabel(extra.rule.kind),true,arrowColor); processing.card(ProcessingDiagnostics.Card.REFRESHED); }
                 }
                 if(activePlan!=null) { AlarmOutputFlow.Plan refreshed=flow.refreshPending(activePlan,now); if(audio.refreshPending(refreshed)) activePlan=refreshed; }
             }
@@ -275,7 +281,7 @@ public final class LiveAlarmService extends Service {
         List<String> candidates=new ArrayList<>();
         // Preserve the pinned Notifications call order: threshold player, drop, rise, persistent high.
         if (result.selectedThresholdRule!=null) candidates.add(result.selectedThresholdRule);
-        for (AlarmEngine.Kind kind:new AlarmEngine.Kind[]{AlarmEngine.Kind.FALLING,AlarmEngine.Kind.RISING,AlarmEngine.Kind.PERSISTENT_HIGH})
+        for (AlarmEngine.Kind kind:new AlarmEngine.Kind[]{AlarmEngine.Kind.FALLING,AlarmEngine.Kind.RISING,AlarmEngine.Kind.PERSISTENT_HIGH,AlarmEngine.Kind.SOURCE_LOW})
             for (AlarmEngine.Decision decision:result.decisions) if (decision.conditionMet && decision.rule.kind==kind) candidates.add(decision.rule.id);
         for (String id:candidates) {
             AlarmOutputFlow.Outcome outcome=flow.alarm(id,RuntimeClock.read(this));
@@ -302,6 +308,7 @@ public final class LiveAlarmService extends Service {
         AlarmOutputFlow.Plan original=speechCompletionPlan;
         Calendar calendar=Calendar.getInstance();calendar.setTimeInMillis(now.wallMs);
         flow.setOutputUnit(UnitPreferences.display(this,preferences));
+        flow.setArrowColor(arrowColor);
         AlarmOutputFlow.Outcome checked=flow.evaluate(AlarmOutputFlow.Origin.LIVE,window.points(),window.episodePoints(),now,
                 calendar.get(Calendar.HOUR_OF_DAY)*60+calendar.get(Calendar.MINUTE),window.sessionStart(),trend);
         AlarmOutputFlow.Plan updated=checked==AlarmOutputFlow.Outcome.ACCEPTED?flow.refreshPending(original,now):null;
@@ -332,18 +339,19 @@ public final class LiveAlarmService extends Service {
         status=result==AlarmOutputFlow.Outcome.ACCEPTED?AppText.tr("Alarm quittiert und gespeichert pausiert"):AppText.tr("Snooze konnte nicht gespeichert werden");
     }
     private static final class DisplayStatus {
-        final Double value;final NotificationParser.Trend trend;final long received;final boolean fresh;
-        DisplayStatus(Double v,NotificationParser.Trend t,long r,boolean f){value=v;trend=t;received=r;fresh=f;}
+        final Double value;final NotificationParser.Trend trend;final long received;final boolean fresh;final ArrowColor arrowColor;
+        DisplayStatus(Double v,NotificationParser.Trend t,long r,boolean f){this(v,t,r,f,ArrowColor.NORMAL);}
+        DisplayStatus(Double v,NotificationParser.Trend t,long r,boolean f,ArrowColor color){value=v;trend=t;received=r;fresh=f;arrowColor=color;}
     }
     /** Display retention never supplies an input to fresh(), evaluate() or an audio path. */
     private DisplayStatus displayStatus() {
         ProbeState.Observation shown=ProbeState.display(this);
-        if(shown!=null)return new DisplayStatus(shown.value,shown.trend,shown.receivedWall,ProbeState.displayFresh(this,shown)&&fresh());
+        if(shown!=null)return new DisplayStatus(shown.value,shown.trend,shown.receivedWall,ProbeState.displayFresh(this,shown)&&fresh(),shown.arrowColor);
         if(ProbeState.displayAllowed(this)&&value!=null&&received!=null) {
             AlarmStateStore.Clock now=RuntimeClock.read(this);
             long elapsed=now.elapsedMs-received.elapsedMs,wall=now.wallMs-received.wallMs;
             if(now.boot==received.boot&&elapsed>=0&&wall>=0&&elapsed<=ProbeState.DISPLAY_MAX_AGE_MS&&Math.abs(wall-elapsed)<=60000)
-                return new DisplayStatus(value,trend,received.wallMs,fresh());
+                return new DisplayStatus(value,trend,received.wallMs,fresh(),arrowColor);
         }
         return new DisplayStatus(null,NotificationParser.Trend.UNKNOWN,0,false);
     }
@@ -352,8 +360,8 @@ public final class LiveAlarmService extends Service {
         DisplayStatus display=displayStatus(); boolean fresh=display.fresh; long age=display.received==0?-1:Math.max(0,(System.currentTimeMillis()-display.received)/60000);
         String detail=status+(display.received>0?AppText.tr(" · Empfang vor ")+age+" Min.":"");
         NotificationParser.Trend shown=display.trend;
-        String signature=detail+"|"+display.value+"|"+display.received+"|"+shown+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this)+"|"+UnitPreferences.display(this,preferences);
-        if (!signature.equals(lastSummary)) { notifications.update(display.value,shown,display.received,fresh,detail); lastSummary=signature;
+        String signature=detail+"|"+display.value+"|"+display.received+"|"+shown+"|"+display.arrowColor+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this)+"|"+UnitPreferences.display(this,preferences);
+        if (!signature.equals(lastSummary)) { notifications.update(display.value,shown,display.received,fresh,detail,display.arrowColor); lastSummary=signature;
             handler.postDelayed(() -> DisplayDiagnostics.write(this),300); }
     }
     private void releaseOutputLock() { if (outputLock!=null && outputLock.isHeld()) outputLock.release(); }

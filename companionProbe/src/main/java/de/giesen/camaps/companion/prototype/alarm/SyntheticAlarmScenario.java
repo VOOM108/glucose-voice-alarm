@@ -17,11 +17,17 @@ public final class SyntheticAlarmScenario {
                 true,0,1440,new AlarmEngine.Outputs(true,true,LevelForm.hasRepeat(kind)?3:0,LevelForm.hasSnooze(kind)?5:0));
         level=new AlarmLevel(rule,AppText.tr("Synthetischer Test: ")+LevelForm.kindLabel(kind),AlarmLevel.DEFAULT_TONE);
     }
+    public List<AlarmLevel> levels() {
+        if(kind!=AlarmEngine.Kind.SOURCE_LOW)return Collections.singletonList(level);
+        return Arrays.asList(level,new AlarmLevel(new AlarmEngine.Rule("synthetic_low",AlarmEngine.Kind.LOW,true,80,0,true,0,1440,
+                new AlarmEngine.Outputs(true,true,3,5)),"Synthetisch niedrig",AlarmLevel.DEFAULT_TONE));
+    }
     public AlarmStateStore.Clock clock(long offset) { return new AlarmStateStore.Clock(BASE+offset,1000000+offset,1); }
     public List<HistoryAnalysis.Point> points(long offset,boolean condition) {
         List<HistoryAnalysis.Point> result=new ArrayList<>();
         for (int i=0;i<4;i++) {
             int value=condition?kind==AlarmEngine.Kind.LOW?65:160:100;
+            if (kind==AlarmEngine.Kind.SOURCE_LOW) value=123;
             if (kind==AlarmEngine.Kind.RISING) value=100+(condition?3*i:0);
             if (kind==AlarmEngine.Kind.FALLING) value=109-(condition?3*i:0);
             if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) value=condition?157+i:100;

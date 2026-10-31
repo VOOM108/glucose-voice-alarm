@@ -2,9 +2,11 @@
 
 [Project overview](../README.md) · [Deutsch](README.de.md) · [Phone](../companionProbe/README.md) · [GVA Dots face](../companionWatchFace/README.md)
 
-**0.19.0 Beta.** One watch APK contains the GVA display, its tile and all six complication sources. It receives data from the phone; no CamAPS watch app, direct sensor link or independent glucose alarm engine is included.
+**0.20.0 Beta.** One watch APK contains the GVA display, its tile and all six complication sources. It receives data from the phone; no CamAPS watch app, direct sensor link or independent glucose alarm engine is included.
 
 **Experimental research tool, not for medical use.** Read [the safety information](../SAFETY.md). The watch cannot independently warn when the phone or connection fails.
+
+Fresh red and yellow arrows are colored in the watch display, tile and composite graphic. Stale arrows stay gray. The phone negotiates display format v2 with a signature-checked connected nearby watch; older or unknown peers continue to receive v1 without color. The selected face controls color for text and monochrome complications.
 
 ## Examples
 

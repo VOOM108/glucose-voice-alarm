@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 
 import android.app.Notification;
 import android.os.Build;
@@ -32,9 +33,16 @@ final class MetricNotification {
         return apply(builder,value,trend,receivedWall,unit,true);
     }
     static CharSequence reading(double value,NotificationParser.Trend trend,GlucoseUnit unit,boolean fresh) {
+        return reading(value,trend,unit,fresh,ArrowColor.NORMAL);
+    }
+    static CharSequence reading(double value,NotificationParser.Trend trend,GlucoseUnit unit,boolean fresh,ArrowColor color) {
         String display=unit.number(value,Locale.getDefault())+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol);
-        if(fresh)return display;
+        if(fresh && (!color.colored() || trend==NotificationParser.Trend.UNKNOWN))return display;
         android.text.SpannableString text=new android.text.SpannableString(display);
+        if(fresh) {
+            text.setSpan(new android.text.style.ForegroundColorSpan(color.phone),display.length()-trend.symbol.length(),display.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            return text;
+        }
         text.setSpan(new android.text.style.ForegroundColorSpan(0xff899298),0,text.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return text;
     }
@@ -55,13 +63,16 @@ final class MetricNotification {
         return apply(builder,value,trend,receivedWall,unit,fresh,trendTitle(trend));
     }
     static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit,boolean fresh,String displayTitle) {
+        return apply(builder,value,trend,receivedWall,unit,fresh,displayTitle,ArrowColor.NORMAL);
+    }
+    static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit,boolean fresh,String displayTitle,ArrowColor color) {
         if (Build.VERSION.SDK_INT<37) return false;
         try {
             Class<?> metric=Class.forName("android.app.Notification$Metric");
             Class<?> metricValue=Class.forName("android.app.Notification$Metric$MetricValue");
             Class<?> fixedText=Class.forName("android.app.Notification$Metric$FixedText");
             Class<?> style=Class.forName("android.app.Notification$MetricStyle");
-            CharSequence display=reading(value,trend,unit,fresh);
+            CharSequence display=reading(value,trend,unit,fresh,color);
             Object rendered=fixedText.getConstructor(CharSequence.class).newInstance(display);
             CharSequence time=clock(receivedWall,fresh);
             Object entry=metric.getConstructor(metricValue,CharSequence.class).newInstance(rendered,time);

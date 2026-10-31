@@ -46,7 +46,7 @@ public final class LevelStore {
             byte[] body=ConfigurationFiles.open(encoded,MAX_ARCHIVE_BYTES);
             try (DataInputStream in=new DataInputStream(new ByteArrayInputStream(body))) {
                 if (!MAGIC.equals(in.readUTF())) throw new IOException(AppText.tr("Unbekanntes Alarmstufenformat; unverändert erhalten"));
-                int schema=in.readInt(); if (schema<1 || schema>4) throw new IOException(AppText.tr("Unbekanntes Alarmstufenformat; unverändert erhalten"));
+                int schema=in.readInt(); if (schema<1 || schema>5) throw new IOException(AppText.tr("Unbekanntes Alarmstufenformat; unverändert erhalten"));
                 long revision=in.readLong(); int count=in.readInt();
                 if (revision<1 || count<0 || count>MAX_LEVELS) throw new IOException(AppText.tr("Ungültiges Alarmstufenformat; unverändert erhalten"));
                 List<AlarmLevel> levels=new ArrayList<>();
@@ -83,7 +83,7 @@ public final class LevelStore {
     public static byte[] encode(Snapshot next) throws IOException {
                 ByteArrayOutputStream buffer=new ByteArrayOutputStream();
                 try (DataOutputStream out=new DataOutputStream(buffer)) {
-                    out.writeUTF(MAGIC); out.writeInt(4); out.writeLong(next.revision); out.writeInt(next.levels.size());
+                    out.writeUTF(MAGIC); out.writeInt(5); out.writeLong(next.revision); out.writeInt(next.levels.size());
                     for (AlarmLevel level:next.levels) {
                         AlarmEngine.Rule r=level.rule;
                         out.writeUTF(r.id); out.writeUTF(level.name); out.writeUTF(r.kind.name()); out.writeBoolean(r.enabled);

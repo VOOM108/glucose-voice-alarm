@@ -105,7 +105,7 @@ public final class AlarmStateStore {
                 throw new IOException(AppText.tr("Prüfsummenfehler; Alarmzustände unverändert erhalten"));
             try (DataInputStream in=new DataInputStream(new ByteArrayInputStream(body))) {
                 if (!"XCAM_ALARM_RUNTIME".equals(in.readUTF())) throw new IOException(AppText.tr("Unbekanntes Alarmzustandsformat"));
-                int schema=in.readInt(); if(schema<1 || schema>3) throw new IOException(AppText.tr("Unbekanntes Alarmzustandsformat"));
+                int schema=in.readInt(); if(schema<1 || schema>4) throw new IOException(AppText.tr("Unbekanntes Alarmzustandsformat"));
                 long revision=in.readLong(); Clock clock=new Clock(in.readLong(),in.readLong(),in.readLong());
                 int count=in.readInt(); if (revision<1 || count<0 || count>LevelStore.MAX_LEVELS) throw new IOException(AppText.tr("Ungültige Alarmzustandsliste"));
                 List<Entry> rows=new ArrayList<>();
@@ -125,7 +125,7 @@ public final class AlarmStateStore {
             Snapshot next=new Snapshot(revision+1,clock,entries);
             ByteArrayOutputStream buffer=new ByteArrayOutputStream();
             try (DataOutputStream out=new DataOutputStream(buffer)) {
-                out.writeUTF("XCAM_ALARM_RUNTIME"); out.writeInt(3); out.writeLong(next.revision);
+                out.writeUTF("XCAM_ALARM_RUNTIME"); out.writeInt(4); out.writeLong(next.revision);
                 out.writeLong(clock.wallMs); out.writeLong(clock.elapsedMs); out.writeLong(clock.boot); out.writeInt(next.entries.size());
                 for (Entry row:next.entries.values()) {
                     out.writeUTF(row.id); out.writeUTF(row.fingerprint); out.writeUTF(row.kind.name()); out.writeLong(row.highSince);

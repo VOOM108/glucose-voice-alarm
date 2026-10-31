@@ -30,8 +30,7 @@ public class TrendSpeechToggleTest {
         assertTrue(SpeechTemplate.render(level.speechText(0,"en"),level,new SpeechTemplate.Values(123,NotificationParser.Trend.DOWN,0,0,muted,"en"),false,false).contains("Critical fall rate"));
     }
     @Test public void previousSchemaNineDefaultsToAllEnabledWithoutRewritingBytes() throws Exception {
-        byte[] bytes=OutputPreferenceStore.encode(new OutputPreferenceStore.Snapshot(3,OutputPreferences.defaults()));byte[] body=ConfigurationFiles.open(bytes,8192);
-        body=Arrays.copyOf(body,body.length-7-6);body[2+"XCAM_OUTPUT".length()+3]=9;byte[] old=ConfigurationFiles.seal(body),copy=old.clone();
+        byte[] old=LegacyOutputFixture.encode(9,3,OutputPreferences.defaults(),"CAMAPS","CAMAPS"),copy=old.clone();
         OutputPreferences saved=OutputPreferenceStore.decode(old).preferences;assertEquals(Collections.nCopies(7,true),saved.trendSpeech.enabled);assertArrayEquals(copy,old);
     }
     @Test public void switchListsAreValidatedAndDefensivelyCopied() {

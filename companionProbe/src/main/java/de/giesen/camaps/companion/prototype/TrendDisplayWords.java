@@ -11,7 +11,10 @@ public final class TrendDisplayWords {
             NotificationParser.Trend.DOWN_RIGHT,NotificationParser.Trend.DOWN,
             NotificationParser.Trend.DOUBLE_UP,NotificationParser.Trend.DOUBLE_DOWN));
     public final List<String> overrides;
-    public TrendDisplayWords(List<String> words) {
+    public final TrendColorOverrides colors;
+    public TrendDisplayWords(List<String> words) { this(words,TrendColorOverrides.defaults()); }
+    public TrendDisplayWords(List<String> words,TrendColorOverrides colors) {
+        this.colors=Objects.requireNonNull(colors);colors.validate(MAX_LENGTH);
         if(words==null || words.size()!=COUNT)throw new IllegalArgumentException(AppText.tr("Sieben Anzeigetexte erforderlich"));
         List<String> copy=new ArrayList<>();
         for(String word:words) {
@@ -23,6 +26,9 @@ public final class TrendDisplayWords {
         overrides=Collections.unmodifiableList(copy);
     }
     public static TrendDisplayWords defaults() { return new TrendDisplayWords(Collections.nCopies(COUNT,"")); }
+    public String title(NotificationParser.Trend trend,de.giesen.gva.watch.ArrowColor color) {
+        return colors.resolve(TRENDS.indexOf(trend),color,title(trend));
+    }
     public String title(NotificationParser.Trend trend) {
         int index=TRENDS.indexOf(trend);
         return index>=0 && !overrides.get(index).isEmpty()?overrides.get(index):MetricNotification.trendTitle(trend);

@@ -151,7 +151,7 @@ public class AndroidUiTest {
         ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.UNKNOWN,SystemClock.elapsedRealtime(),System.currentTimeMillis(),"synthetic");
         ProbeActivity activity=open(ProbeActivity.class).get(); shadowOf(Looper.getMainLooper()).idle();
         View trend=activity.getWindow().getDecorView().findViewWithTag("camaps_trend");
-        assertEquals("CamAPS  Kein Trendpfeil",((TextView)trend).getText().toString());
+        assertEquals("Pfeil: Kein Trendpfeil",((TextView)trend).getText().toString());
         View button=text(activity,"Pfeilgrafik zuordnen …");
         View row=(View)trend.getParent(); ViewGroup parent=(ViewGroup)row.getParent();
         assertSame(button,parent.getChildAt(parent.indexOfChild(row)+1)); assertFalse(button.isEnabled());

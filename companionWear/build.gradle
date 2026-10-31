@@ -5,7 +5,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 android {
     namespace 'de.giesen.gva.watch'
     compileSdk 35
-    defaultConfig { applicationId 'de.giesen.camaps.companion.prototype'; minSdk 30; targetSdk 35; versionCode 40; versionName '0.19.0-beta' }
+    defaultConfig { applicationId 'de.giesen.camaps.companion.prototype'; minSdk 30; targetSdk 35; versionCode 41; versionName '0.20.0-beta' }
     compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
     kotlinOptions { jvmTarget='1.8' }
     buildFeatures { compose true }

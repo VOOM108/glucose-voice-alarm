@@ -36,7 +36,7 @@ public class ReceiptTimeTest {
         assertEquals(HistoryAnalysis.Quality.OUT_OF_ORDER,HistoryAnalysis.analyze(Arrays.asList(HistoryAnalysis.Point.received(106,B+M),HistoryAnalysis.Point.received(100,B)),B+M,ReceiptWindow.limits(),HistoryAnalysis.TimeBasis.RECEIPT).quality);
     }
     @Test public void originalFiveAlarmKindsAcceptExplicitReceiptDataInAnArmedLiveInstance() throws Exception {
-        for (Kind kind:Kind.values()) {
+        for (Kind kind:new Kind[]{Kind.HIGH,Kind.LOW,Kind.PERSISTENT_HIGH,Kind.RISING,Kind.FALLING}) {
             SyntheticAlarmScenario scenario=new SyntheticAlarmScenario(kind); List<AlarmOutputFlow.Plan> plans=new ArrayList<>();
             AlarmOutputFlow.Port port=new AlarmOutputFlow.Port() {
                 public boolean available(AlarmOutputFlow.Plan plan) { return true; }

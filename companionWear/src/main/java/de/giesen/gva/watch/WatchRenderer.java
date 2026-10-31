@@ -53,7 +53,7 @@ public final class WatchRenderer {
         c.save();c.scale(size/600f,size/600f);c.drawColor(Color.BLACK);
         int white=ambient?0xffd5dadc:0xfff4f6f7,muted=ambient?0xff778087:0xff899298;
         text(c,245,213,s==null?"—":number(s.value,s.mmol,false),112,fresh?white:muted,245);
-        if(s!=null)arrow(c,s.trend,fresh?(ambient?0xffdddddd:Color.WHITE):muted);
+        if(s!=null)arrow(c,s.trend,fresh?(s.arrowColor.colored()?(ambient?s.arrowColor.ambient:s.arrowColor.watch):(ambient?0xffdddddd:Color.WHITE)):muted);
         if(s!=null)chart(c,s,now,hours,ambient);
         historyIndicator(c,hours,ambient);
         String delta=s==null||!fresh||s.rate==null?"—":number(s.rate,s.mmol,true);

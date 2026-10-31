@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 import android.graphics.*;
 import de.giesen.gva.watch.WatchSnapshot;
 import java.util.*;
@@ -18,10 +19,13 @@ final class HomeWidgetRenderer {
         return numerals(context,value,arrow,color,small,320);
     }
     static Bitmap numerals(android.content.Context context,String value,String arrow,int color,boolean small,int widgetWidthDp) {
+        return numerals(context,value,arrow,color,small,widgetWidthDp,ArrowColor.NORMAL);
+    }
+    static Bitmap numerals(android.content.Context context,String value,String arrow,int color,boolean small,int widgetWidthDp,ArrowColor arrowColor) {
         Typeface font;
         synchronized(HomeWidgetRenderer.class){if(rounded==null)rounded=context.getResources().getFont(R.font.gva_rounded_widget);font=rounded;}
         Paint digits=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.SUBPIXEL_TEXT_FLAG);digits.setTypeface(font);digits.setTextSize(small?128:256);digits.setColor(color);
-        Paint trend=new Paint(digits);trend.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL));trend.setTextSize(digits.getTextSize()*.85f);
+        Paint trend=new Paint(digits);if(arrowColor.colored())trend.setColor(arrowColor.phone);trend.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL));trend.setTextSize(digits.getTextSize()*.85f);
         Rect a=new Rect(),b=new Rect();digits.getTextBounds(value,0,value.length(),a);
         float arrowX=digits.measureText(value)+digits.measureText("\u2009");
         RectF bounds=new RectF(a);Rect zero=new Rect();digits.getTextBounds("0",0,1,zero);

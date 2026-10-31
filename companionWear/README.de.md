@@ -2,9 +2,11 @@
 
 [Projektübersicht](../README.de.md) · [English](README.md) · [Telefon](../companionProbe/README.de.md) · [GVA Dots](../companionWatchFace/README.de.md)
 
-**0.19.0 Beta.** Eine Uhren-APK enthält die GVA-Anzeige, die Kachel und alle sechs Komplikationsquellen. Sie empfängt Daten vom Telefon; sie enthält keine CamAPS-Uhren-App, direkte Sensorverbindung oder unabhängige Glukosealarmberechnung.
+**0.20.0 Beta.** Eine Uhren-APK enthält die GVA-Anzeige, die Kachel und alle sechs Komplikationsquellen. Sie empfängt Daten vom Telefon; sie enthält keine CamAPS-Uhren-App, direkte Sensorverbindung oder unabhängige Glukosealarmberechnung.
 
 **Experimentelles Forschungswerkzeug, nicht für medizinische Verwendung.** Lies die [Sicherheitshinweise](../SAFETY.de.md). Bei Ausfall von Telefon oder Verbindung kann die Uhr nicht unabhängig warnen.
+
+Frische rote und gelbe Pfeile werden auch in der Uhrenanzeige, Kachel und zusammengesetzten Grafik farbig dargestellt. Veraltete Pfeile bleiben grau. Für diese Farbinformation handeln Telefon und eine signaturgeprüfte verbundene nahe Uhr das Anzeigeformat v2 aus; ältere oder unbekannte Gegenstellen erhalten weiterhin v1 ohne Farbe. Bei Text-/Monochrom-Komplikationen bestimmt das Zifferblatt die Farbe.
 
 ## Beispiele
 

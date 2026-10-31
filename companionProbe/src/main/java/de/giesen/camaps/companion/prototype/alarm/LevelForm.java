@@ -10,6 +10,7 @@ public final class LevelForm {
         switch(kind) {
             case HIGH: return AppText.tr("Hoch");
             case LOW: return AppText.tr("Niedrig");
+            case SOURCE_LOW: return AppText.tr("Bald niedrig");
             case PERSISTENT_HIGH: return AppText.tr("Dauerhaft hoch");
             case RISING: return AppText.tr("Kritische Anstiegsrate");
             case FALLING: return AppText.tr("Kritische Fallrate");
@@ -17,7 +18,7 @@ public final class LevelForm {
         }
     }
     public static boolean isRate(AlarmEngine.Kind kind) { return kind==AlarmEngine.Kind.RISING || kind==AlarmEngine.Kind.FALLING; }
-    public static boolean hasRepeat(AlarmEngine.Kind kind) { return !isRate(kind); }
+    public static boolean hasRepeat(AlarmEngine.Kind kind) { return !isRate(kind) && kind!=AlarmEngine.Kind.SOURCE_LOW; }
     public static boolean hasSnooze(AlarmEngine.Kind kind) { return kind==AlarmEngine.Kind.HIGH || kind==AlarmEngine.Kind.LOW; }
     public static String number(double input) { return BigDecimal.valueOf(input).stripTrailingZeros().toPlainString().replace('.',','); }
     private static double threshold(String raw,boolean rate) {
@@ -44,12 +45,12 @@ public final class LevelForm {
     public static AlarmLevel parse(String id,AlarmEngine.Kind kind,String name,String threshold,
                                    String duration,String repeat,String snooze,boolean enabled,boolean tone,boolean speech,
                                    String toneUri,boolean allDay,int startMinute,int endMinute) {
-        return canonicalLevel(id,kind,name,threshold(threshold,isRate(kind)),duration,repeat,snooze,enabled,tone,speech,toneUri,allDay,startMinute,endMinute);
+        return canonicalLevel(id,kind,name,kind==AlarmEngine.Kind.SOURCE_LOW?1:threshold(threshold,isRate(kind)),duration,repeat,snooze,enabled,tone,speech,toneUri,allDay,startMinute,endMinute);
     }
     public static AlarmLevel parseWithUnit(String id,AlarmEngine.Kind kind,String name,String threshold,
                                    String duration,String repeat,String snooze,boolean enabled,boolean tone,boolean speech,
                                    String toneUri,boolean allDay,int startMinute,int endMinute,de.giesen.camaps.companion.prototype.GlucoseUnit unit,Double unchanged) {
-        double value=unchanged==null?unit.parse(threshold):unchanged;
+        double value=kind==AlarmEngine.Kind.SOURCE_LOW?1:unchanged==null?unit.parse(threshold):unchanged;
         if(!Double.isFinite(value) || value<=0 || value>Integer.MAX_VALUE)throw new IllegalArgumentException(AppText.tr("Grenzwert ist nicht als positive Zahl speicherbar"));
         return canonicalLevel(id,kind,name,value,duration,repeat,snooze,enabled,tone,speech,toneUri,allDay,startMinute,endMinute);
     }
@@ -64,6 +65,7 @@ public final class LevelForm {
                 new AlarmEngine.Outputs(tone,speech,repeatMinutes,snoozeMinutes)),name,toneUri);
     }
     public static String timingSummary(AlarmEngine.Rule rule) {
+        if (rule.kind==AlarmEngine.Kind.SOURCE_LOW) return AppText.tr("Einmal pro roter Pfeilphase · keine Wiederholung oder Snoozezeit");
         if (isRate(rule.kind)) return AppText.tr("Ereignisregel nach xDrip · keine einstellbare Wiederholungs-/Snoozezeit");
         return "Wiederholung: "+rule.outputs.repeatMinutes+" Min."
                 +(hasSnooze(rule.kind)?" · Snooze: "+rule.outputs.snoozeMinutes+" Min.":"");

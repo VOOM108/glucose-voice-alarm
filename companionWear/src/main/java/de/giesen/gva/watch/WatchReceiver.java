@@ -12,6 +12,7 @@ public final class WatchReceiver extends WearableListenerService {
             for(Node node:Tasks.await(Wearable.getNodeClient(this).getConnectedNodes(),3,TimeUnit.SECONDS))
                 if(node.isNearby()&&node.getId().equals(event.getSourceNodeId()))nearby=true;
             if(!nearby)return;
+            if(WatchSnapshot.CAPABILITIES.equals(event.getPath())&&event.getData().length==0){WatchTransport.request(this);return;}
             if(WatchAlert.PATH.equals(event.getPath())){WatchAlerts.receive(this,WatchAlert.decode(event.getData(),System.currentTimeMillis()));return;}
             if(WatchSnapshot.CLEAR.equals(event.getPath())&&event.getData().length==0)WatchStore.clear(this);
             else if(!WatchSnapshot.PATH.equals(event.getPath())||!WatchStore.accept(this,event.getData()))return;

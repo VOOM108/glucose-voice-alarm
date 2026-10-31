@@ -6,15 +6,15 @@
 
 | Component | Version | Source minimum / special requirement |
 |---|---|---|
-| Phone | 0.23.0 Beta | Android API 26 minimum declaration; native large metric display requires Android 17/API 37 |
-| GVA Watch, including tile and six complication sources | 0.19.0 Beta | API 30 minimum declaration; some dynamic-age behavior requires newer APIs |
+| Phone | 0.27.0 Beta | Android API 26 minimum declaration; native large metric display requires Android 17/API 37 |
+| GVA Watch, including tile and six complication sources | 0.20.0 Beta | API 30 minimum declaration; some dynamic-age behavior requires newer APIs |
 | GVA Dots | 0.1.5 Beta | Wear OS 4+, Watch Face Format v1 |
 
 The phone/watch application ID and signing key must match for Google Play services Data Layer communication. The face has its own package. Shared source is in `companionWatchShared/`; the two build roots are documented in [BUILDING.md](BUILDING.md).
 
 ## What has been checked
 
-The phone suite contains 852 synthetic checks; the unchanged watch suite contains 50, including four tile checks. The exported phone source is independently rebuilt and tested without the private developer key; watch test evidence is reused only for byte-identical sources. All three validation APKs use the same ordinary debug identity and are not distributed. Source review checks imported xDrip rule hashes, private-file exclusions, local links, dependency/font notices and package identities. Synthetic tests do not establish clinical safety or reliable alarm delivery. This source publication does not modify the installed apps.
+The exported phone source has 941 synthetic checks and the watch source has 52, including four tile checks. Both exported build roots are independently rebuilt and tested without the private developer key. All three validation APKs use the same ordinary debug identity and are not distributed. Source review checks imported xDrip rule hashes, private-file exclusions, local links, dependency/font notices and package identities. Synthetic tests do not establish clinical safety or reliable alarm delivery. This source publication does not modify the installed apps.
 
 Device work has focused on Pixel 7 Pro, Android 17, CamAPS FX 1.4(194).111, and Galaxy Watch5 Pro, Wear OS 6/One UI 8 Watch. The user observed value/trend speech and phone live-display behavior. The watch-face appearance, age field and worn ambient display were checked. Watch active-mode updates were observed approximately once per minute. The user accepted the phone widget’s appearance on the Pixel launcher in version 0.20.7, including its rounded font, bounded reading size and revised curve weight. The later 0.21.3 widget arrows and direct toggles, and the editable display trend text, are synthetically checked; their latest Pixel behavior still needs user acceptance. These observations are not a compatibility or reliability guarantee.
 
@@ -26,7 +26,9 @@ Phone 0.22.0 adds per-level high/low repeat episodes. Thirty-five new synthetic 
 
 Phone 0.22.1 adds bounded processing diagnostics: 40 synthetic cases cover input/attempt correlation, silent refreshes, output failures, snooze/pause distinctions, timer ticks, cache validation and reset on service start. These snapshots do not prove physical delivery or establish the cause of a past event.
 
-Phone 0.23.0 adds elapsed persistent-high duration across gaps. Its 42 new checks comprise 18 state cases and 12 service scenarios on API 28/34. They cover a five-hour synthetic high episode with early gaps, first high input without a rising slope, stable/falling phases, invalid/stale input, fresh boundary recovery, separate rate/episode history, speech duration, same-boot reload/restart, real clock/boot changes and retained repeat deadlines. The chart is not backfilled. Existing lost beginnings are not retrospectively restored. The latest version is installed on the development Pixel; its new duration behavior still needs everyday device acceptance. The inherited rising-only trigger, density check and one-day limit remain.
+Phone 0.23.0 adds elapsed persistent-high duration across gaps. Its 42 new checks comprise 18 state cases and 12 service scenarios on API 28/34. They cover a five-hour synthetic high episode with early gaps, first high input without a rising slope, stable/falling phases, invalid/stale input, fresh boundary recovery, separate rate/episode history, speech duration, same-boot reload/restart, real clock/boot changes and retained repeat deadlines. The chart is not backfilled. Existing lost beginnings are not retrospectively restored. Its duration behavior still needs everyday device acceptance. The inherited rising-only trigger, density check and one-day limit remain.
+
+Phone 0.24–0.27 and Watch 0.20 add exact normal/red/yellow arrow assignment, a compact 7×3 picker, negotiated color transfer, the optional speech color variable, the source-based low-soon warning, and separate per-color display/speech words. Synthetic checks cover inheritance and checkbox editing, profile and legacy-format migration, stale/unknown graphics, phase claims across restarts, active low boundaries, schedules, pauses, output failures and old/new watch formats. The installed development phone is 0.27.0 and the watch is 0.20.0; everyday color recognition, editor use and spoken output still need device acceptance. Existing documentation images remain synthetic examples from earlier versions and do not show all new controls.
 
 ## Open before broader use
 

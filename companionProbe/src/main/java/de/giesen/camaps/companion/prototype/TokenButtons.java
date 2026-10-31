@@ -17,7 +17,7 @@ final class TokenButtons {
         }
     }
     private static String englishToken(String token) {
-        switch(token) { case "{wert}":return "{value}"; case "{einheit}":return "{unit}"; case "{stufe}":return "{level}"; case "{grenze}":return "{threshold}"; case "{dauer_minuten}":return "{duration_minutes}"; case "{alter_sekunden}":return "{age_seconds}"; default:return token; }
+        switch(token) { case "{farbe}":return "{color}"; case "{wert}":return "{value}"; case "{einheit}":return "{unit}"; case "{stufe}":return "{level}"; case "{grenze}":return "{threshold}"; case "{dauer_minuten}":return "{duration_minutes}"; case "{alter_sekunden}":return "{age_seconds}"; default:return token; }
     }
     static void enabled(EditText field) { if(field.getTag() instanceof LinearLayout) { LinearLayout row=(LinearLayout)field.getTag(); for(int i=0;i<row.getChildCount();i++) row.getChildAt(i).setEnabled(field.isEnabled()); } }
     static boolean insert(EditText field,String token) {

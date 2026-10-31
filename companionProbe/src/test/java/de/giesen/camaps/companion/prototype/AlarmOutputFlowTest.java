@@ -60,7 +60,7 @@ public class AlarmOutputFlowTest {
     private Run run(Kind kind,OutputPreferences preferences) throws Exception { return new Run(temporary.newFolder(),kind,preferences,null); }
     private Run run(Kind kind) throws Exception { return run(kind,SPOKEN); }
     @Test public void allFiveKindsUseSavedSettingsOriginalRulesAndDurableReservationBeforeAudio() throws Exception {
-        for (Kind kind:Kind.values()) {
+        for (Kind kind:new Kind[]{Kind.HIGH,Kind.LOW,Kind.PERSISTENT_HIGH,Kind.RISING,Kind.FALLING}) {
             Run r=run(kind); long at=r.activate();
             r.audio.beforeStart=() -> { try { assertTrue(r.store.load().entries.get(r.scenario.level.rule.id).active); } catch (IOException e) { throw new AssertionError(e); } };
             assertEquals(kind.name(),Outcome.ACCEPTED,r.alarm(at));
@@ -78,7 +78,7 @@ public class AlarmOutputFlowTest {
     }
     @Test public void tonesOnlyRemovesSpeechForEveryAlarmKind() throws Exception {
         OutputPreferences tones=new OutputPreferences(OutputMode.TONES_ONLY,1,SpeechTemplate.VALUE_DEFAULT);
-        for (Kind kind:Kind.values()) {
+        for (Kind kind:new Kind[]{Kind.HIGH,Kind.LOW,Kind.PERSISTENT_HIGH,Kind.RISING,Kind.FALLING}) {
             Run r=run(kind,tones); long at=r.activate(); assertEquals(Outcome.ACCEPTED,r.alarm(at));
             assertNull(r.audio.plans.get(0).speech); assertNotNull(r.audio.plans.get(0).toneUri);
             assertEquals(Outcome.DISABLED,r.flow.value(r.scenario.clock(at)));
@@ -188,7 +188,7 @@ public class AlarmOutputFlowTest {
         assertTrue(r.audio.plans.get(0).speech.endsWith("Erste Testname: 160")); assertTrue(r.audio.plans.get(1).speech.endsWith("Zweite Testname: 160"));
     }
     @Test public void externalLowerCutoffDecisionCanSuppressAllFiveKindsWithoutConsumingOutputDeadlines() throws Exception {
-        for (Kind kind:Kind.values()) {
+        for (Kind kind:new Kind[]{Kind.HIGH,Kind.LOW,Kind.PERSISTENT_HIGH,Kind.RISING,Kind.FALLING}) {
             Run r=run(kind);
             r.flow=new AlarmOutputFlow(r.store,r.levels,SyntheticAlarmScenario.limits(),SPOKEN,r.audio,input -> OutputGuard.Reason.OWN_LOWER_CUTOFF);
             long at=r.activate(); assertEquals(Outcome.SUPPRESSED,r.alarm(at));
@@ -238,5 +238,41 @@ public class AlarmOutputFlowTest {
             r.evaluate(0,true); r.audio.accept=!fail; assertEquals(fail?Outcome.ATTEMPT_FAILED:Outcome.ACCEPTED,r.alarm(0));
             r.audio.accept=true; r.evaluate(M,false); assertEquals(Outcome.ACCEPTED,r.flow.value(r.scenario.clock(M)));
         }
+    }
+
+    @Test public void colorChangesOnlyExplicitAlarmTextAndDoesNotRearmAnExistingAlarm() throws Exception {
+        SyntheticAlarmScenario s=new SyntheticAlarmScenario(Kind.HIGH);
+        AlarmLevel level=new AlarmLevel(s.level.rule,s.level.name,s.level.toneUri,Collections.singletonList("{wert} {trend} {farbe}"));
+        Run r=new Run(temporary.newFolder(),Kind.HIGH,SPOKEN,Collections.singletonList(level));
+        r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.RED); r.evaluate(0,true);
+        assertEquals(Outcome.ACCEPTED,r.alarm(0)); assertTrue(r.audio.plans.get(0).speech.endsWith("160 schnell steigend rot"));
+        r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.YELLOW); r.evaluate(M,true);
+        assertEquals(Outcome.NOT_DUE,r.alarm(M));
+        Plan refreshed=r.flow.refreshPending(r.audio.plans.get(0),r.scenario.clock(M));
+        assertNotNull(refreshed); assertTrue(refreshed.speech.endsWith("160 schnell steigend gelb"));
+        assertEquals(1,r.audio.plans.size());
+    }
+    @Test public void periodicColorUsesLatestConfirmedColorAndNormalRemainsEmpty() throws Exception {
+        Run r=run(Kind.HIGH,new OutputPreferences(OutputMode.SPOKEN_ALARMS_AND_VALUES,1,"{wert} {trend} {farbe}"));
+        r.evaluate(0,true); r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.RED); r.evaluate(M,true);
+        assertEquals(Outcome.ACCEPTED,r.flow.value(r.scenario.clock(M)));
+        assertTrue(r.audio.plans.get(0).speech.endsWith("160 schnell steigend rot"));
+        r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.NORMAL); r.evaluate(2*M,true);
+        assertEquals(Outcome.ACCEPTED,r.flow.value(r.scenario.clock(2*M)));
+        assertTrue(r.audio.plans.get(1).speech.endsWith("160 schnell steigend"));
+    }
+
+    private TrendSpeech coloredSpeech(){return new TrendSpeech(TrendSpeech.defaults().words,Collections.nCopies(7,true),new TrendColorOverrides(Collections.nCopies(7,"rotwort"),Collections.nCopies(7,true),Collections.nCopies(7,"gelbwort"),Collections.nCopies(7,true)));}
+    @Test public void coloredAlarmWordsAndPendingRefreshUseCurrentColorWithoutChangingReservation()throws Exception{
+        SyntheticAlarmScenario scenario=new SyntheticAlarmScenario(Kind.HIGH);AlarmLevel level=new AlarmLevel(scenario.level.rule,"Farbtest",AlarmLevel.DEFAULT_TONE,Collections.singletonList("{wert} {trend} {farbe}"));
+        Run r=new Run(temporary.newFolder(),Kind.HIGH,SPOKEN.withTrendSpeech(coloredSpeech()),Collections.singletonList(level));
+        r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.RED);r.evaluate(0,true);assertEquals(Outcome.ACCEPTED,r.alarm(0));assertTrue(r.audio.plans.get(0).speech.endsWith("160 rotwort rot"));
+        r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.YELLOW);r.evaluate(M,true);assertEquals(Outcome.NOT_DUE,r.alarm(M));
+        assertTrue(r.flow.refreshPending(r.audio.plans.get(0),r.scenario.clock(M)).speech.endsWith("160 gelbwort gelb"));assertEquals(1,r.audio.plans.size());
+    }
+    @Test public void periodicValueOutputUsesIndependentColoredWordsAndTheOptionalColorVariable()throws Exception{
+        Run r=run(Kind.HIGH,new OutputPreferences(OutputMode.SPOKEN_ALARMS_AND_VALUES,1,"{wert} {trend} {farbe}").withTrendSpeech(coloredSpeech()));
+        r.evaluate(0,true);r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.RED);r.evaluate(M,true);assertEquals(Outcome.ACCEPTED,r.flow.value(r.scenario.clock(M)));assertTrue(r.audio.plans.get(0).speech.endsWith("160 rotwort rot"));
+        r.flow.setArrowColor(de.giesen.gva.watch.ArrowColor.YELLOW);r.evaluate(2*M,true);assertEquals(Outcome.ACCEPTED,r.flow.value(r.scenario.clock(2*M)));assertTrue(r.audio.plans.get(1).speech.endsWith("160 gelbwort gelb"));
     }
 }

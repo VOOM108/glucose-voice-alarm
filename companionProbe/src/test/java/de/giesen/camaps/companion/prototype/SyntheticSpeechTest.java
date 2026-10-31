@@ -12,6 +12,7 @@ public class SyntheticSpeechTest {
             assertTrue(kind.name(),text.startsWith("Dies ist eine Testansage mit synthetischen Daten."));
             assertFalse(text.contains("{"));
             if(LevelForm.isRate(kind)) assertTrue(text.contains(kind==AlarmEngine.Kind.FALLING?"Kritische Fallrate bei 65.":"Kritische Anstiegsrate bei 230."));
+            else if(kind==AlarmEngine.Kind.SOURCE_LOW) assertTrue(text.endsWith("Laut Datenquelle bald niedrig"));
             else assertTrue(text.contains("Milligramm pro Deziliter"));
         }
     }

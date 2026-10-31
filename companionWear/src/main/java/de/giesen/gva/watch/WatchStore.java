@@ -19,7 +19,7 @@ final class WatchStore {
             else {
                 ArrayList<WatchSnapshot.Point> points=new ArrayList<>();
                 for(WatchSnapshot.Point p:s.points)points.add(new WatchSnapshot.Point(p.time+shift,p.value));
-                snapshot=new WatchSnapshot(s.generated+shift,s.received+shift,s.value,s.trend,s.mmol,s.sourceAvailable,s.rate,s.low,s.high,points);
+                snapshot=new WatchSnapshot(s.generated+shift,s.received+shift,s.value,s.trend,s.mmol,s.sourceAvailable,s.rate,s.low,s.high,points,s.arrowColor);
             }
         }
         boolean clockValid(Context c,long now){

@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Deutsch](README.de.md) · [GVA Watch](../companionWear/README.md) · [GVA Dots](../companionWatchFace/README.md)
 
-The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.23.0 Beta**. The phone works without either watch component.
+The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.27.0 Beta**. The phone works without either watch component.
 
 **Experimental research tool; not for medical use or treatment decisions.** Read [SAFETY.md](../SAFETY.md). CamAPS continues to control the sensor and pump.
 
@@ -25,6 +25,24 @@ The widget has an optional single row of sound, alarm speech, reading speech, vi
 Configure multiple alarm levels, individual tone/speech/vibration choices, repeats and snooze where applicable. Routine value announcements have their own interval and can pause after an alarm. Spoken templates and all seven spoken trend phrases can be edited; unchecked phrases are omitted. Appearance → Display trend text edits the dashboard/AOD labels separately. Blank labels follow the UI language. Double-arrow defaults are "Rising very fast" and "Falling very fast"; saved speech text is retained. Five local profiles store both text sets independently. See the [detailed phone reference](../docs/PHONE_REFERENCE.md).
 
 The CamAPS arrow is separate from the app's numeric rate calculation. A numeric critical-rate alarm can trigger without a recognized arrow when enough fresh values arrive. The optional data-gap warning uses the last known situation; it never estimates a current value.
+
+## Colored arrows and custom trend words
+
+Arrow assignment shows seven directions with three colors each in a compact grid. The source preview stays visible above it; choices scroll separately from the actions. Red and yellow require explicit assignment for the exact graphic. A similar shape alone does not confirm color. Existing mappings stay normal until you reassign that graphic.
+
+CamAPS places its white arrow on a colored background. GVA colors the arrow itself. Fresh arrows can be normal, red or yellow; stale data stays gray. The trend line uses “Arrow:” instead of a fixed source name.
+
+Edit displayed words under Appearance → Display trend text and spoken words separately under Output → Trend phrases. For each of the seven directions, red and yellow initially inherit the normal/gray word. Enable the color's checkbox to use its own text. On first activation, an empty field is seeded with the current base word. Turning it off preserves that text and follows the base again; an active empty field also follows the base. Display words allow up to 40 characters and spoken words up to 80, on one line without placeholders. The speech enable switch for a direction applies to all its colors. Profiles preserve both text groups and their color switches.
+
+The optional `{color}` placeholder (also `{farbe}`) adds “red” or “yellow” in supported speech templates. It is empty for normal or unknown arrows. Example: `{value} {trend} {color}`. Color is not automatically appended to a trend word; existing templates are preserved. Custom color words and this placeholder work independently.
+
+## Low soon
+
+Under Alarm levels → Low soon → Add level, create a separate warning level. New levels start off. Its editable default text is “According to the data source, low soon.” Choose its schedule, sound, speech and vibration; it has no separate numeric threshold, repeat or snooze setting.
+
+The source signal is a freshly received, recognized red arrow in any direction. The reading must also be strictly above the highest enabled low threshold whose schedule currently applies. With no active low level there is no fallback threshold. At or below that boundary, the existing low alarm applies. GVA does not calculate this forecast from rates or pump data.
+
+The warning occurs once per red phase. A new recognized normal or yellow arrow rearms it for the next red phase. Unknown arrows, gaps, a low value or a restart do not reset that claim. There is no timed repetition. Usual freshness checks, output switches, pauses and schedules still apply. If a blocked output route prevents the warning from starting, it can start later in the same red phase when conditions are met.
 
 ## Persistent-high duration
 

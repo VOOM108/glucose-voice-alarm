@@ -2,7 +2,7 @@
 
 [Projektübersicht](../README.de.md) · [English](README.md) · [GVA Watch](../companionWear/README.de.md) · [GVA Dots](../companionWatchFace/README.de.md)
 
-Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.23.0 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
+Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.27.0 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
 
 **Experimentelles Forschungswerkzeug; nicht für medizinische Verwendung oder Therapieentscheidungen.** Lies [SAFETY.de.md](../SAFETY.de.md). CamAPS steuert weiterhin Sensor und Pumpe.
 
@@ -25,6 +25,24 @@ Das Widget bietet optional eine Schalterzeile für Ton, Alarm-Sprache, Wertansag
 Mehrere Alarmstufen, individuelle Ton-/Sprach-/Vibrationswege sowie Wiederholung und Snooze, soweit für die Alarmart vorgesehen. Normale Wertansagen haben ein eigenes Intervall und können nach Alarmen pausieren. Sprachvorlagen und alle sieben gesprochenen Trendwörter sind anpassbar; abgewählte Wörter bleiben stumm. Unter Darstellung → Trendtexte lassen sich die Dashboard-/AOD-Begriffe getrennt ändern. Leere Felder folgen der Oberflächensprache. Doppelpfeil-Standards sind „Sehr schnell steigend“ und „Sehr schnell fallend“; gespeicherte Sprachtexte bleiben erhalten. Fünf lokale Profile speichern beide Textarten getrennt. Details im [Telefonhandbuch](../docs/PHONE_REFERENCE.de.md).
 
 CamAPS-Pfeil und eigene numerische Änderungsrate sind getrennt. Ein kritischer Ratenalarm kann ohne erkannten Pfeil auslösen, wenn genügend frische Werte vorliegen. Die optionale Lückenwarnung beschreibt die letzte bekannte Situation und schätzt keinen aktuellen Wert.
+
+## Farbige Pfeile und eigene Trendtexte
+
+Die Pfeilzuordnung zeigt sieben Richtungen mit je drei Farben in einem kompakten Raster. Das aktuelle Quellbild bleibt darüber sichtbar; die Auswahl scrollt getrennt von den Aktionen. Rot und Gelb müssen ausdrücklich für die konkrete Grafik zugeordnet werden. Eine ähnliche Form allein bestätigt keine Farbe. Vorhandene Zuordnungen bleiben normal, bis Du die betreffende Grafik neu zuordnest.
+
+CamAPS verwendet einen farbigen Hintergrund um den weißen Pfeil. GVA färbt stattdessen den Pfeil selbst. Frische Pfeile können normal, rot oder gelb sein; veraltete Daten bleiben grau. Die Trendzeile verwendet „Pfeil:“ statt eines festen Quellnamens.
+
+Unter Darstellung → Trendtexte bearbeitest Du die sichtbaren Wörter, unter Ausgabe → Trendwörter getrennt davon die gesprochenen Wörter. Für jede der sieben Richtungen übernehmen Rot und Gelb zunächst den normalen/grauen Text. Mit der jeweiligen Farb-Checkbox aktivierst Du einen eigenen Text. Beim ersten Einschalten wird ein leeres Feld mit dem aktuellen Basistext vorbelegt. Ausschalten bewahrt den eigenen Text und folgt wieder dem Basistext; ein aktives leeres Feld folgt ebenfalls der Basis. Anzeigetexte erlauben bis zu 40, Sprachtexte bis zu 80 Zeichen, jeweils einzeilig und ohne Platzhalter. Die Sprach-Schalter für eine Richtung gelten für alle ihre Farben. Profile speichern beide Textgruppen samt Farbaktivierung.
+
+Der optionale Platzhalter `{farbe}` (auch `{color}`) ergänzt in unterstützten Ansagetexten „rot“ oder „gelb“; bei normalen oder unbekannten Pfeilen bleibt er leer. Beispiel: `{wert} {trend} {farbe}`. Die Farbe wird nicht automatisch an das Trendwort angehängt; vorhandene Ansagetexte bleiben erhalten. Eigene Farbtexte und dieser Platzhalter sind unabhängig voneinander.
+
+## Bald niedrig
+
+Unter Alarmstufen → Bald niedrig → Stufe hinzufügen legst Du eine eigene Warnstufe an. Neue Stufen sind ausgeschaltet. Der Grundtext lautet „Laut Datenquelle bald niedrig“ und lässt sich ändern. Du wählst Zeitfenster, Ton, Sprache und Vibration; es gibt keine eigene Zahlengrenze, Wiederholung oder Snooze-Einstellung.
+
+Diese Warnung verwendet ausschließlich einen frisch empfangenen, erkannten roten Pfeil beliebiger Richtung als Quellhinweis. Zusätzlich muss der Wert strikt oberhalb der höchsten eingeschalteten Niedrig-Grenze liegen, deren Zeitfenster gerade gilt. Ohne aktive Niedrig-Stufe gibt es keine Ersatzgrenze. An oder unter dieser Grenze ist der vorhandene Niedrig-Alarm zuständig. GVA berechnet dafür keine eigene Vorhersage aus Änderungsrate oder Pumpendaten.
+
+Die Warnung kommt einmal pro roter Phase. Ein neuer eindeutig normaler oder gelber Pfeil gibt sie für die nächste rote Phase wieder frei. Unbekannte Pfeile, Datenlücken, ein niedriger Wert oder ein Neustart setzen diese Sperre nicht zurück. Es gibt keine zeitgesteuerte Wiederholung. Die üblichen Frischeprüfungen, Ausgabeschalter, Pausen und Zeitfenster gelten weiterhin. Wird die Warnung wegen eines aktuell gesperrten Ausgabewegs noch nicht gestartet, kann sie bei später erfüllten Bedingungen innerhalb derselben roten Phase starten.
 
 ## Dauerhoch-Zeit
 

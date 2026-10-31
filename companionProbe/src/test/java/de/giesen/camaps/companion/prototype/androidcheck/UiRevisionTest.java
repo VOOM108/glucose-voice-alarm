@@ -63,7 +63,7 @@ public class UiRevisionTest {
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
         VectorReference.Candidate captured=candidate(); ProbeState.vectorCandidate=captured;
         ProbeDiagnosticsActivity activity=open(ProbeDiagnosticsActivity.class,null).get(); action(activity,"Pfeile prüfen").performClick();
-        AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog(); dialog.getListView().performItemClick(null,2,2); assertTrue(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled());
+        AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog(); dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_2").performClick(); assertTrue(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled());
         ProbeState.vectorCandidate=candidate(); assertFalse(VectorReference.canConfirm(captured,ProbeState.vectorCandidate));
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(600)); assertFalse(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled());
         assertFalse(app.getSharedPreferences(VectorReference.PREFS,0).contains(captured.key)); dialog.dismiss();
@@ -74,7 +74,7 @@ public class UiRevisionTest {
         app.getSharedPreferences(VectorReference.PREFS,0).edit().putString(current.key,NotificationParser.Trend.UP.name()).commit();
         app.getSharedPreferences(VectorReference.SHAPE_PREFS,0).edit().putString(current.shapeKey,NotificationParser.Trend.UP.name()).commit();
         ProbeDiagnosticsActivity activity=open(ProbeDiagnosticsActivity.class,null).get(); action(activity,"Pfeile prüfen").performClick(); AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog();
-        dialog.getListView().performItemClick(null,2,2); dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); shadowOf(Looper.getMainLooper()).idle();
+        dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_2").performClick(); dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); shadowOf(Looper.getMainLooper()).idle();
         assertEquals(NotificationParser.Trend.UP_RIGHT,TrendReference.lookup(app.getSharedPreferences(VectorReference.PREFS,0).getAll(),current.key));
         assertEquals(ShapeReference.CONFLICT,app.getSharedPreferences(VectorReference.SHAPE_PREFS,0).getString(current.shapeKey,""));
         ProbeState.vectorCandidate=current; ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.UP_RIGHT,SystemClock.elapsedRealtime(),System.currentTimeMillis(),"synthetic");
@@ -86,10 +86,10 @@ public class UiRevisionTest {
         assertEquals(5,ArrowCoverage.count(app)); ArrowCoverage.observe(app,"synthetic-v1",NotificationParser.Trend.UNKNOWN); assertEquals(5,ArrowCoverage.count(app));
         ArrowCoverage.observe(app,"synthetic-v2",NotificationParser.Trend.UP_RIGHT); assertEquals(1,ArrowCoverage.count(app));
     }
-    @Test public void theSevenChoiceDialogCanExplicitlyConfirmADoubleUpArrow() {
+    @Test public void theTwentyOneChoiceDialogCanExplicitlyConfirmADoubleUpArrow() {
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
         VectorReference.Candidate captured=candidate(); ProbeState.vectorCandidate=captured; ProbeDiagnosticsActivity activity=open(ProbeDiagnosticsActivity.class,null).get(); action(activity,"Pfeile prüfen").performClick();
-        AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog(); assertEquals(7,dialog.getListView().getAdapter().getCount()); dialog.getListView().performItemClick(null,0,0); assertTrue(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled()); dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); shadowOf(Looper.getMainLooper()).idle();
+        AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog(); assertEquals(21,views(dialog.getWindow().getDecorView()).stream().filter(v -> v instanceof Button && v.getTag()!=null && v.getTag().toString().matches("arrow_choice_[0-9]+" )).count()); dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_0").performClick(); assertTrue(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled()); dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); shadowOf(Looper.getMainLooper()).idle();
         assertEquals(NotificationParser.Trend.DOUBLE_UP,TrendReference.lookup(app.getSharedPreferences(VectorReference.PREFS,0).getAll(),captured.key));
     }
     @Test public void valueSpeechCanBeSwitchedOnWithoutEnablingAlarmSpeechOrChangingLiveConsent() throws Exception {

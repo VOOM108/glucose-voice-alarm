@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 import android.app.*;
 import android.appwidget.*;
 import android.content.*;
@@ -65,7 +66,7 @@ final class HomeWidget {
         v.setImageViewBitmap(R.id.widget_chart,new HomeWidgetRenderer().image(model.reading,model.fresh,dark,chartWidth,density,HomeWidgetRenderer.historyMinutes(dataWidth),System.currentTimeMillis()));
         WatchSnapshot s=model.reading;GlucoseUnit unit=s!=null&&s.mmol?GlucoseUnit.MMOL:GlucoseUnit.MGDL;
         int ink=model.fresh?colors.ink:colors.muted;
-        v.setImageViewBitmap(R.id.widget_reading,HomeWidgetRenderer.numerals(c,s==null?"—":unit.number(s.value,Locale.getDefault()),s==null?"":arrow(s.trend),ink,false,width));
+        v.setImageViewBitmap(R.id.widget_reading,HomeWidgetRenderer.numerals(c,s==null?"—":unit.number(s.value,Locale.getDefault()),s==null?"":arrow(s.trend),ink,false,width,s!=null&&model.fresh?s.arrowColor:ArrowColor.NORMAL));
         String stamp=s==null?"—":tr("Empfangen: ","Received: ")+new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received))+" · "+unit.label;
         v.setTextViewText(R.id.widget_stamp,stamp);v.setTextColor(R.id.widget_stamp,s!=null&&!model.fresh?colors.error:colors.muted);
         v.setTextViewText(R.id.widget_period,HomeWidgetRenderer.historyLabel(HomeWidgetRenderer.historyMinutes(dataWidth)));v.setTextColor(R.id.widget_period,colors.muted);
@@ -103,7 +104,7 @@ final class HomeWidget {
         if(m.reading==null)return tr("Kein Anzeigestand. Dashboard öffnen.","No display data. Open dashboard.");
         WatchSnapshot s=m.reading;GlucoseUnit unit=s.mmol?GlucoseUnit.MMOL:GlucoseUnit.MGDL;
         String date=new java.text.SimpleDateFormat("dd.MM. HH:mm",Locale.getDefault()).format(new Date(s.received));
-        return (m.fresh?"":tr("Veraltet. ","Stale. "))+unit.number(s.value,Locale.getDefault())+" "+unit.label+". "+date+". "+MetricNotification.trendTitle(NotificationParser.Trend.valueOf(s.trend.name()))
+        return (m.fresh?"":tr("Veraltet. ","Stale. "))+unit.number(s.value,Locale.getDefault())+" "+unit.label+". "+date+". "+(s.arrowColor.colored()?DisplayTrendPreferences.colorTitle(NotificationParser.Trend.valueOf(s.trend.name()),s.arrowColor):MetricNotification.trendTitle(NotificationParser.Trend.valueOf(s.trend.name())))
                 +(m.fresh&&s.rate!=null?". "+unit.rate(s.rate,Locale.getDefault()):"")+". "+tr("Dashboard öffnen.","Open dashboard.");
     }
     private static PendingIntent activity(Context c,int id,Intent intent,String key) {

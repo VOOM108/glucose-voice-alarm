@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,8 +28,18 @@ public final class TrendReference {
     public static NotificationParser.Trend lookup(Map<String,?> references, String key) {
         if (key == null || !key.matches("[a-f0-9]{64}")) return NotificationParser.Trend.UNKNOWN;
         Object stored = references.get(key);
-        try { return NotificationParser.Trend.valueOf(stored instanceof String ? (String)stored : "UNKNOWN"); }
+        try { return NotificationParser.Trend.valueOf(stored instanceof String ? ((String)stored).replaceFirst("^(RED_|YELLOW_)", "") : "UNKNOWN"); }
         catch (IllegalArgumentException e) { return NotificationParser.Trend.UNKNOWN; }
+    }
+    /** Colour is explicit and pixel-exact; a shape match never inherits it. */
+    public static String label(NotificationParser.Trend trend,ArrowColor color) {
+        if(trend==null || trend==NotificationParser.Trend.UNKNOWN || color==null) throw new IllegalArgumentException("Unknown arrow");
+        return (color==ArrowColor.NORMAL?"":color.name()+"_")+trend.name();
+    }
+    public static ArrowColor color(Map<String,?> references,String key,NotificationParser.Trend resolved) {
+        if(key!=null && key.matches("[a-f0-9]{64}") && resolved!=null && resolved!=NotificationParser.Trend.UNKNOWN)
+            for(ArrowColor color:ArrowColor.values())if(color.colored()&&label(resolved,color).equals(references.get(key)))return color;
+        return ArrowColor.NORMAL;
     }
     public static NotificationParser.Result combine(NotificationParser.Result text, NotificationParser.Trend graphic) {
         if (text.mgdl == null || graphic == NotificationParser.Trend.UNKNOWN) return text;

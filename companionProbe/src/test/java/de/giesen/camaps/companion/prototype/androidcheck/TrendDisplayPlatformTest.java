@@ -68,7 +68,7 @@ public class TrendDisplayPlatformTest {
         for(int i=0;i<7;i++) {
             ProbeState.latest=new ProbeState.Observation(123,TrendDisplayWords.TRENDS.get(i),SystemClock.elapsedRealtime(),System.currentTimeMillis(),"synthetic");
             ActivityController<ProbeActivity> controller=open(ProbeActivity.class,null);
-            boolean found=false;for(View view:views(controller.get().getWindow().getDecorView()))if(view instanceof TextView && ("CamAPS  "+custom.get(i)).contentEquals(((TextView)view).getText()))found=true;
+            boolean found=false;for(View view:views(controller.get().getWindow().getDecorView()))if(view instanceof TextView && ("Pfeil: "+custom.get(i)).contentEquals(((TextView)view).getText()))found=true;
             assertTrue(custom.get(i),found);controller.pause().stop().destroy();controllers.remove(controller);
         }
     }
@@ -113,7 +113,7 @@ public class TrendDisplayPlatformTest {
             ((EditText)tagged(editor,"trend_display_FLAT")).setText("de".equals(language)?"Ruhig":"Level");
             ScrollView scroll=null;for(View view:views(editor.getWindow().getDecorView()))if(view instanceof ScrollView){scroll=(ScrollView)view;break;}
             assertNotNull(scroll);View body=scroll.getChildAt(0);body.measure(View.MeasureSpec.makeMeasureSpec(411,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED));body.layout(0,0,411,body.getMeasuredHeight());
-            for(View view:views(body))if(view instanceof EditText){assertEquals(1,((EditText)view).getMaxLines());assertTrue(view.getWidth()>200);}
+            for(View view:views(body))if(view instanceof EditText && view.isShown()){assertEquals(1,((EditText)view).getMaxLines());assertTrue(view.getWidth()>200);}
             Bitmap bitmap=Bitmap.createBitmap(411,body.getHeight(),Bitmap.Config.ARGB_8888);Canvas canvas=new Canvas(bitmap);canvas.drawColor(AppAppearance.colors(app).background);body.draw(canvas);
             File folder=new File("build/ui-previews");folder.mkdirs();try(FileOutputStream out=new FileOutputStream(new File(folder,"trend-display-"+language+"-"+theme.name().toLowerCase(Locale.ROOT)+".png"))){assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG,100,out));}
             controller.pause().stop().destroy();controllers.remove(controller);

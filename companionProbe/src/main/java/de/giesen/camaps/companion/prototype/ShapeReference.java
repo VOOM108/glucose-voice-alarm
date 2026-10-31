@@ -14,7 +14,13 @@ public final class ShapeReference {
         if (maximum<16) return null;
         int cutoff=Math.max(8,(maximum+1)/2),left=width,top=height,right=-1,bottom=-1,count=0;
         boolean[] mask=new boolean[argb.length];
+        Integer foreground=null;
         for (int y=0;y<height;y++) for (int x=0;x<width;x++) if ((argb[y*width+x]>>>24)>=cutoff) {
+            int rgb=argb[y*width+x]&0x00ffffff;
+            // A filled status circle can hide differently directed white arrows in the same alpha mask.
+            // Only a single-colour foreground can safely use an alpha-only identity.
+            if(foreground!=null && foreground!=rgb)return null;
+            foreground=rgb;
             mask[y*width+x]=true; left=Math.min(left,x); top=Math.min(top,y); right=Math.max(right,x); bottom=Math.max(bottom,y); count++;
         }
         int w=right-left+1,h=bottom-top+1;

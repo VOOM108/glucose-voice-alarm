@@ -58,6 +58,24 @@ With CamAPS already collecting glucose data and controlling therapy, a companion
 - Seven manually confirmable trend states, including double arrows. Unknown or conflicting graphics remain unknown; a source update invalidates an open assignment preview.
 - Lock-screen/status notifications. Android 17's native large live display is attempted where available; Android controls promotion, placement and competition with other apps.
 
+## Colored arrows and custom trend words
+
+Arrow assignment shows seven directions with three colors each in a compact grid. The source preview stays visible above it; choices scroll separately from the actions. Red and yellow require explicit assignment for the exact graphic. A similar shape alone does not confirm color. Existing mappings stay normal until you reassign that graphic.
+
+CamAPS places its white arrow on a colored background. GVA colors the arrow itself. Fresh arrows can be normal, red or yellow; stale data stays gray. The trend line uses “Arrow:” instead of a fixed source name.
+
+Edit displayed words under Appearance → Display trend text and spoken words separately under Output → Trend phrases. For each of the seven directions, red and yellow initially inherit the normal/gray word. Enable the color's checkbox to use its own text. On first activation, an empty field is seeded with the current base word. Turning it off preserves that text and follows the base again; an active empty field also follows the base. Display words allow up to 40 characters and spoken words up to 80, on one line without placeholders. The speech enable switch for a direction applies to all its colors. Profiles preserve both text groups and their color switches.
+
+The optional `{color}` placeholder (also `{farbe}`) adds “red” or “yellow” in supported speech templates. It is empty for normal or unknown arrows. Example: `{value} {trend} {color}`. Color is not automatically appended to a trend word; existing templates are preserved. Custom color words and this placeholder work independently.
+
+## Low soon
+
+Under Alarm levels → Low soon → Add level, create a separate warning level. New levels start off. Its editable default text is “According to the data source, low soon.” Choose its schedule, sound, speech and vibration; it has no separate numeric threshold, repeat or snooze setting.
+
+The source signal is a freshly received, recognized red arrow in any direction. The reading must also be strictly above the highest enabled low threshold whose schedule currently applies. With no active low level there is no fallback threshold. At or below that boundary, the existing low alarm applies. GVA does not calculate this forecast from rates or pump data.
+
+The warning occurs once per red phase. A new recognized normal or yellow arrow rearms it for the next red phase. Unknown arrows, gaps, a low value or a restart do not reset that claim. There is no timed repetition. Usual freshness checks, output switches, pauses and schedules still apply. If a blocked output route prevents the warning from starting, it can start later in the same red phase when conditions are met.
+
 ## Persistent-high duration
 
 Duration starts with the first valid received reading above this persistent-high level's threshold. It includes stable or falling readings and time without data. A fresh reading at or below that threshold ends the episode. Missing, invalid or stale data does not confirm that it has ended.
@@ -88,7 +106,7 @@ If the offline voice is still initializing when a live reading alarm starts thro
 
 ## Scope and limitations
 
-The prepared phone version is 0.23.0 Beta. Development and phone device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor communication or pump control.
+The prepared phone version is 0.27.0 Beta. Development and phone device checks have focused on a Pixel 7 Pro with Android 17 and CamAPS FX 1.4(194).111. Other devices, Android variants and CamAPS versions need separate verification. The app targets supported CamAPS notifications in **mg/dl or mmol/l**. It does not offer arbitrary CGM inputs, direct sensor communication or pump control.
 
 Optional [GVA Watch and the GVA Dots face](../companionWear/README.en.md) have been tested in part on a Galaxy Watch5 Pro running Wear OS 6 / One UI 8 Watch. They show readings and a short chart, with optional forwarding of accepted phone alerts. Phone-to-watch transfer starts off. Complication timing, alarm delivery and battery use need further device testing.
 
@@ -98,7 +116,7 @@ The time shown is receipt/processing time, not a verified sensor measurement tim
 
 ## Watch display
 
-GVA Watch 0.19.0 Beta and the code-free GVA Dots 0.1.5 Beta face work with the prepared phone version 0.23.0 Beta. The round display uses Roboto Flex, a one- or two-hour curve and a reduced ambient view. Menus use official Wear Material 3 components. The watch app also supplies a tile with the same data layout, without time dots. Alongside the composite display and age source, separate reading, CamAPS trend, delta per minute and chart sources can be selected in compatible third-party faces. The watch displays data and can relay accepted phone alarms with vibration. It does not calculate glucose alarms independently. See [watch setup and limits](../companionWear/README.en.md). Everyday device testing continues; the new standalone complications and tile still need device acceptance.
+GVA Watch 0.20.0 Beta and the code-free GVA Dots 0.1.5 Beta face work with the prepared phone version 0.27.0 Beta. The round display uses Roboto Flex, a one- or two-hour curve and a reduced ambient view. Menus use official Wear Material 3 components. The watch app also supplies a tile with the same data layout, without time dots. Alongside the composite display and age source, separate reading, CamAPS trend, delta per minute and chart sources can be selected in compatible third-party faces. The watch displays data and can relay accepted phone alarms with vibration. It does not calculate glucose alarms independently. See [watch setup and limits](../companionWear/README.en.md). Everyday device testing continues; the new standalone complications and tile still need device acceptance.
 
 From version 0.18.0, forwarding GVA alarms and data-gap warnings to GVA Watch can be enabled separately from display transfer. The watch creates its own notifications with vibration. Both apps require opt-in; Appearance → Watch includes a labeled test without readings. Forwarding follows accepted phone alarm outputs, without offline replay. Routine readings do not create watch notifications. [Setup and limits](../companionWear/README.en.md#watch-alerts).
 

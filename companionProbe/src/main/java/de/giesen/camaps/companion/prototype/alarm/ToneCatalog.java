@@ -18,7 +18,7 @@ public final class ToneCatalog {
         switch(set) { case "samt": return AppText.tr("Samt"); case "klar": return AppText.tr("Klar"); case "rund": return AppText.tr("Rund"); default: throw new IllegalArgumentException(AppText.tr("Unbekanntes Klangset")); }
     }
     public static String uri(String set,AlarmEngine.Kind kind) {
-        setName(set); return PREFIX+set+"_"+kind.name().toLowerCase(Locale.ROOT);
+        setName(set); if(kind==AlarmEngine.Kind.SOURCE_LOW)kind=AlarmEngine.Kind.LOW; return PREFIX+set+"_"+kind.name().toLowerCase(Locale.ROOT);
     }
     public static String setOf(String uri) {
         for (String set:SETS) for (AlarmEngine.Kind kind:AlarmEngine.Kind.values()) if (uri(set,kind).equals(uri)) return set;

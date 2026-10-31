@@ -1,5 +1,6 @@
 # Build output and machine-local state
 .gradle/
+.kotlin/
 .idea/
 **/build/
 local.properties

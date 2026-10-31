@@ -58,6 +58,19 @@ public class ShapeReferenceTest {
         int[] rectangle=new int[24*24]; Arrays.fill(rectangle,0xff336699);
         assertNull(key(rectangle,24)); assertNull(key(new int[24*24],24));
     }
+    @Test public void opaqueStatusCircleMustNotHideDifferentArrowsBehindOneAlphaIdentity() {
+        int[] background=new int[24*24];
+        for(int y=0;y<24;y++)for(int x=0;x<24;x++)if((x-12)*(x-12)+(y-12)*(y-12)<=100)background[y*24+x]=0xffff0000;
+        for(NotificationParser.Trend trend:new NotificationParser.Trend[]{UP,DOWN,FLAT}) {
+            int[] image=background.clone(),glyph=arrow(trend);
+            for(int i=0;i<image.length;i++)if(glyph[i]!=0)image[i]=0xffffffff;
+            assertNull(trend.name(),key(image,24));
+        }
+    }
+    @Test public void multipleForegroundColoursCannotSilentlyGeneralizeToAnAlphaShape() {
+        int[] image=arrow(UP);for(int i=0;i<image.length;i++)if(image[i]!=0){image[i]=0xffffffff;break;}
+        assertNull(key(image,24));
+    }
     @Test public void sourceVersionStillBoundsTheConfirmation() {
         assertNotEquals(key(arrow(UP),24),ShapeReference.fingerprint("another-version",arrow(UP),24,24));
     }

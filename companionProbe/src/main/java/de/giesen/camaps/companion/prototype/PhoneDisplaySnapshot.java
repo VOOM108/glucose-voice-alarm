@@ -25,7 +25,7 @@ final class PhoneDisplaySnapshot {
         if(latest!=ProbeState.display(c))return null;
         return new WatchSnapshot(now,latest.receivedWall,latest.value,WatchSnapshot.Trend.valueOf(latest.trend.name()),
                 UnitPreferences.display(c)==GlucoseUnit.MMOL,ProbeState.displayFresh(c,latest),latest.receiptRate.at(now),
-                low,high,WatchSnapshot.minutes(raw,now));
+                low,high,WatchSnapshot.minutes(raw,now),latest.arrowColor);
     }
     private PhoneDisplaySnapshot(){}
 }

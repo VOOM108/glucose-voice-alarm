@@ -48,12 +48,18 @@ public final class PersistentAlarmSession {
     }
     public synchronized Result evaluate(List<HistoryAnalysis.Point> window,List<HistoryAnalysis.Point> episodeWindow,Clock now,int minuteOfDay,
                                         Long confirmedSourceSessionStart,DecisionSink sink) throws IOException {
+        return evaluate(window,episodeWindow,now,minuteOfDay,confirmedSourceSessionStart,sink,
+                de.giesen.camaps.companion.prototype.NotificationParser.Trend.UNKNOWN,de.giesen.gva.watch.ArrowColor.NORMAL);
+    }
+    public synchronized Result evaluate(List<HistoryAnalysis.Point> window,List<HistoryAnalysis.Point> episodeWindow,Clock now,int minuteOfDay,
+                                        Long confirmedSourceSessionStart,DecisionSink sink,
+                                        de.giesen.camaps.companion.prototype.NotificationParser.Trend trend,de.giesen.gva.watch.ArrowColor color) throws IOException {
         verified=null;
         Snapshot before=restored(now); Map<String,Entry> rows=new LinkedHashMap<>(before.entries);
         AlarmEngine engine=new AlarmEngine(rules,limits,mode,timeBasis); Map<String,Long> timers=new HashMap<>();
         for (Entry row:rows.values()) if (row.highSince>0) timers.put(row.id,row.highSince);
         engine.restorePersistentTimers(timers);
-        Result result=engine.evaluate(window,episodeWindow,now.wallMs,minuteOfDay,confirmedSourceSessionStart,null);
+        Result result=engine.evaluate(window,episodeWindow,now.wallMs,minuteOfDay,confirmedSourceSessionStart,null,trend,color);
         Map<String,Long> updated=engine.persistentTimers();
         for (Rule rule:rules) if ((result.status==Status.EVALUATED || timeBasis!=HistoryAnalysis.TimeBasis.RECEIPT) && rule.enabled && rule.kind==Kind.PERSISTENT_HIGH) {
             Entry row=rows.get(rule.id); long since=updated.containsKey(rule.id)?updated.get(rule.id):0;
@@ -114,6 +120,7 @@ public final class PersistentAlarmSession {
     }
     private static boolean ready(Entry row,Clock now) {
         if (!row.active) return true;
+        if (row.kind==Kind.SOURCE_LOW) return false; // No time-based repeat, even after days or a restart.
         return LevelForm.hasSnooze(row.kind)?bound(now,() -> active(row).ready_to_alarm()):now.wallMs>=row.nextAt;
     }
     private boolean thresholdSwitchAllowed(Map<String,Entry> rows,Rule candidate,Clock now) throws IOException {
@@ -144,7 +151,7 @@ public final class PersistentAlarmSession {
         Map<String,Entry> rows=new LinkedHashMap<>(before.entries); Entry row=rows.get(id);
         if (row!=null && !ready(row,now)) throw new IOException(AppText.tr("Wiederholung oder Ereignissperre noch nicht abgelaufen"));
         if (LevelForm.hasSnooze(rule.kind) && !thresholdSwitchAllowed(rows,rule,now)) throw new IOException(AppText.tr("Höher priorisierte Stufe noch pausiert"));
-        long interval=LevelForm.isRate(rule.kind)?RATE_REARM_MS:
+        long interval=rule.kind==Kind.SOURCE_LOW?1:LevelForm.isRate(rule.kind)?RATE_REARM_MS:
                 (rule.kind==Kind.PERSISTENT_HIGH?Math.min(1440,Math.max(1,rule.outputs.repeatMinutes)):Math.max(1,rule.outputs.repeatMinutes))*60000L;
         long next;
         try { next=Math.addExact(now.wallMs,interval); } catch (ArithmeticException e) { throw new IOException(AppText.tr("Alarmzeit außerhalb des Bereichs"),e); }

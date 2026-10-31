@@ -10,8 +10,8 @@ Glucose Voice Alarm (GVA) liest Glukosewerte und Trendpfeile aus **CamAPS-Benach
 
 | Komponente | Aktueller Quellstand | Aufgabe |
 |---|---|---|
-| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.23.0 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
-| [GVA Watch](companionWear/README.de.md) | 0.19.0 Beta | Uhrenanzeige, Kachel, sechs Komplikationsquellen und optionale Telefonalarme mit Uhrenvibration |
+| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.27.0 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
+| [GVA Watch](companionWear/README.de.md) | 0.20.0 Beta | Uhrenanzeige, Kachel, sechs Komplikationsquellen und optionale Telefonalarme mit Uhrenvibration |
 | [GVA Dots](companionWatchFace/README.de.md) | 0.1.5 Beta | Rundes Zifferblatt mit Uhrzeitpunkten, Wert/Pfeil, kurzem Verlauf, Alter und Delta |
 
 Kachel und Komplikationen sind in **GVA Watch** enthalten. Sie sind keine eigenen Apps. Das Telefon funktioniert ohne Uhr; GVA Dots benötigt GVA Watch für die Daten. Gemeinsame Quellen halten Anzeige- und Alarmprotokolle zusammen. Telefon und Uhren-App müssen dieselbe App-ID und denselben Signierschlüssel verwenden.
@@ -50,6 +50,8 @@ Bei einem Live-Messwertalarm kann die beim Stimmenstart fehlende Ansage innerhal
 Ein frischer gültiger Wert zurück innerhalb einer Hoch-/Niedriggrenze beendet die automatische Wiederholung dieser Stufe. Beim nächsten Grenzübertritt sind ihre eingeschalteten Ausgabewege sofort wieder alarmfähig. Manuelles Snooze und globale Pause bleiben bestehen; Lücken setzen nichts zurück. [Episodenregel](docs/PHONE_REFERENCE.de.md#neue-hoch-niedrig-episoden).
 
 Die Dauerhoch-Zeit zählt ab dem ersten hohen Empfang über Lücken hinweg weiter; die Kurvenlücken bleiben sichtbar. Für den Alarm gelten weiterhin frische steigende Werte und die übernommenen Qualitätsprüfungen. [Dauer und Grenzen](docs/PHONE_REFERENCE.de.md#dauerhoch-zeit). Die [Verarbeitungsdiagnose](docs/PHONE_REFERENCE.de.md#verarbeitungsdiagnose) unterscheidet Alarmstart, stille Aktualisierung und Wertansage, ohne Messwerte oder gesprochene Texte zu speichern.
+
+Alle sieben Pfeilrichtungen lassen sich normal, rot oder gelb zuordnen. Anzeige- und Sprachtexte übernehmen zunächst das normale Wort; je Farbe kannst Du eigene Texte aktivieren. Die optionale Sprachvariable `{farbe}` nennt die Farbe. Eine eigene einstellbare Warnung [Bald niedrig](docs/PHONE_REFERENCE.de.md#bald-niedrig) verwendet einen frischen roten Pfeil nur oberhalb der aktiven Niedrig-Grenze, einmal pro roter Phase. [Pfeilfarben und Trendtexte](docs/PHONE_REFERENCE.de.md#farbige-pfeile-und-eigene-trendtexte).
 
 ## Bauen und einrichten
 

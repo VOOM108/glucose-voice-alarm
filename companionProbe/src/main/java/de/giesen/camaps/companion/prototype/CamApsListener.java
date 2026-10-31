@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 
 import android.app.Notification;
 import android.graphics.drawable.BitmapDrawable;
@@ -148,6 +149,7 @@ public final class CamApsListener extends NotificationListenerService {
                 diagnostic.reference(true,reference!=NotificationParser.Trend.UNKNOWN);
                 result=conflict?result.withTrend(NotificationParser.Trend.UNKNOWN,"Widersprüchliche Trendangaben"):
                         TrendReference.combine(result,reference);
+                result=result.withArrowColor(TrendReference.color(getSharedPreferences(VectorReference.PREFS,MODE_PRIVATE).getAll(),candidate.key,result.trend));
             }
         }
         if(result.mgdl!=null && UnitPreferences.source(this)!=null && UnitPreferences.source(this)!=result.sourceUnit) {
@@ -187,10 +189,10 @@ public final class CamApsListener extends NotificationListenerService {
             AlarmProbe.receive(result.mgdl,System.currentTimeMillis(),calendar.get(java.util.Calendar.HOUR_OF_DAY)*60+calendar.get(java.util.Calendar.MINUTE));
             RuntimeStateBridge.unconfirmedInput();
             ReceiptRate.Result rate=ReceiptRate.calculate(receiptOrder.points(),receiptClock.wallMs);
-            LiveAlarmService.receive(sbn.getKey(),sbn.getPostTime(),result.mgdl,result.trend);
+            LiveAlarmService.receive(sbn.getKey(),sbn.getPostTime(),result.mgdl,result.trend,result.arrowColor);
             coreReport();
             ProbeState.observed(new ProbeState.Observation(result.mgdl, result.trend,
-                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey(),rate));
+                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey(),rate,result.arrowColor));
             ProbeState.status = result.reason + "; Zeitbasis: Empfang";
             HomeWidget.changed(this);
             if(WatchPublisher.enabled(this))WatchPublisher.changed(this);

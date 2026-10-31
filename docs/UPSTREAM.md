@@ -50,3 +50,11 @@ GVA also requires two explicit first-start acknowledgements: the research warnin
 ## Listener reconnection
 
 The companion keeps an existing Android listener binding while first-start acknowledgement is pending, but processes no source notifications until both steps are complete. It requests a missing binding on UI resume, output startup and disconnection, with attempts limited to one every 30 seconds. A manual reconnect action preserves notification access and output settings. This does not backfill active notifications, restart a connected listener merely because readings are missing, or change the glucose parser and alarm thresholds.
+
+## Source-color low-soon warning
+
+GVA 0.26 adds `SOURCE_LOW` as its own rule outside the 23 verbatim imported numeric methods. It requires fresh accepted input, an explicitly recognized red arrow of any direction, and a value strictly above the highest enabled LOW threshold whose schedule currently applies. Missing active LOW levels do not supply a default threshold. Equality or a lower value remains the existing numeric LOW case. Arrow direction is not converted into a numeric forecast; GVA does not obtain pump data for this rule.
+
+The output flow persists a claim before starting an attempt, once per red phase. Fresh recognized normal/yellow input rearms it; unknown graphics, gaps, a low reading, reloads and restarts do not. There is no timed repeat or snooze for this kind. Existing numerical priorities, freshness, consent, global output switches, pause and actual-delivery rechecks remain. A route blocked before start does not consume the phase; a started failed attempt does. Numeric alarms are not interrupted by this warning.
+
+Arrow colors come only from explicit exact-graphic assignment. Shape-only references are colorless and filled multicolor status circles are not generalized by their alpha silhouette. GVA 0.27 changes display/speech words and configuration codecs; these word overrides do not change arrow identity, numeric decisions or source-warning conditions.

@@ -23,7 +23,7 @@ public final class AlarmProbe {
     public static int runSyntheticSelfTest() {
         final long base=10000000, minute=60000;
         int passed=0;
-        for (Kind kind:Kind.values()) {
+        for (Kind kind:new Kind[]{Kind.HIGH,Kind.LOW,Kind.PERSISTENT_HIGH,Kind.RISING,Kind.FALLING}) {
             double threshold=kind==Kind.RISING || kind==Kind.FALLING?2:100;
             Rule rule=new Rule("synthetic",kind,true,threshold,1,true,0,1440,new Outputs(false,false,1,1));
             AlarmEngine engine=new AlarmEngine(Arrays.asList(rule),new HistoryAnalysis.Limits(1,2*minute,minute),OutputMode.TONES_ONLY);

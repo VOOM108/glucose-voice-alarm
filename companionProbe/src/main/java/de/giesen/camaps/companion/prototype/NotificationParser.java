@@ -3,6 +3,7 @@
  * (JamOrHam and xDrip contributors); upstream remains in the same source tree.
  */
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -27,9 +28,12 @@ public final class NotificationParser {
         public final GlucoseUnit sourceUnit;
         public final Trend trend;
         public final String reason;
+        public final ArrowColor arrowColor;
         Result(Number mgdl,Trend trend,String reason) { this(mgdl==null?null:mgdl.doubleValue(),trend,reason,GlucoseUnit.MGDL); }
-        Result(Double mgdl,Trend trend,String reason,GlucoseUnit unit) { this.mgdl=mgdl;this.trend=trend;this.reason=reason;this.sourceUnit=unit; }
-        Result withTrend(Trend trend,String reason) { return new Result(mgdl,trend,reason,sourceUnit); }
+        Result(Double mgdl,Trend trend,String reason,GlucoseUnit unit) { this(mgdl,trend,reason,unit,ArrowColor.NORMAL); }
+        private Result(Double mgdl,Trend trend,String reason,GlucoseUnit unit,ArrowColor color) { this.mgdl=mgdl;this.trend=trend;this.reason=reason;this.sourceUnit=unit;this.arrowColor=trend==Trend.UNKNOWN?ArrowColor.NORMAL:java.util.Objects.requireNonNull(color); }
+        Result withTrend(Trend trend,String reason) { return new Result(mgdl,trend,reason,sourceUnit,this.trend==trend?arrowColor:ArrowColor.NORMAL); }
+        Result withArrowColor(ArrowColor color) { return new Result(mgdl,trend,reason,sourceUnit,color); }
     }
     private static final Pattern VALUE=Pattern.compile("^([0-9]{1,3}(?:[.,][0-9]{1,2})?)\\s*(?:(mg\\s*/\\s*dl|mmol\\s*/\\s*l))?$",Pattern.CASE_INSENSITIVE);
     private static final Pattern UNIT=Pattern.compile("(mg\\s*/\\s*dl|mmol\\s*/\\s*l)",Pattern.CASE_INSENSITIVE);

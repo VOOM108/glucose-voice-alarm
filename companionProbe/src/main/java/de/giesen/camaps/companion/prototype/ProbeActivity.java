@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
+import de.giesen.gva.watch.ArrowColor;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -166,7 +167,7 @@ public class ProbeActivity extends UiActivity {
                 speechStatus.setText(AppText.tr("Keine Ansage: kein kürzlich empfangenes, zeitlich plausibles Ereignis vorhanden."));
                 return;
             }
-            try { de.giesen.camaps.companion.prototype.alarm.OutputPreferences p=new de.giesen.camaps.companion.prototype.alarm.OutputPreferenceStore(getFilesDir()).load().preferences; say(SpeechPolicy.observationText(current.value, current.trend, (now-current.receivedElapsed)/1000,p.trendSpeech,p.speechLanguage,UnitPreferences.display(this,p))); }
+            try { de.giesen.camaps.companion.prototype.alarm.OutputPreferences p=new de.giesen.camaps.companion.prototype.alarm.OutputPreferenceStore(getFilesDir()).load().preferences; say(SpeechPolicy.observationText(current.value, current.trend, (now-current.receivedElapsed)/1000,p.trendSpeech,p.speechLanguage,UnitPreferences.display(this,p),current.arrowColor)); }
             catch(IOException e) { speechStatus.setText(AppText.tr("Ausgabe-Einstellungen nicht lesbar")); }
         });
         button(panel, AppText.tr("Sprache stoppen"), v -> { if (audio != null) audio.stop(); });
@@ -255,10 +256,10 @@ public class ProbeActivity extends UiActivity {
                 : AppText.tr("Keine aktuelle, eindeutige Vektorgrafik zum Zuordnen verfügbar."));
         GlucoseUnit unit=UnitPreferences.display(this); readingUnit.setText(unit.label);
         unitHint.setText(AppText.tr("Einheitenkonflikt · Entwickleroptionen öffnen")); unitHint.setVisibility(UnitPreferences.conflict(this)?View.VISIBLE:View.GONE);
-        trendValue.setText("CamAPS  "+(current==null?AppText.tr("Warte auf CamAPS"):current.trend!=NotificationParser.Trend.UNKNOWN
-                ?DisplayTrendPreferences.title(this,current.trend):candidate!=null && candidate.current()?AppText.tr("Trend offen"):AppText.tr("Kein Trendpfeil")));
-        value.setText(current == null ? "—" : unit.number(current.value,java.util.Locale.getDefault())+(current.trend==NotificationParser.Trend.UNKNOWN?"":" "+current.trend.symbol));
-        value.setContentDescription(current==null?AppText.tr("Noch kein Empfang"):unit.number(current.value,java.util.Locale.getDefault())+" "+unit.label);
+        trendValue.setText(AppText.tr("Pfeil:")+" "+(current==null?AppText.tr("Warte auf CamAPS"):current.trend!=NotificationParser.Trend.UNKNOWN
+                ?DisplayTrendPreferences.title(this,current.trend,current.arrowColor):candidate!=null && candidate.current()?AppText.tr("Trend offen"):AppText.tr("Kein Trendpfeil")));
+        value.setText(current == null ? "—" : MetricNotification.reading(current.value,current.trend,unit,ProbeState.displayFresh(this,current),current.arrowColor));
+        value.setContentDescription(current==null?AppText.tr("Noch kein Empfang"):unit.number(current.value,java.util.Locale.getDefault())+" "+unit.label+(current.arrowColor.colored()?". "+DisplayTrendPreferences.title(this,current.trend,current.arrowColor):""));
         boolean currentFresh=ProbeState.displayFresh(this,current);
         Double rate=currentFresh?current.receiptRate.at(System.currentTimeMillis()):null;
         calculatedRate.setText(rate==null?"":unit.rate(rate,java.util.Locale.getDefault()));
@@ -277,34 +278,19 @@ public class ProbeActivity extends UiActivity {
                     .setMessage(AppText.tr("Keine aktuelle, eindeutige Pfeilgrafik verfügbar. Bitte nach dem nächsten CamAPS-Update erneut öffnen."))
                     .setPositiveButton(AppText.tr("OK"),null).show(); render(); return;
         }
-        ImageView preview=new ImageView(this);
-        preview.setImageBitmap(captured.preview);
-        preview.setBackgroundColor(0xffb0b0b0);
-        int size=(int)(112*getResources().getDisplayMetrics().density);
-        preview.setMinimumHeight(size); preview.setAdjustViewBounds(true);
-        preview.setContentDescription(AppText.tr("Isolierte CamAPS-Vektorgrafik zur manuellen Zuordnung"));
-        LinearLayout content=new LinearLayout(this); content.setOrientation(LinearLayout.VERTICAL);
-        text(content,AppText.tr("Ordne diese Vorschau zu. Bei einer neuen Quellmeldung bitte neu laden."),16);
-        content.addView(preview,new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,size));
         NotificationParser.Trend exact=TrendReference.lookup(getSharedPreferences(VectorReference.PREFS,MODE_PRIVATE).getAll(),captured.key);
         NotificationParser.Trend shape=TrendReference.lookup(getSharedPreferences(VectorReference.SHAPE_PREFS,MODE_PRIVATE).getAll(),captured.shapeKey);
         NotificationParser.Trend assigned=ShapeReference.resolve(exact,shape);
-        text(content,AppText.tr("Bisher zugeordnet:")+" "+(assigned==NotificationParser.Trend.UNKNOWN?AppText.tr("Trend offen"):assigned.symbol+" "+MetricNotification.trendTitle(assigned)),16).setTag("vector_assignment");
-        if(assigned!=NotificationParser.Trend.UNKNOWN) {
-            text(content,AppText.tr("Anzeigetext:")+" "+DisplayTrendPreferences.title(this,assigned),14).setTag("vector_display_word");
-            String spoken;
-            try { spoken=new de.giesen.camaps.companion.prototype.alarm.OutputPreferenceStore(getFilesDir()).load().preferences.trendSpeech.word(assigned); }
-            catch(IOException e) { spoken=AppText.tr("Nicht lesbar"); }
-            text(content,AppText.tr("Sprachtext:")+" "+(spoken.isEmpty()?AppText.tr("Aus"):spoken),14).setTag("vector_speech_word");
-        }
-        final NotificationParser.Trend[] choices=new NotificationParser.Trend[]{NotificationParser.Trend.DOUBLE_UP,NotificationParser.Trend.UP,NotificationParser.Trend.UP_RIGHT,NotificationParser.Trend.FLAT,NotificationParser.Trend.DOWN_RIGHT,NotificationParser.Trend.DOWN,NotificationParser.Trend.DOUBLE_DOWN};
-        String[] labels=new String[choices.length];
-        for (int i=0;i<choices.length;i++) labels[i]=choices[i].symbol+"  "+MetricNotification.trendTitle(choices[i]);
+        ArrowColor assignedColor=TrendReference.color(getSharedPreferences(VectorReference.PREFS,MODE_PRIVATE).getAll(),captured.key,assigned);
+        final NotificationParser.Trend[] choices=ArrowChoicePanel.DIRECTIONS;
         final int[] selected={-1};
+        final AlertDialog[] shown={null};
+        ArrowChoicePanel content=new ArrowChoicePanel(this,captured.preview,assigned,assignedColor,index->{
+            selected[0]=index;
+            if(shown[0]!=null)shown[0].getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(enabled() && VectorReference.canConfirm(captured,ProbeState.vectorCandidate));
+        });
         AlertDialog dialog=new AlertDialog.Builder(this).setTitle(AppText.tr("Pfeilgrafik bestätigen"))
-                .setView(content).setSingleChoiceItems(labels,-1,(d,index) -> {
-                    selected[0]=index; ((AlertDialog)d).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(enabled() && VectorReference.canConfirm(captured,ProbeState.vectorCandidate));
-                }).setNeutralButton(AppText.tr("Neu laden"),(d,w) -> handler.post(this::labelVector)).setNegativeButton(AppText.tr("Abbrechen"),null).setPositiveButton(AppText.tr("Speichern"),(d,which) -> {
+                .setView(content).setNeutralButton(AppText.tr("Neu laden"),(d,w) -> handler.post(this::labelVector)).setNegativeButton(AppText.tr("Abbrechen"),null).setPositiveButton(AppText.tr("Speichern"),(d,which) -> {
                     VectorReference.Candidate current=ProbeState.vectorCandidate;
                     if (!enabled() || selected[0]<0 || !VectorReference.canConfirm(captured,current)) {
                         ProbeState.status=AppText.tr("Grafik inzwischen geändert oder zu alt; bitte neu prüfen"); render(); return;
@@ -317,13 +303,15 @@ public class ProbeActivity extends UiActivity {
                         new AlertDialog.Builder(this).setMessage(AppText.tr("Pfeilspeicher voll; diese Grafik kann nicht gespeichert werden."))
                                 .setPositiveButton(AppText.tr("OK"),null).show(); render(); return;
                     }
-                    if (canExact) references.edit().putString(captured.key,choices[selected[0]].name()).apply();
+                    NotificationParser.Trend chosen=choices[selected[0]%choices.length];
+                    ArrowColor chosenColor=ArrowColor.values()[selected[0]/choices.length];
+                    if (canExact) references.edit().putString(captured.key,TrendReference.label(chosen,chosenColor)).apply();
                     if (canShape) shapes.edit().putString(captured.shapeKey,
-                            ShapeReference.registration(shapes.getAll().get(captured.shapeKey),choices[selected[0]])).apply();
+                            ShapeReference.registration(shapes.getAll().get(captured.shapeKey),chosen)).apply();
                     boolean historySaved=false;
                     try {
                         android.content.SharedPreferences history=getSharedPreferences(VectorReference.HISTORY_PREFS,MODE_PRIVATE);
-                        String encoded=VectorHistory.append(history.getString("entries",""),new VectorHistory.Entry(captured.key,captured.shapeKey,choices[selected[0]]));
+                        String encoded=VectorHistory.append(history.getString("entries",""),new VectorHistory.Entry(captured.key,captured.shapeKey,chosen));
                         historySaved=history.edit().putString("entries",encoded).commit();
                     } catch (IllegalArgumentException | ClassCastException e) { /* Preserve unknown history; reference storage is independent. */ }
                     ProbeState.forgetTrend();
@@ -334,6 +322,7 @@ public class ProbeActivity extends UiActivity {
                     ProbeState.status=AppText.tr("Pfeilreferenz gespeichert; warte auf ein neues CamAPS-Update")+(historySaved?"":AppText.tr(". Bestätigungshistorie nicht verfügbar."));
                     render();
                 }).create();
+        shown[0]=dialog;
         Runnable guard=new Runnable() { @Override public void run() {
             if (!dialog.isShowing()) return;
             boolean fresh=enabled() && VectorReference.canConfirm(captured,ProbeState.vectorCandidate);
@@ -341,7 +330,7 @@ public class ProbeActivity extends UiActivity {
             if (!fresh) dialog.setTitle(AppText.tr("Vorschau veraltet · neu laden"));
             handler.postDelayed(this,500);
         }};
-        dialog.setOnShowListener(d -> { dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false); handler.post(guard); });
+        dialog.setOnShowListener(d -> { ArrowChoicePanel.fitActions(dialog); dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false); handler.post(guard); });
         dialog.setOnDismissListener(d -> { handler.removeCallbacks(guard); if(vectorDialog==dialog) vectorDialog=null; });
         vectorDialog=dialog;
         dialog.show();

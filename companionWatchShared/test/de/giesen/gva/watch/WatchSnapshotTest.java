@@ -8,11 +8,33 @@ public class WatchSnapshotTest {
     private static final long NOW=1800000000000L;
     private WatchSnapshot sample(boolean mmol){return new WatchSnapshot(NOW,NOW-60000,126,WatchSnapshot.Trend.UP_RIGHT,mmol,true,1.2,80.,180.,Arrays.asList(new WatchSnapshot.Point(NOW-60000,126)));}
     private void bad(byte[] packet){try{WatchSnapshot.decode(packet,NOW);fail("Malformed packet accepted");}catch(IOException expected){}}
+    @Test public void everyRedDirectionRoundTripsWithoutChangingValueUnitOrAge()throws Exception {
+        for(ArrowColor color:new ArrowColor[]{ArrowColor.RED,ArrowColor.YELLOW})for(WatchSnapshot.Trend trend:WatchSnapshot.Trend.values())if(trend!=WatchSnapshot.Trend.UNKNOWN) {
+            WatchSnapshot a=new WatchSnapshot(NOW,NOW-60000,126,trend,true,true,1.2,80.,180.,Collections.emptyList(),color);
+            byte[] bytes=a.encode();assertEquals(2,bytes[7]);WatchSnapshot b=WatchSnapshot.decode(bytes,NOW);
+            assertEquals(color,b.arrowColor);assertEquals(trend,b.trend);assertEquals(a.value,b.value,0);assertEquals(a.received,b.received);assertTrue(b.mmol);
+        }
+    }
+    @Test public void unknownColourCodesAreRejectedInsteadOfGuessing()throws Exception {
+        byte[] b=new WatchSnapshot(NOW,NOW,126,WatchSnapshot.Trend.UP,false,true,null,null,null,Collections.emptyList(),ArrowColor.YELLOW).encode();
+        for(int code:new int[]{0,3,255}){byte[] malformed=b.clone();malformed[33]=(byte)code;bad(malformed);}
+    }
+    @Test public void legacyEncodingDropsOnlyColourAndKeepsTheV1Layout()throws Exception {
+        WatchSnapshot a=sample(true),red=new WatchSnapshot(a.generated,a.received,a.value,a.trend,a.mmol,a.sourceAvailable,a.rate,a.low,a.high,a.points,ArrowColor.RED);
+        assertArrayEquals(a.encode(),red.encodeForVersion(1));assertEquals(ArrowColor.NORMAL,WatchSnapshot.decode(red.encodeForVersion(1),NOW).arrowColor);
+        assertEquals(ArrowColor.NORMAL,WatchSnapshot.decode(a.encode(),NOW).arrowColor);
+        WatchSnapshot yellow=new WatchSnapshot(a.generated,a.received,a.value,a.trend,a.mmol,a.sourceAvailable,a.rate,a.low,a.high,a.points,ArrowColor.YELLOW);
+        assertArrayEquals(a.encode(),yellow.encodeForVersion(1));
+    }
+    @Test public void everyRedPacketTruncationAndTrailingByteFailsClosed()throws Exception {
+        byte[] b=new WatchSnapshot(NOW,NOW,126,WatchSnapshot.Trend.FLAT,false,true,null,null,null,Collections.emptyList(),ArrowColor.RED).encode();
+        for(int i=0;i<b.length;i++)bad(Arrays.copyOf(b,i));bad(Arrays.copyOf(b,b.length+1));
+    }
     @Test public void mgdlRoundTripPreservesCanonicalValues()throws Exception{WatchSnapshot s=WatchSnapshot.decode(sample(false).encode(),NOW);assertEquals(126,s.value,0);assertFalse(s.mmol);assertEquals(WatchSnapshot.Trend.UP_RIGHT,s.trend);}
     @Test public void mmolRoundTripDoesNotPreRound()throws Exception{WatchSnapshot s=WatchSnapshot.decode(sample(true).encode(),NOW);assertTrue(s.mmol);assertEquals(1.2,s.rate,0);}
     @Test public void everyTruncationFailsClosed()throws Exception{byte[] b=sample(false).encode();for(int i=0;i<b.length;i++)bad(Arrays.copyOf(b,i));}
     @Test public void trailingBytesAreRejected()throws Exception{byte[] b=sample(false).encode();bad(Arrays.copyOf(b,b.length+1));}
-    @Test public void schemaMismatchRejected()throws Exception{byte[] b=sample(false).encode();b[7]=2;bad(b);}
+    @Test public void schemaMismatchRejected()throws Exception{byte[] b=sample(false).encode();b[7]=3;bad(b);}
     @Test public void oversizedPacketRejected(){bad(new byte[WatchSnapshot.MAX_BYTES+1]);}
     @Test public void futurePacketRejected()throws Exception{bad(new WatchSnapshot(NOW+60001,NOW,126,WatchSnapshot.Trend.FLAT,false,true,null,null,null,Collections.emptyList()).encode());}
     @Test public void stalePacketCannotRenewReadingAge(){assertFalse(sample(false).fresh(NOW+WatchSnapshot.FRESH));}

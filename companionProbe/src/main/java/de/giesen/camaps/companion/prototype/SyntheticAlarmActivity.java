@@ -52,7 +52,7 @@ public final class SyntheticAlarmActivity extends UiActivity {
         audio.stop(); cleanup();
         scenario=new SyntheticAlarmScenario(kind); offset=0;
         try {
-            new LevelStore(directory).save(0,Collections.singletonList(scenario.level)); openFlow();
+            new LevelStore(directory).save(0,scenario.levels()); openFlow();
             if (flow==null) return;
             snooze.setEnabled(LevelForm.hasSnooze(kind)); clock.setText("Testzeit: Beginn · "+LevelForm.kindLabel(kind));
             status.setText(AppText.tr("Getrenntes Beispiel bereit. Dauerhoch braucht weitere Testminuten; schnelle Änderungen brauchen keine Snoozezeit."));
@@ -69,6 +69,7 @@ public final class SyntheticAlarmActivity extends UiActivity {
     private void step(boolean advance) {
         if (flow==null || scenario==null) return;
         audio.stop(); if (advance) offset+=SyntheticAlarmScenario.MINUTE;
+        flow.setArrowColor(scenario.kind==AlarmEngine.Kind.SOURCE_LOW && condition?de.giesen.gva.watch.ArrowColor.RED:de.giesen.gva.watch.ArrowColor.NORMAL);
         AlarmOutputFlow.Outcome outcome=flow.evaluate(AlarmOutputFlow.Origin.SYNTHETIC,scenario.points(offset,condition),scenario.clock(offset),720,
                 SyntheticAlarmScenario.BASE-10*SyntheticAlarmScenario.MINUTE,scenario.trend(condition));
         if (outcome==AlarmOutputFlow.Outcome.ACCEPTED) outcome=flow.alarm(scenario.level.rule.id,scenario.clock(offset));

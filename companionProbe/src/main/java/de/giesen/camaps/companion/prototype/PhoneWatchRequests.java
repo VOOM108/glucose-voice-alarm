@@ -5,7 +5,9 @@ import de.giesen.gva.watch.WatchSnapshot;
 /** Only requests a display copy; no command can change phone alarms or settings. */
 public final class PhoneWatchRequests extends WearableListenerService {
     @Override public void onMessageReceived(MessageEvent event) {
-        if(WatchSnapshot.REQUEST.equals(event.getPath())&&event.getData().length==0&&WatchPublisher.enabled(this))
-            WatchPublisher.reply(this,event.getSourceNodeId());
+        byte[] data=event.getData();
+        if(WatchSnapshot.REQUEST.equals(event.getPath())&&WatchPublisher.enabled(this)
+                &&(data.length==0 || (data.length==1 && data[0]==2)))
+            WatchPublisher.reply(this,event.getSourceNodeId(),data.length==0?1:2);
     }
 }

@@ -12,6 +12,7 @@ import java.util.*;
 public final class TrendDisplayActivity extends UiActivity {
     private final List<EditText> fields=new ArrayList<>();
     private ArrayList<String> initial;
+    private TrendColorEditor colors;
     private long revision;
     private boolean ready;
     private TextView status;
@@ -26,21 +27,26 @@ public final class TrendDisplayActivity extends UiActivity {
         try {
             DisplayTrendPreferences.Snapshot snapshot=DisplayTrendPreferences.load(this);
             revision=state==null?snapshot.revision:state.getLong("revision",snapshot.revision);
+            colors=new TrendColorEditor(snapshot.words.colors,TrendDisplayWords.MAX_LENGTH,"trend_display");
+            LevelUi.text(body,AppText.tr("Rot und Gelb übernehmen den normalen Text. Aktiviere je Richtung einen eigenen Farbtext, wenn Du ihn abweichend einstellen möchtest."),14);
             for(int i=0;i<TrendDisplayWords.COUNT;i++) {
                 NotificationParser.Trend trend=TrendDisplayWords.TRENDS.get(i);
-                EditText field=LevelUi.field(body,trend.symbol+" "+MetricNotification.trendTitle(trend),snapshot.words.overrides.get(i),InputType.TYPE_CLASS_TEXT);
+                LinearLayout card=DashboardUi.card(this,body);card.setTag("trend_display_card_"+trend.name());
+                LevelUi.text(card,trend.symbol+" "+MetricNotification.trendTitle(trend),19);
+                EditText field=LevelUi.field(card,AppText.tr("Normal (grau)"),snapshot.words.overrides.get(i),InputType.TYPE_CLASS_TEXT);
                 field.setTag("trend_display_"+trend.name());field.setHint(MetricNotification.trendTitle(trend));field.setSingleLine(true);
                 field.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(TrendDisplayWords.MAX_LENGTH)});
                 fields.add(field);
+                colors.add(card,i,trend,field,()->field.getText().toString().trim().isEmpty()?MetricNotification.trendTitle(trend):field.getText().toString(),null,()->true,()->{});
             }
             initial=values();
             if(state!=null) {
                 ArrayList<String> draft=state.getStringArrayList("fields"),original=state.getStringArrayList("initial");
-                if(draft!=null && draft.size()==TrendDisplayWords.COUNT)for(int i=0;i<fields.size();i++)fields.get(i).setText(draft.get(i));
-                if(original!=null && original.size()==TrendDisplayWords.COUNT)initial=original;
+                if(draft!=null && (draft.size()==TrendDisplayWords.COUNT || draft.size()==35)) {for(int i=0;i<fields.size();i++)fields.get(i).setText(draft.get(i));if(draft.size()==35)colors.restore(draft.subList(7,35));}
+                if(original!=null && (original.size()==TrendDisplayWords.COUNT || original.size()==35)){initial=original;if(initial.size()==7)initial.addAll(TrendColorEditor.defaultValues());}
             }
             LevelUi.button(body,AppText.tr("Standardtexte"),v -> {
-                for(EditText field:fields)field.setText("");
+                for(EditText field:fields)field.setText("");colors.reset();
             });
             Button save=LevelUi.button(body,AppText.tr("Speichern"),v -> save());save.setTag("trend_display_save");
             ready=true;
@@ -48,12 +54,12 @@ public final class TrendDisplayActivity extends UiActivity {
         } catch(IOException e) {status.setText(e.getMessage());}
     }
     private ArrayList<String> values() {
-        ArrayList<String> result=new ArrayList<>();for(EditText field:fields)result.add(field.getText().toString());return result;
+        ArrayList<String> result=new ArrayList<>();for(EditText field:fields)result.add(field.getText().toString());result.addAll(colors.values());return result;
     }
     private void save() {
         if(!ready)return;
         try {
-            DisplayTrendPreferences.save(this,revision,new TrendDisplayWords(values()));
+            DisplayTrendPreferences.save(this,revision,new TrendDisplayWords(values().subList(0,7),colors.words()));
             LiveAlarmService.displayChanged();HomeWidget.changed(this);finish();
         } catch(IOException | IllegalArgumentException e) {status.setText(e.getMessage());}
     }

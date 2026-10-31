@@ -763,3 +763,43 @@ durch Regel ausgesetzt	suppressed by policy
 Länger als … Minuten	Longer than … minutes
 Die Zeit zählt ab dem ersten empfangenen Wert über der Grenze, auch über Datenlücken hinweg. Neue Alarme brauchen einen frischen steigenden Wert. Ein Wert an oder unter der Grenze beendet die Phase. Für Lücken wird kein Wert angenommen.	Time starts with the first received reading above the threshold and includes data gaps. New alarms require a fresh rising reading. A reading at or below the threshold ends the episode. No readings are assumed during gaps.
 Das Zeitfenster begrenzt die Ausgabe, nicht die gezählte Dauer.	The schedule limits output, not the elapsed duration.
+
+ · rot	 · red
+Doppelt aufwärts rot	Double up red
+Aufwärts rot	Up red
+Schräg aufwärts rot	Diagonal up red
+Waagerecht rot	Horizontal red
+Schräg abwärts rot	Diagonal down red
+Abwärts rot	Down red
+Doppelt abwärts rot	Double down red
+
+ · gelb	 · yellow
+Doppelt aufwärts gelb	Double up yellow
+Aufwärts gelb	Up yellow
+Schräg aufwärts gelb	Diagonal up yellow
+Waagerecht gelb	Horizontal yellow
+Schräg abwärts gelb	Diagonal down yellow
+Abwärts gelb	Down yellow
+Doppelt abwärts gelb	Double down yellow
+
+Pfeil:	Arrow:
+
+Bald niedrig	Low soon
+Einmal pro roter Pfeilphase · keine Wiederholung oder Snoozezeit	Once per red arrow phase · no repeat or snooze interval
+Roter Quellpfeil · Wert oberhalb der aktiven Niedrig-Grenzen	Red source arrow · value above active low thresholds
+Auslösung nur durch einen erkannten roten Quellpfeil, unabhängig von seiner Richtung. Der aktuelle Wert muss oberhalb der höchsten eingeschalteten Niedrig-Grenze im gültigen Zeitfenster liegen. Keine eigene Prognose aus dem Verlauf.	Triggered only by a recognized red source arrow, regardless of its direction. The current value must be above the highest enabled low threshold within its time window. No prediction calculated from history.
+Einmal pro roter Pfeilphase. Ein frischer erkannter normaler oder gelber Pfeil beendet die Phase; erneutes Rot kann wieder auslösen. Datenlücken, unbekannte Pfeile und niedrige Werte setzen die Sperre nicht zurück. Keine automatische Wiederholung und kein Snooze.	Once per red arrow phase. A fresh recognized normal or yellow arrow ends the phase; red can then trigger again. Data gaps, unknown arrows and low values do not reset the lock. No automatic repeat and no snooze.
+Noch keine Niedrig-Stufe eingeschaltet. Bis dahin bleibt dieser Alarm ohne Auslösung.	No low level is enabled yet. This alarm will not trigger until one is enabled.
+
+Sieben Farbtexte erforderlich	Seven colour texts required
+Farbtexte müssen einzeilig sein und dürfen keine Platzhalter enthalten	Colour texts must be single-line and cannot contain placeholders
+Sieben Farbauswahlen erforderlich	Seven colour choices required
+Eigene Farbtexte: höchstens 80 Zeichen, einzeilig, ohne Platzhalter	Custom colour texts: at most 80 characters, single-line, without placeholders
+Rot	Red
+Gelb	Yellow
+Eigener Text für Rot	Custom text for red
+Eigener Text für Gelb	Custom text for yellow
+eigenen Text verwenden	use custom text
+Normal (grau)	Normal (grey)
+Rot und Gelb übernehmen den normalen Text. Aktiviere je Richtung einen eigenen Farbtext, wenn Du ihn abweichend einstellen möchtest.	Red and yellow inherit the normal text. Enable a custom colour text for each direction when you want different wording.
+Rot und Gelb übernehmen den normalen Text. Eigene Farbtexte sind je Richtung zuschaltbar. Der Ansageschalter einer Richtung gilt für alle Farben; {farbe} bleibt ein eigener optionaler Platzhalter.	Red and yellow inherit the normal text. Custom colour texts can be enabled for each direction. A direction's speech switch applies to all colours; {color} remains a separate optional placeholder.

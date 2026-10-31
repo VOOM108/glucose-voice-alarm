@@ -7,10 +7,13 @@ public final class TrendSpeech {
     public static final int COUNT=7;
     public final List<String> words;
     public final List<Boolean> enabled;
+    public final de.giesen.camaps.companion.prototype.TrendColorOverrides colors;
     public TrendSpeech(List<String> words) {
         this(words,Collections.nCopies(COUNT,true));
     }
-    public TrendSpeech(List<String> words,List<Boolean> enabled) {
+    public TrendSpeech(List<String> words,List<Boolean> enabled) { this(words,enabled,de.giesen.camaps.companion.prototype.TrendColorOverrides.defaults()); }
+    public TrendSpeech(List<String> words,List<Boolean> enabled,de.giesen.camaps.companion.prototype.TrendColorOverrides colors) {
+        this.colors=Objects.requireNonNull(colors);colors.validate(80);
         if (words==null || (words.size()!=COUNT && words.size()!=5)) throw new IllegalArgumentException("Sieben Trendtexte erforderlich");
         if(enabled==null || enabled.size()!=COUNT || enabled.contains(null)) throw new IllegalArgumentException("Seven trend speech switches required");
         List<String> copy=new ArrayList<>();
@@ -25,13 +28,14 @@ public final class TrendSpeech {
     }
     public static TrendSpeech defaults() { return defaults("de"); }
     public static TrendSpeech defaults(String language) { return "en".equals(language)?new TrendSpeech(Arrays.asList("rising","rising fast","steady","falling","falling fast","rising very fast","falling very fast")):new TrendSpeech(Arrays.asList("steigend","schnell steigend","stabil","fallend","schnell fallend","sehr schnell steigend","sehr schnell fallend")); }
-    public String word(Trend trend) {
+    public String word(Trend trend) { return word(trend,de.giesen.gva.watch.ArrowColor.NORMAL); }
+    public String word(Trend trend,de.giesen.gva.watch.ArrowColor color) {
         if(trend==null) return "";
         int index;
         switch(trend) {
             case UP_RIGHT: index=0; break; case UP: index=1; break; case DOUBLE_UP: index=5; break;
             case FLAT: index=2; break; case DOWN_RIGHT: index=3; break; case DOWN: index=4; break; case DOUBLE_DOWN: index=6; break; default: return "";
         }
-        return enabled.get(index)?words.get(index):"";
+        return enabled.get(index)?colors.resolve(index,color,words.get(index)):"";
     }
 }

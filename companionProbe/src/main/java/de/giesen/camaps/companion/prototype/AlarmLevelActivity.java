@@ -60,7 +60,13 @@ public final class AlarmLevelActivity extends UiActivity {
             name.setFilters(new InputFilter[]{new InputFilter.LengthFilter(80)});
             enabled=LevelUi.check(body,AppText.tr("Alarmstufe einschalten"),r!=null && r.enabled);
             String limitLabel=LevelForm.isRate(kind)?(kind==AlarmEngine.Kind.FALLING?AppText.tr("Abnahme in "):AppText.tr("Anstieg in "))+editingUnit.label+AppText.tr(" pro Minute (positiv eingeben)"):AppText.tr("Grenzwert in ")+editingUnit.label;
-            threshold=LevelUi.field(body,limitLabel,initialThreshold,InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            if(kind==AlarmEngine.Kind.SOURCE_LOW) {
+                threshold=new EditText(this); threshold.setText("1");
+                LevelUi.text(body,AppText.tr("Auslösung nur durch einen erkannten roten Quellpfeil, unabhängig von seiner Richtung. Der aktuelle Wert muss oberhalb der höchsten eingeschalteten Niedrig-Grenze im gültigen Zeitfenster liegen. Keine eigene Prognose aus dem Verlauf."),16).setTag("source_low_condition");
+                LevelUi.text(body,AppText.tr("Einmal pro roter Pfeilphase. Ein frischer erkannter normaler oder gelber Pfeil beendet die Phase; erneutes Rot kann wieder auslösen. Datenlücken, unbekannte Pfeile und niedrige Werte setzen die Sperre nicht zurück. Keine automatische Wiederholung und kein Snooze."),14);
+                boolean low=false; for(AlarmLevel candidate:snapshot.levels)if(candidate.rule.enabled && candidate.rule.kind==AlarmEngine.Kind.LOW)low=true;
+                if(!low)LevelUi.text(body,AppText.tr("Noch keine Niedrig-Stufe eingeschaltet. Bis dahin bleibt dieser Alarm ohne Auslösung."),15).setTag("source_low_missing_boundary");
+            } else threshold=LevelUi.field(body,limitLabel,initialThreshold,InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
             threshold.setFilters(new InputFilter[]{new InputFilter.LengthFilter(24)});
             if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) {
                 duration=LevelUi.field(body,AppText.tr("Länger als … Minuten"),r==null?"":Integer.toString(r.durationMinutes),InputType.TYPE_CLASS_NUMBER);
@@ -87,8 +93,9 @@ public final class AlarmLevelActivity extends UiActivity {
                     InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
             speechTexts.setMinLines(2); speechTexts.setMaxLines(6);
             speechTexts.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2003)});
-            if(kind==AlarmEngine.Kind.PERSISTENT_HIGH) TokenButtons.add(body,speechTexts,"{wert}","{einheit}","{stufe}","{grenze}","{trend}","{dauer_minuten}");
-            else TokenButtons.add(body,speechTexts,"{wert}","{einheit}","{stufe}","{grenze}","{trend}");
+            if(kind==AlarmEngine.Kind.PERSISTENT_HIGH) TokenButtons.add(body,speechTexts,"{wert}","{einheit}","{stufe}","{grenze}","{trend}","{farbe}","{dauer_minuten}");
+            else if(kind==AlarmEngine.Kind.SOURCE_LOW) TokenButtons.add(body,speechTexts,"{wert}","{einheit}","{stufe}","{trend}","{farbe}");
+            else TokenButtons.add(body,speechTexts,"{wert}","{einheit}","{stufe}","{grenze}","{trend}","{farbe}");
             LevelUi.help(body,AppText.tr("Textregeln"),AppText.tr("Bis zu vier Formulierungen, eine je Zeile, höchstens 500 Zeichen. Leer verwendet den Standard: ")+SpeechTemplate.defaultAlarm(kind,new OutputPreferenceStore(getFilesDir()).load().preferences.speechLanguage));
             LevelUi.text(body,AppText.tr("Anhören mit Testwert"),14);
             LinearLayout samples=new LinearLayout(this); samples.setGravity(android.view.Gravity.CENTER_VERTICAL); body.addView(samples);
@@ -163,7 +170,7 @@ public final class AlarmLevelActivity extends UiActivity {
     }
     private void chooseTone() {
         stopTone();
-        String[] choices={AppText.tr("Samt · ")+LevelForm.kindLabel(kind),AppText.tr("Klar · ")+LevelForm.kindLabel(kind),AppText.tr("Rund · ")+LevelForm.kindLabel(kind),AppText.tr("Eigener Android-Ton …")};
+        String[] choices={AppText.tr("Samt · ")+LevelForm.kindLabel(kind==AlarmEngine.Kind.SOURCE_LOW?AlarmEngine.Kind.LOW:kind),AppText.tr("Klar · ")+LevelForm.kindLabel(kind==AlarmEngine.Kind.SOURCE_LOW?AlarmEngine.Kind.LOW:kind),AppText.tr("Rund · ")+LevelForm.kindLabel(kind==AlarmEngine.Kind.SOURCE_LOW?AlarmEngine.Kind.LOW:kind),AppText.tr("Eigener Android-Ton …")};
         new AlertDialog.Builder(this).setTitle(AppText.tr("Ton für diese Alarmart")).setItems(choices,(dialog,index) -> {
             if (index==3) { chooseAndroidTone(); return; }
             toneUri=ToneCatalog.uri(ToneCatalog.SETS.get(index),kind); updateControls(); playTone();

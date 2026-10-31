@@ -107,6 +107,8 @@ public class LivePlatformTest {
         try {
             TrendDisplayActivity editor=controller.get();
             ((EditText)editor.getWindow().getDecorView().findViewWithTag("trend_display_UP")).setText("Rasch aufwärts");
+            ((CheckBox)editor.getWindow().getDecorView().findViewWithTag("trend_display_RED_UP_enabled")).setChecked(true);
+            ((EditText)editor.getWindow().getDecorView().findViewWithTag("trend_display_RED_UP")).setText("Rasch rot");
             editor.getWindow().getDecorView().findViewWithTag("trend_display_save").performClick();shadowOf(Looper.getMainLooper()).idle();
             assertTrue(editor.isFinishing());assertTrue(tone.playing);assertSame(tone,AndroidUiTest.TestBellPlayer.latest);
             assertSame(flow,org.robolectric.util.ReflectionHelpers.getField(instance,"flow"));assertTrue(LiveAlarmService.live());
@@ -168,7 +170,7 @@ public class LivePlatformTest {
     }
     @Test public void allBundledToneResourcesAreRealUncompressedPcmWaves() throws Exception {
         for (String set:ToneCatalog.SETS) for (AlarmEngine.Kind kind:AlarmEngine.Kind.values()) {
-            int id=app.getResources().getIdentifier("xcam_"+set+"_"+kind.name().toLowerCase(Locale.ROOT),"raw",app.getPackageName()); assertTrue(id!=0);
+            int id=app.getResources().getIdentifier(android.net.Uri.parse(ToneCatalog.uri(set,kind)).getLastPathSegment(),"raw",app.getPackageName()); assertTrue(id!=0);
             try (android.content.res.AssetFileDescriptor asset=app.getResources().openRawResourceFd(id); InputStream input=asset.createInputStream()) {
                 byte[] header=new byte[44]; assertEquals(44,input.read(header));
                 assertEquals("RIFF",new String(header,0,4,StandardCharsets.US_ASCII)); assertEquals("WAVE",new String(header,8,4,StandardCharsets.US_ASCII));

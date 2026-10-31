@@ -16,7 +16,7 @@ import java.util.Set;
 
 /** Data -> pinned xDrip decisions -> decision port. No audio/notifications/sensor initialization. */
 public final class AlarmEngine {
-    public enum Kind { HIGH, LOW, PERSISTENT_HIGH, RISING, FALLING }
+    public enum Kind { HIGH, LOW, PERSISTENT_HIGH, RISING, FALLING, SOURCE_LOW }
     public enum Status { DISABLED, DATA_BLOCKED, CLOCK_BLOCKED, EVALUATED }
     public enum OutputMode { TONES_ONLY, SPOKEN_ALARMS, SPOKEN_ALARMS_AND_VALUES }
     public interface DecisionSink { void onDecision(Result result); }
@@ -122,6 +122,13 @@ public final class AlarmEngine {
     /** Separate observed episode history must never be used for a cross-gap rate. */
     public synchronized Result evaluate(List<HistoryAnalysis.Point> window,List<HistoryAnalysis.Point> episodeWindow,long nowMs,int minuteOfDay,
                                         Long confirmedSourceSessionStart,DecisionSink sink) {
+        return evaluate(window,episodeWindow,nowMs,minuteOfDay,confirmedSourceSessionStart,sink,
+                de.giesen.camaps.companion.prototype.NotificationParser.Trend.UNKNOWN,de.giesen.gva.watch.ArrowColor.NORMAL);
+    }
+    /** Source warning is GVA policy, separate from the verbatim numerical xDrip methods. */
+    public synchronized Result evaluate(List<HistoryAnalysis.Point> window,List<HistoryAnalysis.Point> episodeWindow,long nowMs,int minuteOfDay,
+                                        Long confirmedSourceSessionStart,DecisionSink sink,
+                                        de.giesen.camaps.companion.prototype.NotificationParser.Trend sourceTrend,de.giesen.gva.watch.ArrowColor color) {
         if (window==null || nowMs<=0 || minuteOfDay<0 || minuteOfDay>=1440
                 || (confirmedSourceSessionStart!=null && (confirmedSourceSessionStart<=0 || confirmedSourceSessionStart>nowMs)))
             throw new IllegalArgumentException("Invalid decision context");
@@ -192,7 +199,17 @@ public final class AlarmEngine {
                 try {
                     boolean condition=false,recovering=false,resetNotification=false;
                     boolean inTime=AlertType.s_in_time_frame(rule.allDay,rule.startMinute,rule.endMinute);
-                    if (rule.kind==Kind.HIGH || rule.kind==Kind.LOW) {
+                    if (rule.kind==Kind.SOURCE_LOW) {
+                        double lowBoundary=0;
+                        for(Rule low:rules) if(low.enabled && low.kind==Kind.LOW
+                                && AlertType.s_in_time_frame(low.allDay,low.startMinute,low.endMinute))
+                            lowBoundary=Math.max(lowBoundary,low.threshold);
+                        boolean recognized=color!=null && sourceTrend!=null && sourceTrend!=de.giesen.camaps.companion.prototype.NotificationParser.Trend.UNKNOWN;
+                        condition=inTime && recognized && color==de.giesen.gva.watch.ArrowColor.RED
+                                && lowBoundary>0 && data.get(data.size()-1).calculated_value>Math.max(14,lowBoundary);
+                        // Only a positively recognized non-red arrow ends the red phase.
+                        resetNotification=recognized && color!=de.giesen.gva.watch.ArrowColor.RED;
+                    } else if (rule.kind==Kind.HIGH || rule.kind==Kind.LOW) {
                         AlertType candidate=new AlertType(); candidate.active=true; candidate.threshold=rule.threshold;
                         candidate.above=rule.kind==Kind.HIGH; candidate.all_day=rule.allDay;
                         candidate.start_time_minutes=rule.startMinute; candidate.end_time_minutes=rule.endMinute;

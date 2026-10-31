@@ -52,7 +52,7 @@ final class AlarmOutputDiagnostics {
             File file=new File(context.getCacheDir(),FILE);if(!file.isFile() || file.length()>1024)return AppText.tr("Letzter Alarm: noch kein Ausgabestatus");
             List<String> lines=Files.readAllLines(file.toPath(),StandardCharsets.UTF_8);
             if(lines.size()!=10 || !lines.get(0).equals("GVA_ALARM_OUTPUT_V2") || !lines.get(1).equals("version="+BuildConfig.VERSION_CODE)
-                    || !lines.get(2).matches("kind=(HIGH|LOW|FALLING|RISING|PERSISTENT_HIGH|GAP)") || !lines.get(6).matches("deferred=(true|false)") || !lines.get(7).equals("data_basis=fixed_codes_only")
+                    || !lines.get(2).matches("kind=(HIGH|LOW|FALLING|RISING|PERSISTENT_HIGH|SOURCE_LOW|GAP)") || !lines.get(6).matches("deferred=(true|false)") || !lines.get(7).equals("data_basis=fixed_codes_only")
                     || !lines.get(8).matches("receipt=(0|[1-9][0-9]{0,18})") || !lines.get(9).matches("attempt=(0|[1-9][0-9]{0,18})"))throw new IOException();
             long receipt=Long.parseLong(value(lines.get(8),"receipt=")),attempt=Long.parseLong(value(lines.get(9),"attempt="));
             Speech speech=Speech.valueOf(value(lines.get(3),"speech="));Signal tone=Signal.valueOf(value(lines.get(4),"tone=")),vibration=Signal.valueOf(value(lines.get(5),"vibration="));
