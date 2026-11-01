@@ -9,15 +9,15 @@ public final class WatchSettingsActivity extends UiActivity {
     private void renderStatus(){displayStatus.setText(WatchPublisher.status.line(WatchPublisher.tr("Anzeige","Display")));alertStatus.setText(WatchAlertPublisher.status.line(WatchPublisher.tr("Alarme","Alerts")));}
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);if(!SafetyConsent.ready(this))return;
-        LinearLayout body=LevelUi.screen(this);LevelUi.button(body,AppText.tr("Zurück"),v->finish());
+        LinearLayout body=LevelUi.screen(this);LevelUi.back(body,AppText.tr("Zurück"),v->finish());
         LevelUi.text(body,WatchPublisher.tr("Uhr","Watch"),28);
-        CheckBox enabled=LevelUi.check(body,WatchPublisher.tr("Werte an Uhr senden","Send readings to watch"),WatchPublisher.enabled(this));
+        Switch enabled=new Switch(this);enabled.setText(WatchPublisher.tr("Werte an Uhr senden","Send readings to watch"));enabled.setContentDescription(enabled.getText());enabled.setMinHeight(LevelUi.dp(this,48));enabled.setChecked(WatchPublisher.enabled(this));body.addView(enabled);
         enabled.setOnCheckedChangeListener((b,value)->WatchPublisher.set(this,value));
         LevelUi.text(body,WatchPublisher.tr("Anzeige: Wert, CamAPS-Pfeil, Wertzeit, Delta und zwei Stunden Verlauf. Keine Bedienung der Pumpe.",
                 "Display: reading, CamAPS arrow, receipt time, delta and two hours of history. No pump controls."),16);
         LevelUi.button(body,WatchPublisher.tr("Anzeige jetzt senden","Send display now"),v->WatchPublisher.changed(this));
         displayStatus=LevelUi.text(body,"",15);displayStatus.setTag("watch_display_status");
-        CheckBox alarms=LevelUi.check(body,WatchPublisher.tr("Alarme an Uhr senden","Send alerts to watch"),WatchAlertPublisher.enabled(this));
+        Switch alarms=new Switch(this);alarms.setText(WatchPublisher.tr("Alarme an Uhr senden","Send alerts to watch"));alarms.setContentDescription(alarms.getText());alarms.setMinHeight(LevelUi.dp(this,48));alarms.setChecked(WatchAlertPublisher.enabled(this));body.addView(alarms);
         alarms.setOnCheckedChangeListener((b,value)->WatchAlertPublisher.set(this,value));
         LevelUi.text(body,WatchPublisher.tr("Alarme und Datenlückenwarnungen mit Vibration. In GVA Watch unter Alarme ebenfalls freigeben. Keine normalen Wertmeldungen; ohne Verbindung können Alarme auf der Uhr fehlen.",
                 "Alarms and data-gap warnings with vibration. Also enable Alerts in GVA Watch. No routine reading notifications; watch alerts may be missed without a connection."),16);

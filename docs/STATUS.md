@@ -6,7 +6,7 @@
 
 | Component | Version | Source minimum / special requirement |
 |---|---|---|
-| Phone | 0.27.0 Beta | Android API 26 minimum declaration; native large metric display requires Android 17/API 37 |
+| Phone | 0.30.0 Beta | Android API 26 minimum declaration; native large metric display requires Android 17/API 37 |
 | GVA Watch, including tile and six complication sources | 0.20.0 Beta | API 30 minimum declaration; some dynamic-age behavior requires newer APIs |
 | GVA Dots | 0.1.5 Beta | Wear OS 4+, Watch Face Format v1 |
 
@@ -14,7 +14,7 @@ The phone/watch application ID and signing key must match for Google Play servic
 
 ## What has been checked
 
-The exported phone source has 941 synthetic checks and the watch source has 52, including four tile checks. Both exported build roots are independently rebuilt and tested without the private developer key. All three validation APKs use the same ordinary debug identity and are not distributed. Source review checks imported xDrip rule hashes, private-file exclusions, local links, dependency/font notices and package identities. Synthetic tests do not establish clinical safety or reliable alarm delivery. This source publication does not modify the installed apps.
+The exported phone source has 1030 synthetic checks and the watch source has 52, including four tile checks. Both exported build roots are independently rebuilt and tested without the private developer key. All three validation APKs use the same ordinary debug identity and are not distributed. Source review checks imported xDrip rule hashes, private-file exclusions, local links, dependency/font notices and package identities. Synthetic tests do not establish clinical safety or reliable alarm delivery. This source publication does not modify the installed apps.
 
 Device work has focused on Pixel 7 Pro, Android 17, CamAPS FX 1.4(194).111, and Galaxy Watch5 Pro, Wear OS 6/One UI 8 Watch. The user observed value/trend speech and phone live-display behavior. The watch-face appearance, age field and worn ambient display were checked. Watch active-mode updates were observed approximately once per minute. The user accepted the phone widget’s appearance on the Pixel launcher in version 0.20.7, including its rounded font, bounded reading size and revised curve weight. The later 0.21.3 widget arrows and direct toggles, and the editable display trend text, are synthetically checked; their latest Pixel behavior still needs user acceptance. These observations are not a compatibility or reliability guarantee.
 
@@ -28,7 +28,9 @@ Phone 0.22.1 adds bounded processing diagnostics: 40 synthetic cases cover input
 
 Phone 0.23.0 adds elapsed persistent-high duration across gaps. Its 42 new checks comprise 18 state cases and 12 service scenarios on API 28/34. They cover a five-hour synthetic high episode with early gaps, first high input without a rising slope, stable/falling phases, invalid/stale input, fresh boundary recovery, separate rate/episode history, speech duration, same-boot reload/restart, real clock/boot changes and retained repeat deadlines. The chart is not backfilled. Existing lost beginnings are not retrospectively restored. Its duration behavior still needs everyday device acceptance. The inherited rising-only trigger, density check and one-day limit remain.
 
-Phone 0.24–0.27 and Watch 0.20 add exact normal/red/yellow arrow assignment, a compact 7×3 picker, negotiated color transfer, the optional speech color variable, the source-based low-soon warning, and separate per-color display/speech words. Synthetic checks cover inheritance and checkbox editing, profile and legacy-format migration, stale/unknown graphics, phase claims across restarts, active low boundaries, schedules, pauses, output failures and old/new watch formats. The installed development phone is 0.27.0 and the watch is 0.20.0; everyday color recognition, editor use and spoken output still need device acceptance. Existing documentation images remain synthetic examples from earlier versions and do not show all new controls.
+Phone 0.24–0.27 and Watch 0.20 add exact normal/red/yellow arrow assignment, a compact 7×3 picker, negotiated color transfer, the optional speech color variable, the source-based low-soon warning, and separate per-color display/speech words. Synthetic checks cover inheritance and checkbox editing, profile and legacy-format migration, stale/unknown graphics, phase claims across restarts, active low boundaries, schedules, pauses, output failures and old/new watch formats. The installed development phone is 0.30.0 and the watch is 0.20.0; everyday color recognition, editor use and spoken output still need device acceptance. The phone documentation images are refreshed from the 0.30.0 synthetic test renderings; watch examples remain unchanged.
+
+Phone 0.28 through 0.30 adds the reorganized settings, separate trend display/speech editors with value relocation, explicit missing/unassigned-arrow messages, and per-widget appearance controls. Widgets use one or two hours with hour dots, chart opacity and padding; reading/arrow taps open CamAPS and chart taps open GVA. The standard reading/arrow rendering was compared directly with 0.29 and remains pixel-identical. Version 0.30.0 is installed on the development Pixel; its new launcher geometry, settings and touch targets still need everyday device acceptance.
 
 ## Open before broader use
 

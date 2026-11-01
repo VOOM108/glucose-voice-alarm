@@ -3,62 +3,62 @@
   "personal_device_images_included": false,
   "images": {
     "phone-dashboard-dark.png": {
-      "sha256": "20978917a21a0d47df6ab803a709b5e4282bdc6576cf63cde23834f316547de1",
+      "sha256": "726312e2312bb3dd2060999c6ffbc1333a51ed901f97907b2691d39aea699f59",
       "width": 411,
       "height": 891,
-      "kind": "Native synthetic Android app rendering",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe0.21.4 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.30.0 complete synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-dashboard-light.png": {
-      "sha256": "b8d1651c27ebb0eb1e7837b975949f7d0833ea401393c47dc507feb105a8f26a",
+      "sha256": "a5ff28ed26ecfd214ddfef2eb2b91fc7a029a56b3f2855a591c56291447fcf8c",
       "width": 411,
       "height": 891,
-      "kind": "Native synthetic Android app rendering",
+      "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe0.21.4 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.30.0 complete synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-settings-output.png": {
-      "sha256": "003e1fe370a3a97310b3f9e80e6828d9d169068d0d5d64fc0b78b2de6a0c00e3",
+      "sha256": "a4b0ba9674e3d83622c058ec0bc4945b720644908bacc6ca8477ba2393c1d56e",
       "width": 411,
-      "height": 1610,
+      "height": 1721,
       "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.30.0 complete synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-settings-levels.png": {
-      "sha256": "b3ddb8758206121d7025b8de6c454181dde63d996bdf648758387cb367737d45",
+      "sha256": "2e417a6b721926096a8e9a2e3665e4a88527e372861d31a67bb47d86b3e9e8f0",
       "width": 411,
-      "height": 1348,
+      "height": 964,
       "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.30.0 complete synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-widget-dark.png": {
-      "sha256": "20f56064e690ef356e6e747ced66f0a352b14889833aea37457a2801fdd97746",
+      "sha256": "9087bbc3cd8c3a7e0335d80425e03f6ff75f99f0ad23ddc4863d2db4f85340f4",
       "width": 320,
       "height": 160,
       "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.30.0 complete synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     },
     "phone-widget-light.png": {
-      "sha256": "8bf55c7af2778b30ec7a12853df0f6eeaee47550259e08a3ae0345da293e22da",
+      "sha256": "97a3b40bfbe20b09edd8e13d952e63dbe77e7593fe94a1bcac8b95e1c0a31b7f",
       "width": 1280,
       "height": 640,
       "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.30.0 complete synthetic dense-display/parcel test; no device capture",
       "synthetic": true,
       "device_capture": false
     },
@@ -161,12 +161,12 @@
       "device_capture": false
     },
     "phone-settings-trends.png": {
-      "sha256": "2d34cbf4e3e89f30b4da0991a311a0253fbb5bf09ae7a2476d33f3fcf92ecec1",
+      "sha256": "2158a2bbe5bd7737baa7228efec3e81218a2e6848519f3b3d7e34fc619ec79c3",
       "width": 411,
-      "height": 993,
+      "height": 1167,
       "kind": "Native synthetic Android app/widget rendering",
       "component": "phone",
-      "source": "companionProbe0.21.3 full synthetic platform tests; no device capture",
+      "source": "companionProbe0.30.0 complete synthetic platform tests; no device capture",
       "synthetic": true,
       "device_capture": false
     }

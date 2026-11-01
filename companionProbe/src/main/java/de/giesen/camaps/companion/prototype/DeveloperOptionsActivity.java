@@ -12,7 +12,7 @@ public final class DeveloperOptionsActivity extends UiActivity {
     private Spinner mode;private TextView status,source;
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved); if(!SafetyConsent.ready(this))return;store=new OutputPreferenceStore(getFilesDir());LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück"),v -> finish());LevelUi.text(body,AppText.tr("Entwickleroptionen"),28);
+        LevelUi.back(body,AppText.tr("Zurück"),v -> finish());LevelUi.text(body,AppText.tr("Einheit"),28);
         source=LevelUi.text(body,UnitPreferences.status(this),16);source.setTag("unit_source");
         LevelUi.text(body,AppText.tr("Einmal erkannt, bleibt die CamAPS-Einheit gespeichert. Eine andere Einheit im Empfang wird nicht automatisch übernommen."),14);
         LevelUi.text(body,AppText.tr("Einheit für Anzeige und Ansagen"),18);
@@ -23,7 +23,7 @@ public final class DeveloperOptionsActivity extends UiActivity {
         try {snapshot=store.load();mode.setSelection(saved==null?snapshot.preferences.unitMode.ordinal():saved.getInt("unit_mode",snapshot.preferences.unitMode.ordinal()));if(saved!=null)snapshot=new OutputPreferenceStore.Snapshot(saved.getLong("revision",snapshot.revision),snapshot.preferences);}
         catch(IOException e) {mode.setEnabled(false);status.setText(AppText.tr("Ausgabe-Einstellungen nicht lesbar"));}
         LevelUi.text(body,AppText.tr("Automatisch folgt der gespeicherten CamAPS-Einheit. Eine feste Auswahl rechnet Dashboard, AOD, Ansagen und Grenzfelder um. Vorhandene Alarmgrenzen behalten ihre Bedeutung."),14);
-        LevelUi.button(body,AppText.tr("Einheit übernehmen"),v -> {
+        LevelUi.primary(body,AppText.tr("Einheit übernehmen"),v -> {
             if(snapshot==null)return;GlucoseUnit.Mode chosen=GlucoseUnit.Mode.values()[mode.getSelectedItemPosition()];
             if(chosen==GlucoseUnit.Mode.AUTO)save(chosen);
             else new AlertDialog.Builder(this).setTitle(AppText.tr("Abweichende Einheit verwenden?"))

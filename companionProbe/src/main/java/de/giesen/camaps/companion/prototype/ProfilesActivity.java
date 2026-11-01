@@ -15,7 +15,7 @@ public final class ProfilesActivity extends UiActivity {
     private ProfileStore.Snapshot snapshot;
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved); if(!SafetyConsent.ready(this))return; store=new ProfileStore(getFilesDir()); LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Profile"),28);
+        LevelUi.back(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Profile"),28);
         LevelUi.text(body,AppText.tr("Fünf Speicherplätze für Deine Einstellungen."),16);
         LevelUi.help(body,AppText.tr("Was wird gespeichert?"),AppText.tr("Alarmstufen, Erholungsregeln, Lückenwarnung, Ausgabewege, Töne, Vibrationsmuster, Lautstärken, Texte, Darstellung und AOD-Einstellungen. Beim Laden wird die Live-Ausgabe ausgeschaltet. Aktuelle Werte, Pfeilzuordnungen, laufende Snooze-Fristen und Systemfreigaben gehören nicht zum Profil."));
         status=LevelUi.text(body,"",15); status.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -30,7 +30,7 @@ public final class ProfilesActivity extends UiActivity {
             final int index=slot; final long revision=snapshot.revision; final ProfileStore.Entry entry=snapshot.slots.get(slot);
             LinearLayout card=DashboardUi.card(this,list); card.setTag("profile_slot_"+slot);
             LevelUi.text(card,(slot+1)+" · "+(entry==null?AppText.tr("Frei"):entry.name),20);
-            if(entry==null) LevelUi.button(card,AppText.tr("Speichern"),v -> save(index,revision,null));
+            if(entry==null) LevelUi.primary(card,AppText.tr("Speichern"),v -> save(index,revision,null));
             else {
                 LevelUi.button(card,AppText.tr("Laden"),v -> new AlertDialog.Builder(this).setTitle("„"+entry.name+"“ laden?")
                         .setMessage(AppText.tr("Einheit für Anzeige und Ansagen: ")+entry.settings.output.preferences.unitMode.title()+"\n\n"+AppText.tr("Ersetzt Deine aktuellen Einstellungen. Die Live-Ausgabe wird ausgeschaltet; danach bitte im Dashboard wieder einschalten. Laufende Snooze-Fristen bleiben erhalten, soweit die Alarmbedingung unverändert ist."))

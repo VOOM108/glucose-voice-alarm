@@ -39,7 +39,7 @@ final class HomeWidget {
     }
     static int[] ids(Context c){return AppWidgetManager.getInstance(c).getAppWidgetIds(new ComponentName(c,HomeWidgetProvider.class));}
     static boolean owns(Context c,int id){AppWidgetProviderInfo info=AppWidgetManager.getInstance(c).getAppWidgetInfo(id);return info!=null&&new ComponentName(c,HomeWidgetProvider.class).equals(info.provider);}
-    static boolean controls(Context c,int id,int width,int height){return c.getSharedPreferences(PREFS,0).getBoolean("controls_"+id,true);}
+    static boolean controls(Context c,int id,int width,int height){return WidgetAppearance.load(c,id).settings.controls;}
     static final class Model {
         final WatchSnapshot reading;final boolean fresh,live,configured,paused,ready;final OutputPreferenceStore.Snapshot output;
         Model(WatchSnapshot s,boolean fresh,boolean live,boolean configured,boolean paused,boolean ready,OutputPreferenceStore.Snapshot output){reading=s;this.fresh=fresh;this.live=live;this.configured=configured;this.paused=paused;this.ready=ready;this.output=output;}
@@ -56,23 +56,41 @@ final class HomeWidget {
         return m.live?(m.paused?tr("Ausgabe pausiert","Output paused"):tr("Ausgabe an","Output on")):m.configured?tr("Ausgabe prüfen","Check output"):tr("Ausgabe aus","Output off");
     }
     static RemoteViews view(Context c,int id,int width,int height,Model model) {
-        AppAppearance.Colors colors=AppAppearance.colors(c);boolean dark=AppAppearance.dark(c),show=controls(c,id,width,height);
+        return view(c,id,width,height,model,WidgetAppearance.load(c,id).settings);
+    }
+    static RemoteViews view(Context c,int id,int width,int height,Model model,WidgetAppearance.Settings settings) {
+        return render(c,id,width,height,model,settings,true);
+    }
+    static RemoteViews preview(Context c,int width,int height,Model model,WidgetAppearance.Settings settings) {return render(c,0,width,height,model,settings,false);}
+    private static RemoteViews render(Context c,int id,int width,int height,Model model,WidgetAppearance.Settings settings,boolean interactive) {
+        WidgetAppearance.Palette colors=WidgetAppearance.palette(c,settings);boolean dark=colors.dark,show=settings.controls;
         RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.home_widget);
-        v.setInt(R.id.widget_root,"setBackgroundResource",dark?R.drawable.widget_surface_dark:R.drawable.widget_surface_light);
-        PendingIntent dashboard=activity(c,id,new Intent(c,ProbeActivity.class),"dashboard");
-        v.setOnClickPendingIntent(R.id.widget_root,dashboard);
-        int dataWidth=Math.max(204,width-16),chartWidth=Math.round((dataWidth-8)/2.25f);
+        v.setImageViewBitmap(R.id.widget_background,HomeWidgetRenderer.surface(width,height,colors.background(settings.opacity)));
+        int vertical=Math.min(settings.paddingVertical,Math.max(0,(height-(show?96:48))/2));
         float density=c.getResources().getDisplayMetrics().density;
-        v.setImageViewBitmap(R.id.widget_chart,new HomeWidgetRenderer().image(model.reading,model.fresh,dark,chartWidth,density,HomeWidgetRenderer.historyMinutes(dataWidth),System.currentTimeMillis()));
+        v.setViewPadding(R.id.widget_content,Math.round(settings.paddingHorizontal*density),Math.round(vertical*density),Math.round(settings.paddingHorizontal*density),Math.round(vertical*density));
+        PendingIntent dashboard=interactive?activity(c,id,new Intent(c,ProbeActivity.class),"dashboard"):null;
+        if(interactive)v.setOnClickPendingIntent(R.id.widget_root,dashboard);
+        int dataWidth=Math.max(160,width-2*settings.paddingHorizontal),chartWidth=Math.round((dataWidth-8)/2.25f);
+        v.setImageViewBitmap(R.id.widget_chart,new HomeWidgetRenderer().image(model.reading,model.fresh,dark,chartWidth,density,settings.historyHours*60,System.currentTimeMillis(),colors.muted));
+        v.setInt(R.id.widget_chart,"setImageAlpha",Math.round(settings.chartOpacity*255f/100));
+        Intent camaps=interactive?CamApsAppLink.intent(c):null;
         WatchSnapshot s=model.reading;GlucoseUnit unit=s!=null&&s.mmol?GlucoseUnit.MMOL:GlucoseUnit.MGDL;
-        int ink=model.fresh?colors.ink:colors.muted;
+        int ink=model.fresh?colors.ink:colors.stale;
         v.setImageViewBitmap(R.id.widget_reading,HomeWidgetRenderer.numerals(c,s==null?"—":unit.number(s.value,Locale.getDefault()),s==null?"":arrow(s.trend),ink,false,width,s!=null&&model.fresh?s.arrowColor:ArrowColor.NORMAL));
         String stamp=s==null?"—":tr("Empfangen: ","Received: ")+new java.text.SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(s.received))+" · "+unit.label;
         v.setTextViewText(R.id.widget_stamp,stamp);v.setTextColor(R.id.widget_stamp,s!=null&&!model.fresh?colors.error:colors.muted);
-        v.setTextViewText(R.id.widget_period,HomeWidgetRenderer.historyLabel(HomeWidgetRenderer.historyMinutes(dataWidth)));v.setTextColor(R.id.widget_period,colors.muted);
         v.setImageViewBitmap(R.id.widget_delta,HomeWidgetRenderer.numerals(c,s==null||!model.fresh||s.rate==null?"—":unit.rate(s.rate,Locale.getDefault()).replace(" "+unit.label," "),"",ink,true));
-        v.setContentDescription(R.id.widget_data,description(model)+" "+tr("Zeitraum: ","History window: ")+HomeWidgetRenderer.historyMinutes(dataWidth)+tr(" Minuten."," minutes."));
-        v.setOnClickPendingIntent(R.id.widget_data,dashboard);
+        String accessible=(interactive?"":tr("Vorschau mit Beispieldaten. ","Preview with sample data. "))+description(model).replace(tr("Dashboard öffnen.","Open dashboard."),"");
+        String chartDescription=accessible+" "+tr("Zeitraum: ","History window: ")+settings.historyHours*60+tr(" Minuten."," minutes.");
+        v.setContentDescription(R.id.widget_data,chartDescription);
+        v.setContentDescription(R.id.widget_reading_area,accessible+(interactive?(camaps!=null?tr("CamAPS öffnen.","Open CamAPS."):tr("CamAPS nicht verfügbar. Dashboard öffnen.","CamAPS unavailable. Open dashboard.")):""));
+        v.setContentDescription(R.id.widget_chart_area,chartDescription+(interactive?tr("Dashboard öffnen.","Open dashboard."):""));
+        if(interactive){
+            // The external app receives its ordinary launcher intent, never a GVA URI or values.
+            v.setOnClickPendingIntent(R.id.widget_reading_area,camaps==null?dashboard:PendingIntent.getActivity(c,id,camaps,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
+            v.setOnClickPendingIntent(R.id.widget_chart_area,dashboard);
+        }
         v.setViewVisibility(R.id.widget_controls,show?View.VISIBLE:View.GONE);
         v.setViewVisibility(R.id.widget_master_separator,width>=300?View.VISIBLE:View.GONE);
         v.setInt(R.id.widget_master_separator,"setBackgroundColor",colors.line);
@@ -86,19 +104,19 @@ final class HomeWidget {
         for(int i=0;i<4;i++) {
             toggle(v,texts[i],tracks[i],labels[i],enabled[i],dark,colors);v.setBoolean(buttons[i],"setEnabled",model.ready&&p!=null);
             v.setContentDescription(buttons[i],full[i]+", "+(enabled[i]?tr("an","on"):tr("aus","off")));
-            if(p!=null)v.setOnClickPendingIntent(buttons[i],control(c,id,i,!enabled[i],model.output.revision,model.configured));
+            if(interactive&&p!=null)v.setOnClickPendingIntent(buttons[i],control(c,id,i,!enabled[i],model.output.revision,model.configured));
         }
         toggle(v,R.id.widget_master_label,R.id.widget_master_track,model.live&&model.paused?tr("Pause","Paused"):tr("Ausgabe","Output"),model.live,dark,colors);
-        v.setContentDescription(R.id.widget_master,status(model)+". "+tr("Eigene Ausgabe ","Own output ")+(model.live?tr("ausschalten","off"):tr("einschalten","on")));
-        v.setOnClickPendingIntent(R.id.widget_master,control(c,id,-1,!model.live,model.output==null?-1:model.output.revision,model.configured));
+        v.setContentDescription(R.id.widget_master,interactive?status(model)+". "+tr("Eigene Ausgabe ","Own output ")+(model.live?tr("ausschalten","off"):tr("einschalten","on")):status(model));
+        if(interactive)v.setOnClickPendingIntent(R.id.widget_master,control(c,id,-1,!model.live,model.output==null?-1:model.output.revision,model.configured));
         return v;
     }
     static String arrow(WatchSnapshot.Trend trend) {
         switch(trend){case DOUBLE_UP:return "⇈";case UP:return "↑";case UP_RIGHT:return "↗";case FLAT:return "→";case DOWN_RIGHT:return "↘";case DOWN:return "↓";case DOUBLE_DOWN:return "⇊";default:return "";}
     }
-    private static void toggle(RemoteViews v,int text,int track,String label,boolean enabled,boolean dark,AppAppearance.Colors colors) {
+    private static void toggle(RemoteViews v,int text,int track,String label,boolean enabled,boolean dark,WidgetAppearance.Palette colors) {
         v.setTextViewText(text,label);v.setTextColor(text,enabled?colors.ink:colors.muted);
-        v.setImageViewBitmap(track,HomeWidgetRenderer.toggle(enabled,dark));
+        v.setImageViewBitmap(track,HomeWidgetRenderer.toggle(enabled,colors));
     }
     static String description(Model m) {
         if(m.reading==null)return tr("Kein Anzeigestand. Dashboard öffnen.","No display data. Open dashboard.");

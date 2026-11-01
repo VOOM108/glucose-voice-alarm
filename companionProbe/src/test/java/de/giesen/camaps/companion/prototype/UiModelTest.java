@@ -29,7 +29,7 @@ public class UiModelTest {
         assertEquals("123: ruhig",text);
         assertTrue(SpeechPolicy.observationText(123,NotificationParser.Trend.FLAT,1,words).endsWith("Trend: ruhig."));
         assertTrue(SyntheticSpeech.value("{trend}",words).endsWith("ruhig")); assertEquals("",words.word(NotificationParser.Trend.UNKNOWN));
-        try { new TrendSpeech(Arrays.asList("{wert}","b","c","d","e")); fail(); } catch(IllegalArgumentException expected) {}
+        try { new TrendSpeech(Arrays.asList("{trend}","b","c","d","e")); fail(); } catch(IllegalArgumentException expected) {}
     }
     @Test public void valuesCanSpeakWhileAlarmSpeechIsOffAndTheLastAlarmRouteCannotBeDisabled() {
         OutputPreferences p=new OutputPreferences(AlarmEngine.OutputMode.SPOKEN_ALARMS_AND_VALUES,1,SpeechTemplate.VALUE_DEFAULT).withChannels(true,false,true);

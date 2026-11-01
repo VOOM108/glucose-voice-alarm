@@ -106,7 +106,7 @@ public class RedArrowPlatformTest {
         for(ArrowColor expectedColor:new ArrowColor[]{ArrowColor.RED,ArrowColor.YELLOW})for(int i=0;i<directions.length;i++){
             NotificationParser.Trend direction=directions[i];SourceViews.rendered=colouredArrow(direction,expectedColor);
             shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(1));post("123 mg/dl",true);shadowOf(Looper.getMainLooper()).idle();
-            assertEquals(NotificationParser.Trend.UNKNOWN,ProbeState.latest.trend);assertEquals(ArrowColor.NORMAL,ProbeState.latest.arrowColor);
+            assertEquals(NotificationParser.Trend.UNKNOWN,ProbeState.latest.trend);assertEquals(ArrowColor.NORMAL,ProbeState.latest.arrowColor);assertTrue(ProbeState.latest.assignmentNeeded);
             VectorReference.Candidate captured=ProbeState.vectorCandidate;assertNotNull(captured);assertNull(captured.shapeKey);
             long stamp=ProbeState.latest.receivedWall;assign(a,i+7*expectedColor.ordinal());
             assertEquals(stamp,ProbeState.latest.receivedWall);assertEquals(ArrowColor.NORMAL,ProbeState.latest.arrowColor);
@@ -114,7 +114,7 @@ public class RedArrowPlatformTest {
             shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(1));post("123 mg/dl",true);shadowOf(Looper.getMainLooper()).idle();refresh(a);
             assertEquals(direction,ProbeState.latest.trend);assertEquals(expectedColor,ProbeState.latest.arrowColor);
             assertEquals("123 "+direction.symbol,((TextView)tag(a,"dashboard_value")).getText().toString());arrowColour(((TextView)tag(a,"dashboard_value")).getText(),expectedColor);
-            assertEquals("Pfeil: "+MetricNotification.trendTitle(direction),((TextView)tag(a,"camaps_trend")).getText().toString());
+            assertEquals("Trend: "+MetricNotification.trendTitle(direction),((TextView)tag(a,"camaps_trend")).getText().toString());
             Notification status=shadowOf(app.getSystemService(NotificationManager.class)).getNotification(LiveNotifications.STATUS_ID);arrowColour(status.extras.getCharSequence(Notification.EXTRA_TITLE),expectedColor);
             de.giesen.gva.watch.WatchSnapshot snapshot=PhoneDisplaySnapshot.read(app);assertEquals(expectedColor,snapshot.arrowColor);assertEquals(direction.name(),snapshot.trend.name());
             render((View)tag(a,"camaps_trend").getParent().getParent(),expectedColor.name().toLowerCase(java.util.Locale.ROOT)+"-arrow-"+direction.name().toLowerCase(java.util.Locale.ROOT),480);

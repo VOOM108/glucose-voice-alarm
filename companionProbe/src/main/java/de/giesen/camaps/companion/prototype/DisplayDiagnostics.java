@@ -48,6 +48,7 @@ final class DisplayDiagnostics {
         try (FileOutputStream output=new FileOutputStream(new File(context.getCacheDir(),FILE))) { output.write(report(context).getBytes(StandardCharsets.UTF_8)); }
         catch (IOException | RuntimeException e) { /* Optional bounded diagnostic. */ }
     }
+    static String promotionAllowed(android.content.Context context) {return flag(context.getSystemService(NotificationManager.class),"canPostPromotedNotifications");}
     static String status(android.content.Context context) {
         if (!LivePreferences.nativeDisplay(context)) return "Große Live-Anzeige: ausgeschaltet";
         String allowed=flag(context.getSystemService(NotificationManager.class),"canPostPromotedNotifications");

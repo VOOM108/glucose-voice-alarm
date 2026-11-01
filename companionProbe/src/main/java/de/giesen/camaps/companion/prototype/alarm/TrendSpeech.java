@@ -2,7 +2,7 @@
 package de.giesen.camaps.companion.prototype.alarm;
 import de.giesen.camaps.companion.prototype.NotificationParser.Trend;
 import java.util.*;
-/** Seven literal phrases and speech switches. Never changes arrow identity or alarm rules. */
+/** Seven bounded speech phrases with optional value/unit variables and speech switches. Never changes arrow identity or alarm rules. */
 public final class TrendSpeech {
     public static final int COUNT=7;
     public final List<String> words;
@@ -18,8 +18,7 @@ public final class TrendSpeech {
         if(enabled==null || enabled.size()!=COUNT || enabled.contains(null)) throw new IllegalArgumentException("Seven trend speech switches required");
         List<String> copy=new ArrayList<>();
         for(String text:words) {
-            if(text==null || text.trim().isEmpty() || text.length()>80 || text.codePoints().anyMatch(Character::isISOControl) || text.contains("{") || text.contains("}"))
-                throw new IllegalArgumentException("Trendtexte: 1 bis 80 Zeichen, ohne Platzhalter");
+            TrendPhrase.validate(text,false);
             copy.add(text.trim());
         }
         if(copy.size()==5) { copy.add("doppelt aufwärts"); copy.add("doppelt abwärts"); }

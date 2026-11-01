@@ -37,11 +37,11 @@ public class BetaEnglishRenderTest {
             long wall=System.currentTimeMillis(); List<HistoryAnalysis.Point> trendPoints=Arrays.asList(HistoryAnalysis.Point.received(132,wall-180000),HistoryAnalysis.Point.received(129,wall-120000),HistoryAnalysis.Point.received(126,wall-60000),HistoryAnalysis.Point.received(123,wall));
             ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.DOUBLE_UP,SystemClock.elapsedRealtime(),wall,"synthetic",ReceiptRate.calculate(trendPoints,wall));ProbeState.vectorCandidate=null;
             app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
-            Class<? extends Activity> type=page.startsWith("home")?ProbeActivity.class:page.startsWith("output")?OutputSettingsActivity.class:page.equals("gap")?GapSettingsActivity.class:page.equals("units")?DeveloperOptionsActivity.class:AlarmLevelActivity.class;
+            Class<? extends Activity> type=page.startsWith("home")?ProbeActivity.class:page.equals("output-words")?TrendNamesActivity.class:page.startsWith("output")?OutputSettingsActivity.class:page.equals("gap")?GapSettingsActivity.class:page.equals("units")?DeveloperOptionsActivity.class:AlarmLevelActivity.class;
             Intent intent=new Intent(app,type);if(type==AlarmLevelActivity.class)intent.putExtra("kind",AlarmEngine.Kind.HIGH.name());
             ActivityController<? extends Activity> controller=Robolectric.buildActivity(type,intent).create().start().resume().visible();
             try {
-                if(page.equals("output-words")) for(View v:views(controller.get().getWindow().getDecorView()))if(v instanceof DisclosureRow && "Trend phrases".contentEquals(((TextView)v).getText()))v.performClick();
+                if(page.equals("output-words"))((RadioButton)controller.get().findViewById(9102)).performClick();
                 ScrollView scroll=null;for(View v:views(controller.get().getWindow().getDecorView()))if(v instanceof ScrollView){scroll=(ScrollView)v;break;}assertNotNull(scroll);View body=scroll.getChildAt(0);
                 body.measure(View.MeasureSpec.makeMeasureSpec(width,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED));body.layout(0,0,width,body.getMeasuredHeight());
                 assertEquals("en",AppText.language());

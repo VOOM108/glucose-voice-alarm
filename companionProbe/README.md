@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Deutsch](README.de.md) · [GVA Watch](../companionWear/README.md) · [GVA Dots](../companionWatchFace/README.md)
 
-The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.27.0 Beta**. The phone works without either watch component.
+The phone app receives supported CamAPS notifications, evaluates its configured alarms and supplies all other GVA displays. Version **0.30.0 Beta**. The phone works without either watch component.
 
 **Experimental research tool; not for medical use or treatment decisions.** Read [SAFETY.md](../SAFETY.md). CamAPS continues to control the sensor and pump.
 
@@ -14,31 +14,38 @@ Synthetic examples. Dashboard and setting images are native app renderings; the 
 
 <details><summary>Example settings</summary>
 
-<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Output"></a><br>Output</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarm levels"></a><br>Alarm levels</td><td valign="top"><a href="../docs/images/phone-settings-trends.png"><img src="../docs/images/phone-settings-trends.png" width="260" alt="Display trend text"></a><br>Display trend text</td></tr></table>
+<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Output"></a><br>Output</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarm levels"></a><br>Alarm levels</td><td valign="top"><a href="../docs/images/phone-settings-trends.png"><img src="../docs/images/phone-settings-trends.png" width="260" alt="Trend names"></a><br>Trend names</td></tr></table>
 
 </details>
 
-The widget has an optional single row of sound, alarm speech, reading speech, vibration and output toggles. They switch directly when their prerequisites are met; required setup opens the app. Its chart shows labeled 30-minute, one-hour or two-hour windows as width changes. Rounded numerals keep their size limit while the arrow grows into available space at wider sizes. The receipt caption follows the app language: "Received: HH:mm" in English and "Empfangen: HH:mm" in German. The remaining surface opens the dashboard.
+Each widget has a preview and its own system, app or custom colors. Background opacity, chart opacity and horizontal/vertical padding can be adjusted separately. Choose one or two hours: one or two dots inside the chart indicate the window. The larger chart retains the existing reading and arrow size and leaves a gap before the delta below. The original receipt caption follows the app language. Tap the reading/arrow to open CamAPS and the chart area to open GVA. If CamAPS is unavailable, the left area also opens GVA. The optional toggle row controls sound, alarm speech, reading speech, vibration and output; missing prerequisites open setup.
 
 ## Output and settings
 
-Configure multiple alarm levels, individual tone/speech/vibration choices, repeats and snooze where applicable. Routine value announcements have their own interval and can pause after an alarm. Spoken templates and all seven spoken trend phrases can be edited; unchecked phrases are omitted. Appearance → Display trend text edits the dashboard/AOD labels separately. Blank labels follow the UI language. Double-arrow defaults are "Rising very fast" and "Falling very fast"; saved speech text is retained. Five local profiles store both text sets independently. See the [detailed phone reference](../docs/PHONE_REFERENCE.md).
+Multiple alarm levels retain their own sound, speech and vibration routes, with repeat and snooze where supported. Routine reading speech has its own interval and can pause after an alarm. Five local profiles preserve output and display text settings. See the [phone reference](../docs/PHONE_REFERENCE.md).
 
-The CamAPS arrow is separate from the app's numeric rate calculation. A numeric critical-rate alarm can trigger without a recognized arrow when enough fresh values arrive. The optional data-gap warning uses the last known situation; it never estimates a current value.
+
+The main navigation separates Alarm levels, Output, Trend names, Android permissions, Profiles, History & diagnostics, and general Settings. Alarm levels start as compact cards, sorted by type and threshold. One Add alarm button opens the type picker. Delete is in the level editor and requires confirmation. The six-hour chart uses a stronger line with the same threshold colors as the widget.
+
+Under Trend names, choose display or speech text and a direction. Every selector uses ⇈, ↑, ↗, →, ↘, ↓, ⇊. Red and yellow inherit the normal word until their own text is enabled. Display and speech are saved separately. Spoken trend text supports {value}/{wert} and {unit}/{einheit}. If the selected phrase contains the value variable, the value moves there and its original value part is removed. Without it, the existing reading announcement remains. Previews display and speak synthetic data.
+
+The display distinguishes “Trend open” when no arrow is present from “Assign arrow” for a graphic awaiting assignment. On the dashboard these read “Trend: open” and “Trend: Assign arrow”. Unknown trends remain omitted from speech. Stale AOD readings still show their age.
+
+Android permissions have separate rows with a green checkmark, red exclamation mark, or a neutral state for unavailable or uncheckable functions. History & diagnostics provides reception and output checks and an optional technical summary to copy. Auditions use consistent play/stop controls. Updates retain settings and profiles; enable output again yourself afterwards.
 
 ## Colored arrows and custom trend words
 
 Arrow assignment shows seven directions with three colors each in a compact grid. The source preview stays visible above it; choices scroll separately from the actions. Red and yellow require explicit assignment for the exact graphic. A similar shape alone does not confirm color. Existing mappings stay normal until you reassign that graphic.
 
-CamAPS places its white arrow on a colored background. GVA colors the arrow itself. Fresh arrows can be normal, red or yellow; stale data stays gray. The trend line uses “Arrow:” instead of a fixed source name.
+CamAPS places its white arrow on a colored background. GVA colors the arrow itself. Fresh arrows can be normal, red or yellow; stale data stays gray. The trend line uses “Trend:” instead of a fixed source name.
 
-Edit displayed words under Appearance → Display trend text and spoken words separately under Output → Trend phrases. For each of the seven directions, red and yellow initially inherit the normal/gray word. Enable the color's checkbox to use its own text. On first activation, an empty field is seeded with the current base word. Turning it off preserves that text and follows the base again; an active empty field also follows the base. Display words allow up to 40 characters and spoken words up to 80, on one line without placeholders. The speech enable switch for a direction applies to all its colors. Profiles preserve both text groups and their color switches.
+Edit displayed words under Trend names → Display text and spoken words separately under Trend names → Speech text. For each of the seven directions, red and yellow initially inherit the normal/gray word. Enable the color's checkbox to use its own text. On first activation, an empty field is seeded with the current base word. Turning it off preserves that text and follows the base again; an active empty field also follows the base. Display words allow up to 40 characters and spoken words up to 80, on a single line. Display text is literal; speech text accepts `{value}`/`{wert}` and `{unit}`/`{einheit}`. A value placeholder moves the reading to that position; without one, the existing reading introduction remains. The speech enable switch for a direction applies to all its colors. Profiles preserve both text groups and their color switches.
 
 The optional `{color}` placeholder (also `{farbe}`) adds “red” or “yellow” in supported speech templates. It is empty for normal or unknown arrows. Example: `{value} {trend} {color}`. Color is not automatically appended to a trend word; existing templates are preserved. Custom color words and this placeholder work independently.
 
 ## Low soon
 
-Under Alarm levels → Low soon → Add level, create a separate warning level. New levels start off. Its editable default text is “According to the data source, low soon.” Choose its schedule, sound, speech and vibration; it has no separate numeric threshold, repeat or snooze setting.
+Under Alarm levels → Add alarm → Low soon, create a separate warning level. New levels start off. Its editable default text is “According to the data source, low soon.” Choose its schedule, sound, speech and vibration; it has no separate numeric threshold, repeat or snooze setting.
 
 The source signal is a freshly received, recognized red arrow in any direction. The reading must also be strictly above the highest enabled low threshold whose schedule currently applies. With no active low level there is no fallback threshold. At or below that boundary, the existing low alarm applies. GVA does not calculate this forecast from rates or pump data.
 
@@ -64,9 +71,7 @@ Updates do not retrospectively clear stored deadlines. The new policy needs a ne
 
 ## Processing diagnostics
 
-Under Background & AOD → Details and permissions, the last new input, last alarm attempt and last output attempt are shown separately. The input snapshot distinguishes a new alarm start from a silent notification refresh. For a threshold alarm that is not yet due, it identifies the repeat interval, snooze or another level's deadline where readable. The last output attempt distinguishes routine value speech, an alarm and a data-gap warning, with the requested channels and acceptance or rejection.
-
-The separate last-alarm status lists speech, sound and vibration. Input and attempt numbers link it to the processing records within one service run. Timer checks do not overwrite the last input snapshot, and routine value speech does not replace the last alarm attempt. The bounded private caches contain only fixed technical states and counters, without readings, spoken text, alarm-level identifiers or timestamps. They reset when the service starts and do not form an event history. Acceptance or a completed callback does not prove that output was audible or perceptible.
+History & diagnostics groups reception and output checks. Function check separates the last new input, alarm attempt and output attempt and distinguishes a new alarm from a silent notification refresh. Sound, speech and vibration status remain separate. If needed, copy the technical summary there; it contains fixed status codes rather than readings or spoken text. A successful API call does not establish that sound or vibration was perceptible. These bounded snapshots are not an event history.
 
 ## Speech after voice initialization
 

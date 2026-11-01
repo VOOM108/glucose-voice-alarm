@@ -1,22 +1,22 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:padding="8dp" android:background="@drawable/widget_surface_dark" android:clipToOutline="true"
+    android:background="@drawable/widget_outline" android:clipToOutline="true"
     android:importantForAccessibility="no">
+    <ImageView android:id="@+id/widget_background" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+    <LinearLayout android:id="@+id/widget_content" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="8dp">
     <LinearLayout android:id="@+id/widget_data" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
-        android:orientation="horizontal" android:contentDescription="@string/widget_waiting" android:minHeight="48dp" android:importantForAccessibility="yes">
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1.25" android:orientation="vertical">
+        android:orientation="horizontal" android:contentDescription="@string/widget_waiting" android:minHeight="48dp" android:importantForAccessibility="no">
+        <LinearLayout android:id="@+id/widget_reading_area" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1.25" android:orientation="vertical" android:importantForAccessibility="yes">
             <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
                 <ImageView android:id="@+id/widget_reading" android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:layout_gravity="start|center_vertical" android:adjustViewBounds="true" android:maxHeight="56dp"
                     android:scaleType="fitStart" android:importantForAccessibility="no"/>
             </FrameLayout>
             <TextView android:id="@+id/widget_stamp" android:layout_width="match_parent" android:layout_height="22dp" android:gravity="start|center_vertical"
-                android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="14sp" android:autoSizeStepGranularity="1sp" android:importantForAccessibility="no"/>
+                android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="8dp" android:autoSizeMaxTextSize="14sp" android:autoSizeStepGranularity="1dp" android:importantForAccessibility="no"/>
         </LinearLayout>
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical">
-            <ImageView android:id="@+id/widget_chart" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
-            <TextView android:id="@+id/widget_period" android:layout_width="match_parent" android:layout_height="24dp" android:gravity="start|center_vertical"
-                android:includeFontPadding="false" android:maxLines="1" android:textSize="18sp" android:textStyle="bold" android:importantForAccessibility="no"/>
+        <LinearLayout android:id="@+id/widget_chart_area" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical" android:importantForAccessibility="yes">
+            <ImageView android:id="@+id/widget_chart" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="8dp" android:scaleType="fitXY" android:importantForAccessibility="no"/>
             <ImageView android:id="@+id/widget_delta" android:layout_width="match_parent" android:layout_height="22dp"
                 android:paddingTop="2dp" android:paddingBottom="2dp" android:scaleType="fitStart" android:importantForAccessibility="no"/>
         </LinearLayout>
@@ -46,4 +46,5 @@
             <TextView android:id="@+id/widget_master_label" style="@style/WidgetToggleLabel"/>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>
+</FrameLayout>

@@ -21,10 +21,9 @@ public final class SyntheticAlarmActivity extends UiActivity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state); if(!SafetyConsent.ready(this))return;
         LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Alarmtest mit synthetischen Daten"),26);
+        LevelUi.back(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Alarmtest mit synthetischen Daten"),26);
         LevelUi.text(body,AppText.tr("Nur feste Beispielregeln, eine virtuelle Uhr und getrennte Testdateien im Cache. Echte Alarmstufen, Pausen, Werte und CamAPS bleiben unberührt. Es läuft kein Test im Hintergrund weiter."),16);
         LevelUi.text(body,AppText.tr("Jeder Ausgabestart erfolgt per Knopfdruck. Ein Testton dauert höchstens acht Sekunden; danach folgt gegebenenfalls die deutlich als Test bezeichnete Sprache. Androids Lautstärke und Nicht stören werden nicht verändert."),15);
-        LevelUi.text(body,AppText.tr("Eigene Untergrenze und intelligente Trendunterdrückung sind in diesen Beispielen nicht aktiv; die noch offenen Rückkehrregeln werden hier nicht festgelegt."),14);
         status=LevelUi.text(body,"",15); clock=LevelUi.text(body,"",16);
         audio=new PreviewAudio(this,message -> status.setText(message));
         directory=new File(getCacheDir(),"alarm-output-demo-"+UUID.randomUUID());
@@ -45,7 +44,7 @@ public final class SyntheticAlarmActivity extends UiActivity {
         LevelUi.button(body,AppText.tr("Periodische Testwertansage prüfen"),v -> {
             if (flow!=null) status.setText(label(flow.value(scenario.clock(offset))));
         });
-        LevelUi.button(body,AppText.tr("Test stoppen"),v -> { if (flow!=null) flow.stop(); audio.stop(); status.setText(AppText.tr("Testausgabe gestoppt. Kein automatischer Neustart.")); });
+        LevelUi.stop(body,AppText.tr("Test stoppen"),v -> { if (flow!=null) flow.stop(); audio.stop(); status.setText(AppText.tr("Testausgabe gestoppt. Kein automatischer Neustart.")); });
         begin(AlarmEngine.Kind.HIGH); audio.prepareSpeech();
     }
     private void begin(AlarmEngine.Kind kind) {

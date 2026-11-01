@@ -103,14 +103,14 @@ public class LivePlatformTest {
         File alarmState=new File(new File(app.getFilesDir(),"live-receipt-runtime-v1"),AlarmStateStore.FILE_NAME);
         byte[] state=java.nio.file.Files.readAllBytes(alarmState.toPath());
         File outputFile=new File(app.getFilesDir(),OutputPreferenceStore.FILE_NAME);byte[] output=java.nio.file.Files.readAllBytes(outputFile.toPath());
-        org.robolectric.android.controller.ActivityController<TrendDisplayActivity> controller=Robolectric.buildActivity(TrendDisplayActivity.class).create().start().resume().visible();
+        org.robolectric.android.controller.ActivityController<TrendNamesActivity> controller=Robolectric.buildActivity(TrendNamesActivity.class).create().start().resume().visible();
         try {
-            TrendDisplayActivity editor=controller.get();
+            TrendNamesActivity editor=controller.get();
             ((EditText)editor.getWindow().getDecorView().findViewWithTag("trend_display_UP")).setText("Rasch aufwärts");
             ((CheckBox)editor.getWindow().getDecorView().findViewWithTag("trend_display_RED_UP_enabled")).setChecked(true);
             ((EditText)editor.getWindow().getDecorView().findViewWithTag("trend_display_RED_UP")).setText("Rasch rot");
-            editor.getWindow().getDecorView().findViewWithTag("trend_display_save").performClick();shadowOf(Looper.getMainLooper()).idle();
-            assertTrue(editor.isFinishing());assertTrue(tone.playing);assertSame(tone,AndroidUiTest.TestBellPlayer.latest);
+            editor.getWindow().getDecorView().findViewWithTag("trend_names_save").performClick();shadowOf(Looper.getMainLooper()).idle();
+            assertFalse(editor.isFinishing());assertTrue(tone.playing);assertSame(tone,AndroidUiTest.TestBellPlayer.latest);
             assertSame(flow,org.robolectric.util.ReflectionHelpers.getField(instance,"flow"));assertTrue(LiveAlarmService.live());
             assertArrayEquals(state,java.nio.file.Files.readAllBytes(alarmState.toPath()));assertArrayEquals(output,java.nio.file.Files.readAllBytes(outputFile.toPath()));
             assertEquals("Rasch aufwärts",DisplayTrendPreferences.title(app,NotificationParser.Trend.UP));

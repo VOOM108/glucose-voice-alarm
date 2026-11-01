@@ -52,7 +52,7 @@ public class AppearanceRenderTest {
                 assertNotNull(scroll); View body=scroll.getChildAt(0); body.measure(View.MeasureSpec.makeMeasureSpec(411,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED)); body.layout(0,0,411,body.getMeasuredHeight());
                 Bitmap bitmap=Bitmap.createBitmap(411,body.getHeight(),Bitmap.Config.ARGB_8888); Canvas canvas=new Canvas(bitmap); canvas.drawColor(AppAppearance.colors(app).background); body.draw(canvas);
                 if(mode==AppAppearance.Mode.DARK) for(View v:views(body)) if(v instanceof TextView && "Synthetischer Hochalarm".contentEquals(((TextView)v).getText())) {
-                    assertEquals(AppAppearance.colors(app).ink,((TextView)v).getCurrentTextColor());
+                    assertEquals(AppAppearance.colors(app).muted,((TextView)v).getCurrentTextColor());
                     android.graphics.drawable.GradientDrawable card=(android.graphics.drawable.GradientDrawable)((View)v.getParent()).getBackground(); assertEquals(AppAppearance.colors(app).surface,card.getColor().getDefaultColor());
                 }
                 File folder=new File("build/ui-previews"); folder.mkdirs(); try(FileOutputStream out=new FileOutputStream(new File(folder,(profiles?"profiles":"levels")+"-"+mode.name().toLowerCase(Locale.ROOT)+".png"))) { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG,100,out)); }
@@ -64,7 +64,7 @@ public class AppearanceRenderTest {
         for(int density:new int[]{1,3}) {
             DisplayMetrics metrics=new DisplayMetrics(); metrics.setTo(app.getResources().getDisplayMetrics()); metrics.density=density; metrics.densityDpi=160*density; metrics.scaledDensity=density;
             app.getResources().updateConfiguration(app.getResources().getConfiguration(),metrics);
-            LinearLayout row=new LinearLayout(app); Button button=LevelUi.button(row,"Ton anhören",v -> {});
+            LinearLayout row=new LinearLayout(app); Button button=LevelUi.play(row,"Ton anhören",v -> {});
             int width=52*density,height=48*density; button.measure(View.MeasureSpec.makeMeasureSpec(width,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(height,View.MeasureSpec.EXACTLY)); button.layout(0,0,width,height);
             Bitmap bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888); button.draw(new Canvas(bitmap));
             int minX=width,minY=height,maxX=-1,maxY=-1,accent=AppAppearance.colors(app).accent;

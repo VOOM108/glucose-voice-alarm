@@ -90,7 +90,7 @@ public class SafetyConsentPlatformTest {
         app.getSharedPreferences(SafetyConsent.PREFS,0).edit().putInt(SafetyConsent.TERMS,SafetyConsent.TEXT_REVISION).commit();warning();assertEquals(SafetyConsent.Stage.TERMS,SafetyConsent.stage(app));
     }
     @Test public void everyOwnUiEntryRoutesToSafetyAndCanBeDestroyedWithoutInitializedWidgets(){
-        for(Class<? extends Activity> type:Arrays.asList(ProbeActivity.class,AppearanceActivity.class,ReadinessActivity.class,OutputSettingsActivity.class,AlarmLevelsActivity.class,AlarmLevelActivity.class,ProfilesActivity.class,GapSettingsActivity.class,DeveloperOptionsActivity.class,DiagnosticHistoryActivity.class,ProbeDiagnosticsActivity.class,SyntheticAlarmActivity.class,ToneSetsActivity.class)){
+        for(Class<? extends Activity> type:Arrays.asList(ProbeActivity.class,OutputTestActivity.class,SettingsActivity.class,DisplaySettingsActivity.class,TrendNamesActivity.class,AppearanceActivity.class,ReadinessActivity.class,OutputSettingsActivity.class,AlarmLevelsActivity.class,AlarmLevelActivity.class,ProfilesActivity.class,GapSettingsActivity.class,DeveloperOptionsActivity.class,DiagnosticHistoryActivity.class,ProbeDiagnosticsActivity.class,SyntheticAlarmActivity.class,ToneSetsActivity.class)){
             Activity a=open(type);assertTrue(type.getSimpleName(),a.isFinishing());assertEquals(SafetyActivity.class.getName(),shadowOf(a).getNextStartedActivity().getComponent().getClassName());
             Bundle saved=new Bundle();activities.get(activities.size()-1).saveInstanceState(saved);
         }

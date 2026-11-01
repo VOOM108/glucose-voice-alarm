@@ -360,7 +360,7 @@ public final class LiveAlarmService extends Service {
         DisplayStatus display=displayStatus(); boolean fresh=display.fresh; long age=display.received==0?-1:Math.max(0,(System.currentTimeMillis()-display.received)/60000);
         String detail=status+(display.received>0?AppText.tr(" · Empfang vor ")+age+" Min.":"");
         NotificationParser.Trend shown=display.trend;
-        String signature=detail+"|"+display.value+"|"+display.received+"|"+shown+"|"+display.arrowColor+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this)+"|"+UnitPreferences.display(this,preferences);
+        String signature=TrendNotice.title(this,shown,display.arrowColor,display.received)+"|"+detail+"|"+display.value+"|"+display.received+"|"+shown+"|"+display.arrowColor+"|"+fresh+"|"+LivePreferences.publicValue(this)+"|"+LivePreferences.nativeDisplay(this)+"|"+UnitPreferences.display(this,preferences);
         if (!signature.equals(lastSummary)) { notifications.update(display.value,shown,display.received,fresh,detail,display.arrowColor); lastSummary=signature;
             handler.postDelayed(() -> DisplayDiagnostics.write(this),300); }
     }

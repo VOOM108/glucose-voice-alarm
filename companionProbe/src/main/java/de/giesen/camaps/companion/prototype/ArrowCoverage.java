@@ -22,7 +22,7 @@ final class ArrowCoverage {
         int mask=context.getSharedPreferences(PREFS,0).getInt("mask_seven",0)&127;
         String[] words={AppText.tr("↗ Steigend"),AppText.tr("↑ Schnell steigend"),AppText.tr("→ Stabil"),AppText.tr("↘ Fallend"),AppText.tr("↓ Schnell fallend"),AppText.tr("⇈ Doppelt aufwärts"),AppText.tr("⇊ Doppelt abwärts")};
         StringBuilder text=new StringBuilder(AppText.tr("In diesem CamAPS-Stand empfangen: ")+Integer.bitCount(mask)+"/7");
-        for(int i=0;i<7;i++) text.append('\n').append(words[i]).append(AppText.tr((mask&(1<<i))!=0?" · erkannt":" · noch nicht wiedererkannt"));
+        for(NotificationParser.Trend trend:TrendOrder.ALL) { int i=group(trend); text.append('\n').append(words[i]).append(AppText.tr((mask&(1<<i))!=0?" · erkannt":" · noch nicht wiedererkannt")); }
         return text.toString();
     }
     private ArrowCoverage() {}

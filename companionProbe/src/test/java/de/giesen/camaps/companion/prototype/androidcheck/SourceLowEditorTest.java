@@ -37,7 +37,7 @@ public class SourceLowEditorTest {
     private View text(Activity a,String text){for(View v:views(a.getWindow().getDecorView()))if(v instanceof TextView && (text.contentEquals(((TextView)v).getText()) || text.equals(v.getContentDescription())))return v;throw new AssertionError(text+"; synthetic text="+views(a.getWindow().getDecorView()).stream().filter(v->v instanceof TextView).map(v->((TextView)v).getText().toString()).collect(java.util.stream.Collectors.joining(" | ")));}
     @Test public void listOpensANewDisabledSourceLevelWithExplicitConditionAndNoThresholdOrTimers()throws Exception{
         ActivityController<AlarmLevelsActivity> list=Robolectric.buildActivity(AlarmLevelsActivity.class).create().start().resume().visible();owners.add(list);
-        text(list.get(),"Stufe für „Bald niedrig“ hinzufügen").performClick();Intent destination=shadowOf(list.get()).getNextStartedActivity();assertEquals("SOURCE_LOW",destination.getStringExtra("kind"));
+        text(list.get(),"Alarm hinzufügen").performClick();AlertDialog choose=org.robolectric.shadows.ShadowAlertDialog.getLatestAlertDialog();choose.getListView().performItemClick(null,2,2);Intent destination=shadowOf(list.get()).getNextStartedActivity();assertEquals("SOURCE_LOW",destination.getStringExtra("kind"));
         ActivityController<AlarmLevelActivity> c=editor();AlarmLevelActivity a=c.get();
         assertNotNull(a.getWindow().getDecorView().findViewWithTag("source_low_condition"));
         assertFalse(org.robolectric.util.ReflectionHelpers.<CheckBox>getField(a,"enabled").isChecked());

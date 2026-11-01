@@ -25,7 +25,7 @@ public class TrendDisplayWordsTest {
         assertEquals("Falling very fast",TrendDisplayWords.defaults().title(NotificationParser.Trend.DOUBLE_DOWN));
         assertEquals("rising very fast",TrendSpeech.defaults("en").word(NotificationParser.Trend.DOUBLE_UP));
         assertEquals("sehr schnell fallend",TrendSpeech.defaults("de").word(NotificationParser.Trend.DOUBLE_DOWN));
-        assertEquals("Trend unmapped",display.title(NotificationParser.Trend.UNKNOWN));
+        assertEquals("Trend open",display.title(NotificationParser.Trend.UNKNOWN));
         try {display.overrides.set(0,"x");fail();}catch(UnsupportedOperationException expected){}
     }
     @Test public void displayValidationAllowsDefaultButRejectsLongMultilineAndTemplateContent() {

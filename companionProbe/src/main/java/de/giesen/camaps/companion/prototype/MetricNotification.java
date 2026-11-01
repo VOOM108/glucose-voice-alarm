@@ -57,7 +57,7 @@ final class MetricNotification {
         return age+AppText.tr(" min alt");
     }
     static String displayTitle(Context context,NotificationParser.Trend trend,long receivedWall,boolean fresh) {
-        return fresh?DisplayTrendPreferences.title(context,trend):ageTitle(receivedWall);
+        return fresh?TrendNotice.title(context,trend,ArrowColor.NORMAL,receivedWall):ageTitle(receivedWall);
     }
     static boolean apply(Notification.Builder builder,double value,NotificationParser.Trend trend,long receivedWall,GlucoseUnit unit,boolean fresh) {
         return apply(builder,value,trend,receivedWall,unit,fresh,trendTitle(trend));

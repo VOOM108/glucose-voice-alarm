@@ -155,7 +155,7 @@ Ausgabeversuch fehlgeschlagen. Reservierte Frist bleibt erhalten; kein sofortige
 Ausgewählter Ton	Selected sound
 Ausgewählter Ton (Verfügbarkeit bitte anhören)	Selected sound (preview to check availability)
 Ausnahme erteilt	exception granted
-Ausnahme fehlt	exception missing
+Ausnahme fehlt	Exemption missing
 Ausnahme von Akku-Optimierung anfordern	Request battery exemption
 Beginn auswählen	Select start
 Bei Erholung aussetzen	Suspend repeats during recovery
@@ -314,7 +314,7 @@ Ordne diese Vorschau zu. Bei einer neuen Quellmeldung bitte neu laden.	Map this 
 Pause beenden	End pause
 Pause beendet; warte auf frischen Empfang	Pause ended; waiting for fresh data
 Periodische Testwertansage prüfen	Test periodic reading speech
-Pfeil zuordnen	Map arrow
+Pfeil zuordnen	Assign arrow
 Pfeile prüfen	Review arrows
 Pfeilgrafik bestätigen	Confirm arrow graphic
 Pfeilgrafik zuordnen …	Map arrow graphic …
@@ -402,7 +402,7 @@ Tonstandard konnte nicht gespeichert werden	Cannot save default sound
 Tonvorschau an Android übergeben; spätestens nach acht Sekunden beendet.	Sound preview sent to Android; stops within eight seconds.
 Tonwiedergabe hat nicht regulär geendet und wurde beendet.	Sound playback did not finish normally and was stopped.
 Trend anhören	Preview trend
-Trend offen	Trend unmapped
+Trend offen	Trend open
 Trenddiagnose anzeigen	Show trend diagnostics
 Trenddiagnose ausblenden	Hide trend diagnostics
 Trenddiagnose kopieren	Copy trend diagnostics
@@ -803,3 +803,122 @@ eigenen Text verwenden	use custom text
 Normal (grau)	Normal (grey)
 Rot und Gelb übernehmen den normalen Text. Aktiviere je Richtung einen eigenen Farbtext, wenn Du ihn abweichend einstellen möchtest.	Red and yellow inherit the normal text. Enable a custom colour text for each direction when you want different wording.
 Rot und Gelb übernehmen den normalen Text. Eigene Farbtexte sind je Richtung zuschaltbar. Der Ansageschalter einer Richtung gilt für alle Farben; {farbe} bleibt ein eigener optionaler Platzhalter.	Red and yellow inherit the normal text. Custom colour texts can be enabled for each direction. A direction's speech switch applies to all colours; {color} remains a separate optional placeholder.
+Trend:	Trend:
+Trendbezeichnungen	Trend names
+Displaytext	Display text
+Sprachtext	Speech text
+Displaytexte speichern	Save display text
+Sprachtexte speichern	Save speech text
+Gespeichert	Saved
+Diese Richtung ansagen	Speak this direction
+Leer übernimmt den Standard. Rot und Gelb übernehmen den normalen Text, bis Du einen eigenen aktivierst.	Leave blank to use the default. Red and yellow inherit the normal text until you enable their own text.
+Wertposition und Farben	Value position and colors
+Ohne {wert} steht der Wert bei Wertansagen am Anfang. Mit {wert} im Trendtext wird er dorthin verschoben. {einheit} setzt die Ausgabeeinheit ein. Die optionale Farbe kommt weiterhin aus {farbe} im Ansagetext. Die Richtungsauswahl gilt für alle Farben.	Reading announcements start with the value unless the trend text contains {value}; the value then moves to that position. {unit} inserts the output unit. Optional color still comes from {color} in the announcement template. The direction switch applies to all colors.
+Trendbezeichnungen nicht lesbar. Gespeicherte Texte bleiben erhalten.	Trend names cannot be read. Saved text is preserved.
+Anhören	Listen
+Sprachtexte: 1 bis 80 Zeichen, einzeilig	Speech text: 1 to 80 characters, one line
+Im Trendtext sind nur {wert} und {einheit} erlaubt	Trend text allows only {value} and {unit}
+Einheit	Unit
+Datenquelle	Data source
+CamAPS-Empfang	CamAPS reception
+Empfangseinstellung nicht speicherbar	Cannot save reception setting
+App-Informationen	About the app
+Sicherheit und Bedingungen	Safety and terms
+Android-Freigaben	Android permissions
+Sperrbildschirm und Benachrichtigungen	Lock screen and notifications
+Zur Live-Anzeige	About the live display
+Bitte zuerst die Android-Freigaben prüfen.	Check Android permissions first.
+Anzeige angefordert	Display requested
+Hintergrundstart fehlgeschlagen	Background start failed
+Hintergrundbetrieb beendet	Background operation stopped
+Ausgaben pausieren …	Pause output …
+Pausiert bis	Paused until
+Alle eigenen Ausgaben pausieren	Pause all GVA output
+Was wird geprüft?	What is checked?
+Die Häkchen bestätigen die Android-Freigaben. Ob Du eine Ausgabe hörst oder die Anzeige auf Deinem Sperrbildschirm siehst, prüfst Du mit einem Test am Gerät.	Checkmarks confirm Android permissions. Test on your device whether you can hear the output and see the lock-screen display.
+Android-Einstellung öffnen	Open Android setting
+Benötigte Android-Freigaben erteilt	Required Android permissions granted
+Bitte die markierten Freigaben prüfen	Check the marked permissions
+Benachrichtigungszugriff	Notification access
+Freigabe fehlt	Permission missing
+Eigene Benachrichtigungen	GVA notifications
+Von Android gesperrt	Blocked by Android
+Akku-Optimierung	Battery optimization
+Hintergrundnutzung	Background use
+Eingeschränkt	Restricted
+Nicht eingeschränkt	Not restricted
+Große Live-Anzeige	Large live display
+Nicht verwendet	Not used
+Auf dieser Android-Version nicht verfügbar	Not available on this Android version
+Nicht prüfbar	Cannot be checked
+Von Android erlaubt	Allowed by Android
+Funktionsprüfung	Function check
+Ausgabe mit Testdaten prüfen	Test output with synthetic data
+Pfeilzuordnung im Dashboard prüfen	Check arrow assignment on the dashboard
+Technischen Kurzbericht kopieren	Copy technical summary
+Technischer Kurzbericht kopiert	Technical summary copied
+Der Kurzbericht enthält technische Zustände, keine Messwerte oder Benachrichtigungstexte.	The summary contains technical states, without readings or notification text.
+✓ Empfang aktuell	✓ Reception up to date
+! Kein aktueller Empfang	! No current input
+Einheitenkonflikt · Einheit prüfen	Unit conflict · check unit
+Alarm hinzufügen	Add alarm
+Alarmart auswählen	Choose alarm type
+Aktiv	Enabled
+Grenze	Threshold
+Details	Details
+Datenlücken-Einstellungen nicht lesbar	Cannot read data-gap settings
+Telefon	Phone
+Zum Boost	About boost
+Wertansagen	Reading announcements
+Wertansage testen	Test reading announcement
+Standardtext einsetzen	Use default text
+Standardtext einsetzen?	Use default text?
+Weitere Ausgabeziele	Other output destinations
+Ganzes Set	Whole set
+Ausgabe testen	Test output
+Die Vorschau verwendet Testwerte und Deine gespeicherten Ausgabewege. Jeder Start erfolgt per Knopfdruck.	The preview uses test readings and your saved output routes. Press play to start each preview.
+Alarmstufe für den Ausgabetest	Alarm level for output test
+Wenn die Vorschau stumm bleibt	If the preview is silent
+Prüfe die gewählten Ausgabewege, Lautstärke, eine verfügbare Offline-Stimme und Androids Nicht-stören-Einstellungen. Eine laufende Alarmausgabe hat Vorrang vor der Vorschau.	Check the chosen output routes, volume, an available offline voice and Android Do Not Disturb settings. An ongoing alarm takes priority over previews.
+Erlaubt	Allowed
+offen	open
+Sprachtext testen	Test speech text
+Alle sieben Sprachtexte werden zurückgesetzt, eigene Farbtexte ausgeschaltet und geleert. Die Ansageschalter bleiben erhalten.	All seven spoken texts will be reset and custom color texts turned off and cleared. Speech switches are preserved.
+Alle sieben Displaytexte und ihre Farbtexte werden zurückgesetzt.	All seven display texts and their color texts will be reset.
+Eigene Farbtexte: höchstens 80 Zeichen, einzeilig	Custom color text: up to 80 characters, one line
+Uhr	Watch
+Widget gestalten	Style widget
+Vorschau · Beispieldaten	Preview · sample data
+Android-Systemfarben	Android system colors
+GVA-App-Theme	GVA app theme
+Eigene Farben	Custom colors
+Hintergrundfarbe	Background color
+Textfarbe	Text color
+Hintergrund-Deckkraft	Background opacity
+Schrift auf dem Hintergrund	Text on the background
+Automatisch	Automatic
+Helle Schrift	Light text
+Dunkle Schrift	Dark text
+Schalterzeile anzeigen	Show toggle row
+Zu Farben und Vorschau	About colors and preview
+Die Deckkraft betrifft die Hintergrundfläche. Pfeil- und Kurvenfarben bleiben erhalten. Das Schachbrett zeigt transparente Bereiche; die Vorschau verwendet keine Messwerte. Android-Systemfarben folgen dem Gerät, das App-Theme folgt GVA. Vor Android 12 werden für Systemfarben die GVA-Farben im Systemmodus verwendet.	Opacity affects the background surface. Arrow and chart colors stay unchanged. The checkerboard shows transparent areas; the preview uses sample data. Android system colors follow the device, while the app theme follows GVA. Before Android 12, system colors use the GVA palette in system light or dark mode.
+Farbvorschau	Color preview
+Farbcode (#RRGGBB)	Color code (#RRGGBB)
+Grün	Green
+Blau	Blue
+Übernehmen	Apply
+Bitte sechs hexadezimale Stellen eingeben, zum Beispiel #19252A.	Enter six hexadecimal digits, for example #19252A.
+Dieses Widget ist nicht mehr vorhanden.	This widget no longer exists.
+Widget-Einstellungen wurden inzwischen geändert. Bitte neu öffnen.	Widget settings have changed. Please reopen.
+Widget-Einstellungen konnten nicht gespeichert werden.	Could not save widget settings.
+
+Kurve	Curve
+Zeitraum	History window
+1 Stunde	1 hour
+2 Stunden	2 hours
+Deckkraft der Kurvengrafik	Chart opacity
+Innenabstand	Padding
+Innenabstand seitlich	Horizontal padding
+Innenabstand oben/unten	Vertical padding
+Hintergrund und Kurvengrafik haben eine eigene Deckkraft. Die Kurvengrafik umfasst Linie, Farbflächen und Stundenpunkte. Ein Punkt bedeutet eine Stunde, zwei Punkte bedeuten zwei Stunden. Wert, Pfeil und Schalter bleiben davon unberührt. Tippe auf Wert und Pfeil, um CamAPS zu öffnen, oder auf die Kurvenfläche für GVA. Ist CamAPS nicht verfügbar, öffnet sich GVA. Bei kleinen Widgets wird der obere und untere Innenabstand begrenzt. Das Schachbrett zeigt transparente Bereiche; die Vorschau verwendet Beispieldaten. Android-Systemfarben folgen dem Gerät, das App-Theme folgt GVA. Vor Android 12 werden für Systemfarben die GVA-Farben im Systemmodus verwendet.	The background and chart have separate opacity controls. Chart opacity covers the line, color bands and hour dots. One dot means one hour; two dots mean two hours. The reading, arrow and switches keep their own appearance. Tap the reading and arrow to open CamAPS, or the chart area to open GVA. If CamAPS is unavailable, GVA opens instead. Vertical padding is limited on small widgets. The checkerboard shows transparent areas; the preview uses sample data. Android system colors follow the device; the app theme follows GVA. Before Android 12, system colors use the GVA palette in system mode.
+CamAPS öffnen	Open CamAPS

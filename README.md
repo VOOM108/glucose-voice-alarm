@@ -10,7 +10,7 @@ Glucose Voice Alarm (GVA) reads glucose values and trend arrows from **CamAPS no
 
 | Component | Current source version | Role |
 |---|---|---|
-| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.27.0 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
+| [Glucose Voice Alarm — phone](companionProbe/README.md) | 0.30.0 Beta | CamAPS receipt, configurable alarms and speech, dashboard, AOD/lock-screen notification and widget |
 | [GVA Watch](companionWear/README.md) | 0.20.0 Beta | Watch display, tile, six complication sources, and optional relayed phone alarms with vibration |
 | [GVA Dots](companionWatchFace/README.md) | 0.1.5 Beta | Round watch face with time dots, value/arrow, short history, age and delta |
 
@@ -23,7 +23,7 @@ The tile and complications are included in **GVA Watch**. They are not separate 
 | Phone app | Value, CamAPS arrow, delta and six-hour diagnostic chart | Alarm levels and output configuration |
 | Phone audio and haptics | Optional routine value/trend speech | Short tones, spoken alarm text and vibration, separately configurable |
 | Phone AOD / lock screen / status bar | Value and trend; compact status-bar number where supported | Android notifications; actual visibility depends on Android |
-| Home-screen widget | Value, arrow, adaptive chart, delta and original receipt time | Optional output/channel toggles; no separate alarm engine |
+| Home-screen widget | Value, arrow, one/two-hour chart, delta and original receipt time | Optional output/channel toggles; no separate alarm engine |
 | Watch app and GVA Dots | Value, arrow, one-/two-hour history, age and delta; ambient view | Optional forwarded phone alarms/data-gap warnings, with watch vibration |
 | Watch tile and other faces | Tile plus combined and individual complication sources | Display only; GVA Watch handles forwarded notifications |
 
@@ -52,6 +52,9 @@ A fresh valid reading back inside a high/low threshold ends that level's automat
 Persistent-high duration includes gaps from the first received high reading; chart gaps stay visible. Fresh rising input and the imported quality checks still govern the alarm. [Duration and limits](docs/PHONE_REFERENCE.md#persistent-high-duration). [Processing diagnostics](docs/PHONE_REFERENCE.md#processing-diagnostics) distinguish alarm starts, silent refreshes and routine speech without storing readings or spoken text.
 
 All seven arrow directions support normal, red and yellow assignments. Displayed and spoken words inherit the normal word by default, with optional per-color text. The optional `{color}` speech variable names the color. A separate, configurable [Low soon warning](docs/PHONE_REFERENCE.md#low-soon) uses a fresh red arrow only while the reading remains above the active low boundary, once per red phase. [Arrow colors and words](docs/PHONE_REFERENCE.md#colored-arrows-and-custom-trend-words).
+
+
+The main menu separates alarm levels, output, trend names, Android permissions, profiles, history/diagnostics and settings. Trend names groups display and speech text with optional red/yellow overrides. A `{value}` placeholder in a spoken trend moves the reading there; without it, the existing reading introduction remains. Widget appearance and padding are configured per widget.
 
 ## Build and set up
 

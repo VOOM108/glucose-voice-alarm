@@ -10,7 +10,7 @@ import java.util.*;
 
 /** Display words have their own editor; saving never reloads or arms alarm output. */
 public final class TrendDisplayActivity extends UiActivity {
-    private final List<EditText> fields=new ArrayList<>();
+    private final List<EditText> fields=new ArrayList<>(Collections.nCopies(7,null));
     private ArrayList<String> initial;
     private TrendColorEditor colors;
     private long revision;
@@ -19,7 +19,7 @@ public final class TrendDisplayActivity extends UiActivity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);if(!SafetyConsent.ready(this))return;
         LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück"),v -> onBackPressed());
+        LevelUi.back(body,AppText.tr("Zurück"),v -> onBackPressed());
         LevelUi.text(body,AppText.tr("Trendtexte"),28);
         LevelUi.text(body,AppText.tr("Für Dashboard und AOD. Sprachtexte änderst Du getrennt unter Ausgabe → Trendwörter."),14);
         LevelUi.text(body,AppText.tr("Leer = Standardtext. Kurz halten: Android kann lange AOD-Texte kürzen."),14);
@@ -29,14 +29,14 @@ public final class TrendDisplayActivity extends UiActivity {
             revision=state==null?snapshot.revision:state.getLong("revision",snapshot.revision);
             colors=new TrendColorEditor(snapshot.words.colors,TrendDisplayWords.MAX_LENGTH,"trend_display");
             LevelUi.text(body,AppText.tr("Rot und Gelb übernehmen den normalen Text. Aktiviere je Richtung einen eigenen Farbtext, wenn Du ihn abweichend einstellen möchtest."),14);
-            for(int i=0;i<TrendDisplayWords.COUNT;i++) {
-                NotificationParser.Trend trend=TrendDisplayWords.TRENDS.get(i);
+            for(NotificationParser.Trend trend:TrendOrder.ALL) {
+                int i=TrendOrder.storedIndex(trend);
                 LinearLayout card=DashboardUi.card(this,body);card.setTag("trend_display_card_"+trend.name());
                 LevelUi.text(card,trend.symbol+" "+MetricNotification.trendTitle(trend),19);
                 EditText field=LevelUi.field(card,AppText.tr("Normal (grau)"),snapshot.words.overrides.get(i),InputType.TYPE_CLASS_TEXT);
                 field.setTag("trend_display_"+trend.name());field.setHint(MetricNotification.trendTitle(trend));field.setSingleLine(true);
                 field.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(TrendDisplayWords.MAX_LENGTH)});
-                fields.add(field);
+                fields.set(i,field);
                 colors.add(card,i,trend,field,()->field.getText().toString().trim().isEmpty()?MetricNotification.trendTitle(trend):field.getText().toString(),null,()->true,()->{});
             }
             initial=values();
@@ -48,7 +48,7 @@ public final class TrendDisplayActivity extends UiActivity {
             LevelUi.button(body,AppText.tr("Standardtexte"),v -> {
                 for(EditText field:fields)field.setText("");colors.reset();
             });
-            Button save=LevelUi.button(body,AppText.tr("Speichern"),v -> save());save.setTag("trend_display_save");
+            Button save=LevelUi.primary(body,AppText.tr("Speichern"),v -> save());save.setTag("trend_display_save");
             ready=true;
             if(revision!=snapshot.revision) {save.setEnabled(false);status.setText(AppText.tr("Anzeigetexte wurden inzwischen geändert. Bitte neu öffnen."));}
         } catch(IOException e) {status.setText(e.getMessage());}

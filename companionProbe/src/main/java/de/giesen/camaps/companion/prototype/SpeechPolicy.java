@@ -25,6 +25,11 @@ public final class SpeechPolicy {
     }
     public static String observationText(double value,NotificationParser.Trend trend,long seconds,de.giesen.camaps.companion.prototype.alarm.TrendSpeech words,String language,GlucoseUnit unit,de.giesen.gva.watch.ArrowColor color) {
         String phrase=words.word(trend,color),number=unit.number(value,"en".equals(language)?java.util.Locale.ENGLISH:java.util.Locale.GERMAN);
+        if(de.giesen.camaps.companion.prototype.alarm.TrendPhrase.hasValue(phrase)) {
+            String rendered=de.giesen.camaps.companion.prototype.alarm.TrendPhrase.render(phrase,number,unit.spokenUnit(language));
+            return ("en".equals(language)?"Received "+seconds+" seconds ago: ":"Vor "+seconds+" Sekunden empfangen: ")+rendered+".";
+        }
+        phrase=de.giesen.camaps.companion.prototype.alarm.TrendPhrase.render(phrase,number,unit.spokenUnit(language));
         if("en".equals(language)) return "Value received "+seconds+" seconds ago: "+number+" "+unit.spokenUnit(language)+"."+(phrase.isEmpty()?"":" Trend: "+phrase+".");
         return "Vor " + seconds + " Sekunden empfangener Wert: " + number
                 + " "+unit.spokenUnit(language)+"."

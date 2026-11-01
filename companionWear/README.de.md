@@ -36,7 +36,7 @@ GVA Dots verwendet das Sammelbild und die Altersquelle. Andere Zifferblätter k�
 Telefon und Uhr aus demselben Quellstand mit demselben Signierschlüssel bauen. Siehe [Bauanleitung](../docs/BUILDING.de.md). Uhrenziel: `:companionWear:assembleDebug` im Projekt `watch-build/` mit JDK 21/SDK 35. Deklarierte Mindestversion API 30; getestet wird auf Watch5 Pro mit Wear OS 6. Dynamische Altersanzeige benötigt passende Plattformunterstützung.
 
 1. GVA Watch öffnen und beide Hinweise persönlich bestätigen.
-2. Auf dem Telefon Darstellung → Uhr → Anzeige an Uhr senden einschalten. Anfangs aus; getrennt vom Alarm-Hauptschalter.
+2. Auf dem Telefon Ausgabe → Uhr → Anzeige an Uhr senden einschalten. Anfangs aus; getrennt vom Alarm-Hauptschalter.
 3. GVA-Kachel selbst hinzufügen oder Komplikationsquellen wählen. Antippen der App-Anzeige öffnet das Menü und die Ein-/Zwei-Stunden-Auswahl.
 4. Für Alarme Telefonweiterleitung und Uhrenempfang getrennt aktivieren und Uhrenbenachrichtigungen erlauben. Zuerst den gekennzeichneten Test verwenden.
 

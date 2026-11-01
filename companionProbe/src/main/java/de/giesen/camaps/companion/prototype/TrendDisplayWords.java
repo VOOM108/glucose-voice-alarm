@@ -6,6 +6,7 @@ import java.util.*;
 /** Literal display overrides only. Blank entries follow the current UI language. */
 public final class TrendDisplayWords {
     public static final int COUNT=7,MAX_LENGTH=40;
+    // Stable legacy storage indices; all UI uses TrendOrder.ALL.
     public static final List<NotificationParser.Trend> TRENDS=Collections.unmodifiableList(Arrays.asList(
             NotificationParser.Trend.UP_RIGHT,NotificationParser.Trend.UP,NotificationParser.Trend.FLAT,
             NotificationParser.Trend.DOWN_RIGHT,NotificationParser.Trend.DOWN,

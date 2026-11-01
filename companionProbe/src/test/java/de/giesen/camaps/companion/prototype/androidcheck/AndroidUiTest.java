@@ -73,9 +73,9 @@ public class AndroidUiTest {
     }
     @Test public void tonesOnlyDiagnosticsCreateNoSpeechEngineAndBlockManualPreview() throws Exception {
         new OutputPreferenceStore(app.getFilesDir()).save(0,new OutputPreferences(AlarmEngine.OutputMode.TONES_ONLY,0,SpeechTemplate.VALUE_DEFAULT));
-        ProbeActivity activity=open(ProbeDiagnosticsActivity.class).get();
+        ProbeDiagnosticsActivity activity=open(ProbeDiagnosticsActivity.class).get();
         assertNull(ShadowTextToSpeech.getLastTextToSpeechInstance());
-        assertTrue(text(activity,"Sprachvorschau mit Testtext").performClick());
+        assertTrue(views(activity.getWindow().getDecorView()).stream().filter(v->v instanceof Button && "Letzten Empfang ansagen".equals(v.getContentDescription())).findFirst().get().performClick());
         assertNull(ShadowTextToSpeech.getLastTextToSpeechInstance());
     }
     @Test public void outputFormSurvivesRotationAndSavesTheActualEditedModeIntervalAndTemplate() throws Exception {
@@ -86,7 +86,7 @@ public class AndroidUiTest {
         OutputSettingsActivity restored=open(OutputSettingsActivity.class,new Intent(app,OutputSettingsActivity.class),state).get();
         assertEquals("7",fields(restored).get(0).getText().toString());
         assertEquals("Beispiel {wert} {einheit}",fields(restored).get(1).getText().toString());
-        assertTrue(((Switch)text(restored,"Werte sprechen")).isChecked());
+        assertTrue(((CompoundButton)text(restored,"Werte sprechen")).isChecked());
         text(restored,"Ausgabe-Einstellungen speichern").performClick();
         OutputPreferences saved=new OutputPreferenceStore(app.getFilesDir()).load().preferences;
         assertEquals(AlarmEngine.OutputMode.SPOKEN_ALARMS_AND_VALUES,saved.mode); assertEquals(7,saved.valueIntervalMinutes);
@@ -151,7 +151,7 @@ public class AndroidUiTest {
         ProbeState.latest=new ProbeState.Observation(123,NotificationParser.Trend.UNKNOWN,SystemClock.elapsedRealtime(),System.currentTimeMillis(),"synthetic");
         ProbeActivity activity=open(ProbeActivity.class).get(); shadowOf(Looper.getMainLooper()).idle();
         View trend=activity.getWindow().getDecorView().findViewWithTag("camaps_trend");
-        assertEquals("Pfeil: Kein Trendpfeil",((TextView)trend).getText().toString());
+        assertEquals("Trend: offen",((TextView)trend).getText().toString());
         View button=text(activity,"Pfeilgrafik zuordnen …");
         View row=(View)trend.getParent(); ViewGroup parent=(ViewGroup)row.getParent();
         assertSame(button,parent.getChildAt(parent.indexOfChild(row)+1)); assertFalse(button.isEnabled());
@@ -193,22 +193,23 @@ public class AndroidUiTest {
     @Test public void missingBatteryExceptionOffersAnEnabledDirectActionAndPermissionReturnNeverArmsAlarms() {
         readyExceptBattery(); ActivityController<ReadinessActivity> controller=open(ReadinessActivity.class);
         ReadinessActivity activity=controller.get(); shadowOf(Looper.getMainLooper()).idle();
-        View action=text(activity,"Akku-Ausnahme erteilen"); assertTrue(action.isEnabled()); action.performClick();
+        View action=views(activity.getWindow().getDecorView().findViewWithTag("permission_battery")).stream().filter(v->v instanceof Button).findFirst().get(); assertTrue(action.isEnabled()); action.performClick();
         Intent intent=shadowOf(activity).getNextStartedActivity();
         assertEquals(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,intent.getAction());
         assertEquals("package:"+app.getPackageName(),intent.getDataString());
         assertFalse(LivePreferences.alarms(app));
         shadowOf(app.getSystemService(PowerManager.class)).setIgnoringBatteryOptimizations(app.getPackageName(),true);
         controller.pause().resume(); shadowOf(Looper.getMainLooper()).idle();
-        assertTrue(text(activity,"Live-Alarme einschalten").isEnabled()); assertFalse(LivePreferences.alarms(app));
+        assertTrue(text(activity,"✓ Akku-Optimierung").isShown()); assertFalse(LivePreferences.alarms(app));
         assertFalse(LiveAlarmService.running());
     }
-    @Test public void technicalTestsAreAbsentFromHomeAndAvailableOnTheirOwnPage() {
+    @Test public void technicalTestsStayOutOfNormalPagesAndTheSummaryCanBeRequested() {
         ProbeActivity activity=open(ProbeActivity.class).get(); shadowOf(Looper.getMainLooper()).idle();
         for (View view:views(activity.getWindow().getDecorView())) if (view instanceof TextView)
             assertFalse(((TextView)view).getText().toString().contains("Alarmkern mit Testdaten prüfen"));
         ProbeDiagnosticsActivity diagnostic=open(ProbeDiagnosticsActivity.class).get();
-        assertTrue(text(diagnostic,"Alarmkern mit Testdaten prüfen").isShown());
+        assertTrue(text(diagnostic,"Technischen Kurzbericht kopieren").isShown());
+        for(View view:views(diagnostic.getWindow().getDecorView()))if(view instanceof TextView)assertFalse(((TextView)view).getText().toString().contains("Alarmkern mit Testdaten prüfen"));
     }
     @Test public void savedLivePreferenceDoesNotClaimThatAServiceIsRunning() {
         readyExceptBattery(); shadowOf(app.getSystemService(PowerManager.class)).setIgnoringBatteryOptimizations(app.getPackageName(),true);
@@ -347,10 +348,10 @@ public class AndroidUiTest {
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(10)); assertSame(second,TestBellPlayer.latest); assertTrue(second.released);
     }
     @Test public void displayControlsAreDirectlyVisibleAndTheRequiredMetricLabelIsNeverBlank() {
-        readyExceptBattery(); ReadinessActivity activity=open(ReadinessActivity.class).get(); shadowOf(Looper.getMainLooper()).idle();
-        CheckBox toggle=(CheckBox)text(activity,"Große Live-Anzeige verwenden"); assertTrue(toggle.isShown()); assertTrue(toggle.isChecked());
+        readyExceptBattery(); DisplaySettingsActivity activity=open(DisplaySettingsActivity.class).get(); shadowOf(Looper.getMainLooper()).idle();
+        CompoundButton toggle=(CompoundButton)text(activity,"Große Live-Anzeige verwenden"); assertTrue(toggle.isShown()); assertTrue(toggle.isChecked());
         toggle.performClick(); assertFalse(LivePreferences.nativeDisplay(app)); assertFalse(LivePreferences.alarms(app));
-        assertTrue(text(activity,"Live-Anzeige in Android öffnen").isShown());
+        assertTrue(text(activity,"Android-Freigaben").isShown());
         assertTrue(MetricNotification.label(System.currentTimeMillis()).matches("[0-9]{2}:[0-9]{2}"));
     }
     @Test public void compactNativeTitleDescribesEachArrowWithoutRepeatingTheValueOrAppName() {

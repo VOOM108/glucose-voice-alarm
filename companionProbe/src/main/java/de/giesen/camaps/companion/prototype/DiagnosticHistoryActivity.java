@@ -17,12 +17,12 @@ public final class DiagnosticHistoryActivity extends UiActivity {
     private final Runnable refresh=new Runnable() { @Override public void run() { load(); handler.postDelayed(this,60000); } };
     @Override public void onCreate(Bundle state) {
         super.onCreate(state); if(!SafetyConsent.ready(this))return; store=new ObservationStore(this); LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Verlauf"),28);
+        LevelUi.back(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Verlauf & Diagnose"),28);
         LevelUi.help(body,AppText.tr("Zur Kurve"),AppText.tr("Empfangszeiten über sechs Stunden. Gestrichelte senkrechte Grenzen markieren Lücken über zwei Minuten. Horizontale Flächen zeigen eingestellte Hoch- und Niedrigbereiche. Die Zeichnung verändert keine Alarmberechnung."));
         chart=new HistoryChartView(this); body.addView(chart,new LinearLayout.LayoutParams(-1,LevelUi.dp(this,320)));
         summary=LevelUi.text(body,AppText.tr("Daten werden lokal gelesen …"),15);
         LevelUi.button(body,AppText.tr("Aktualisieren"),v -> load());
-        LevelUi.button(body,AppText.tr("Technische Prüfungen und Pfeildiagnose"),v -> startActivity(new android.content.Intent(this,ProbeDiagnosticsActivity.class)));
+        LevelUi.navigation(body,AppText.tr("Funktionsprüfung"),v -> startActivity(new android.content.Intent(this,ProbeDiagnosticsActivity.class)));
         LevelUi.text(body,AppText.tr("Nur private Daten dieser App. Kein Export, kein Upload und keine zusätzlichen Sensorabfragen. Vor dem ersten gespeicherten Empfang bleibt die Kurve leer."),14);
     }
     private void load() {

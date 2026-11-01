@@ -37,7 +37,7 @@ public class CamapsTrendPlatformTest {
     private <T extends Activity> ActivityController<T> open(Class<T> type,Bundle state){ActivityController<T> c=Robolectric.buildActivity(type).create(state).start().resume().visible();activities.add(c);shadowOf(Looper.getMainLooper()).idle();return c;}
     private View tag(Activity a,String tag){return a.getWindow().getDecorView().findViewWithTag(tag);}
     private List<View> views(View v){List<View> result=new ArrayList<>();result.add(v);if(v instanceof ViewGroup)for(int i=0;i<((ViewGroup)v).getChildCount();i++)result.addAll(views(((ViewGroup)v).getChildAt(i)));return result;}
-    private void save(Activity a){for(View v:views(a.getWindow().getDecorView()))if("Ausgabe-Einstellungen speichern".equals(v.getContentDescription())){v.performClick();return;}throw new AssertionError("save");}
+    private void save(Activity a){for(View v:views(a.getWindow().getDecorView()))if("Ausgabe-Einstellungen speichern".equals(v.getContentDescription()) || "Sprachtexte speichern".equals(v.getContentDescription())){v.performClick();return;}throw new AssertionError("save");}
     private void observation(NotificationParser.Trend original){long wall=System.currentTimeMillis();List<HistoryAnalysis.Point> data=Arrays.asList(HistoryAnalysis.Point.received(120,wall-180000),HistoryAnalysis.Point.received(117,wall-120000),HistoryAnalysis.Point.received(114,wall-60000),HistoryAnalysis.Point.received(111,wall));ProbeState.latest=new ProbeState.Observation(111,original,SystemClock.elapsedRealtime(),wall,"synthetic",ReceiptRate.calculate(data,wall));}
     @Test public void dashboardUsesOneCamapsArrowAndKeepsSeparateNumericRate(){
         observation(NotificationParser.Trend.UP);ProbeActivity a=open(ProbeActivity.class,null).get();
@@ -67,7 +67,7 @@ public class CamapsTrendPlatformTest {
     }
     @Test public void missingCamapsArrowLeavesNumericRateButDoesNotInventDirection(){
         observation(NotificationParser.Trend.UNKNOWN);ProbeActivity a=open(ProbeActivity.class,null).get();
-        assertTrue(((TextView)tag(a,"camaps_trend")).getText().toString().contains("Kein Trendpfeil"));assertEquals("111",((TextView)tag(a,"dashboard_value")).getText().toString());assertNull(tag(a,"calculated_trend"));
+        assertTrue(((TextView)tag(a,"camaps_trend")).getText().toString().contains("Trend: offen"));assertEquals("111",((TextView)tag(a,"dashboard_value")).getText().toString());assertNull(tag(a,"calculated_trend"));
         assertEquals(View.VISIBLE,tag(a,"calculated_rate").getVisibility());assertTrue(((TextView)tag(a,"calculated_rate")).getText().toString().contains("mg/dl/min"));
     }
     @Test public void staleReadingHidesNumericRate(){
@@ -75,9 +75,9 @@ public class CamapsTrendPlatformTest {
         assertEquals(View.GONE,tag(a,"calculated_rate").getVisibility());assertEquals("",((TextView)tag(a,"calculated_rate")).getText().toString());
     }
     @Test public void individualSpeechSwitchesSurviveRotationAndSaveWithoutEnablingLive() throws Exception {
-        ActivityController<OutputSettingsActivity> first=open(OutputSettingsActivity.class,null);
+        ActivityController<TrendNamesActivity> first=open(TrendNamesActivity.class,null);((RadioButton)first.get().findViewById(9102)).performClick();first.get().getWindow().getDecorView().findViewWithTag("trend_direction_FLAT").performClick();
         for(int index:new int[]{0,2,3})((CheckBox)tag(first.get(),"trend_speech_"+index)).setChecked(false);
-        Bundle state=new Bundle();first.saveInstanceState(state).pause().stop().destroy();activities.remove(first);OutputSettingsActivity second=open(OutputSettingsActivity.class,state).get();
+        Bundle state=new Bundle();first.saveInstanceState(state).pause().stop().destroy();activities.remove(first);TrendNamesActivity second=open(TrendNamesActivity.class,state).get();
         for(int index=0;index<7;index++)assertEquals(index!=0 && index!=2 && index!=3,((CheckBox)tag(second,"trend_speech_"+index)).isChecked());save(second);
         TrendSpeech saved=new OutputPreferenceStore(app.getFilesDir()).load().preferences.trendSpeech;assertEquals("",saved.word(NotificationParser.Trend.FLAT));assertEquals("stabil",saved.words.get(2));assertFalse(LivePreferences.alarms(app));
         observation(NotificationParser.Trend.FLAT);ProbeActivity dashboard=open(ProbeActivity.class,null).get();assertEquals("111 →",((TextView)tag(dashboard,"dashboard_value")).getText().toString());
@@ -86,8 +86,9 @@ public class CamapsTrendPlatformTest {
         OutputPreferenceStore store=new OutputPreferenceStore(app.getFilesDir());List<Boolean> enabled=new ArrayList<>(Collections.nCopies(7,true));enabled.set(2,false);
         store.save(0,OutputPreferences.defaults().withTrendSpeech(new TrendSpeech(TrendSpeech.defaults().words,enabled)));
         OutputSettingsActivity editor=open(OutputSettingsActivity.class,null).get();((Spinner)tag(editor,"speech_language")).setSelection(1);shadowOf(Looper.getMainLooper()).idle();
-        for(View v:views(editor.getWindow().getDecorView()))if(v instanceof TextView && "Standardtexte einsetzen".contentEquals(((TextView)v).getText()))v.performClick();
-        org.robolectric.shadows.ShadowAlertDialog.getLatestAlertDialog().getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick();shadowOf(Looper.getMainLooper()).idle();save(editor);
+        save(editor);TrendNamesActivity names=open(TrendNamesActivity.class,null).get();((RadioButton)names.findViewById(9102)).performClick();
+        for(View v:views(names.getWindow().getDecorView()))if(v instanceof TextView && "Standardtexte".contentEquals(((TextView)v).getText()))v.performClick();
+        org.robolectric.shadows.ShadowAlertDialog.getLatestAlertDialog().getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick();shadowOf(Looper.getMainLooper()).idle();save(names);
         OutputPreferences saved=store.load().preferences;assertEquals("en",saved.speechLanguage);assertEquals("steady",saved.trendSpeech.words.get(2));assertFalse(saved.trendSpeech.enabled.get(2));
     }
 }

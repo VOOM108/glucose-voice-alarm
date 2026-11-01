@@ -4,7 +4,7 @@ import de.giesen.gva.watch.ArrowColor;
 import java.io.*;
 import java.util.*;
 
-/** Literal optional colour-specific words. Disabled or blank entries inherit the normal word. */
+/** Optional colour-specific text; speech permits bounded value/unit variables. Disabled or blank entries inherit the normal word. */
 public final class TrendColorOverrides {
     public static final int COUNT=7;
     public final List<String> red,yellow;
@@ -15,7 +15,7 @@ public final class TrendColorOverrides {
     private static List<String> words(List<String> source) {
         if(source==null || source.size()!=COUNT || source.contains(null))throw new IllegalArgumentException(AppText.tr("Sieben Farbtexte erforderlich"));
         // Validate before trimming: a trailing line break must not silently become valid text.
-        for(String word:source)if(word.codePoints().anyMatch(Character::isISOControl) || word.contains("{") || word.contains("}"))throw new IllegalArgumentException(AppText.tr("Farbtexte müssen einzeilig sein und dürfen keine Platzhalter enthalten"));
+        for(String word:source)de.giesen.camaps.companion.prototype.alarm.TrendPhrase.validate(word,true);
         List<String> copy=new ArrayList<>();for(String word:source)copy.add(word.trim());return Collections.unmodifiableList(copy);
     }
     private static List<Boolean> flags(List<Boolean> source) {
@@ -23,8 +23,8 @@ public final class TrendColorOverrides {
         return Collections.unmodifiableList(new ArrayList<>(source));
     }
     public void validate(int maximum) {
-        for(List<String> entries:Arrays.asList(red,yellow))for(String word:entries)if(word.length()>maximum)
-            throw new IllegalArgumentException(maximum==40?AppText.tr("Anzeigetexte: höchstens 40 Zeichen, ohne Zeilenumbrüche oder Platzhalter"):AppText.tr("Eigene Farbtexte: höchstens 80 Zeichen, einzeilig, ohne Platzhalter"));
+        for(List<String> entries:Arrays.asList(red,yellow))for(String word:entries)if(word.length()>maximum || maximum==40 && (word.contains("{") || word.contains("}")))
+            throw new IllegalArgumentException(maximum==40?AppText.tr("Anzeigetexte: höchstens 40 Zeichen, ohne Zeilenumbrüche oder Platzhalter"):AppText.tr("Eigene Farbtexte: höchstens 80 Zeichen, einzeilig"));
     }
     public static TrendColorOverrides defaults(){return new TrendColorOverrides(Collections.nCopies(COUNT,""),Collections.nCopies(COUNT,false),Collections.nCopies(COUNT,""),Collections.nCopies(COUNT,false));}
     public String resolve(int index,ArrowColor color,String normal) {

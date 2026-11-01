@@ -2,7 +2,7 @@
 
 [Projektübersicht](../README.de.md) · [English](README.md) · [GVA Watch](../companionWear/README.de.md) · [GVA Dots](../companionWatchFace/README.de.md)
 
-Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.27.0 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
+Die Telefon-App empfängt unterstützte CamAPS-Benachrichtigungen, prüft ihre eingestellten Alarme und versorgt die anderen GVA-Anzeigen. Version **0.30.0 Beta**. Sie funktioniert ohne die beiden Uhrenkomponenten.
 
 **Experimentelles Forschungswerkzeug; nicht für medizinische Verwendung oder Therapieentscheidungen.** Lies [SAFETY.de.md](../SAFETY.de.md). CamAPS steuert weiterhin Sensor und Pumpe.
 
@@ -14,31 +14,38 @@ Synthetische Beispiele. Dashboard und Einstellungen sind native App-Renderings; 
 
 <details><summary>Einstellungsbeispiele</summary>
 
-<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Ausgabe"></a><br>Ausgabe</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarmstufen"></a><br>Alarmstufen</td><td valign="top"><a href="../docs/images/phone-settings-trends.png"><img src="../docs/images/phone-settings-trends.png" width="260" alt="Trendanzeigetexte"></a><br>Trendanzeigetexte</td></tr></table>
+<table><tr><td valign="top"><a href="../docs/images/phone-settings-output.png"><img src="../docs/images/phone-settings-output.png" width="260" alt="Ausgabe"></a><br>Ausgabe</td><td valign="top"><a href="../docs/images/phone-settings-levels.png"><img src="../docs/images/phone-settings-levels.png" width="260" alt="Alarmstufen"></a><br>Alarmstufen</td><td valign="top"><a href="../docs/images/phone-settings-trends.png"><img src="../docs/images/phone-settings-trends.png" width="260" alt="Trendbezeichnungen"></a><br>Trendbezeichnungen</td></tr></table>
 
 </details>
 
-Das Widget bietet optional eine Schalterzeile für Ton, Alarm-Sprache, Wertansagen, Vibration und Ausgabe. Die Toggles schalten bei erfüllten Voraussetzungen direkt; nötige Einrichtungsschritte öffnen die App. Je nach Breite zeigt die beschriftete Kurve 30 Minuten, eine oder zwei Stunden. Die runden Ziffern behalten ihre Größenbegrenzung, während der Pfeil bei mehr Breite freien Platz nutzt. Die Empfangsbeschriftung folgt der App-Sprache: „Empfangen: HH:mm“ auf Deutsch und „Received: HH:mm“ auf Englisch. Die übrige Fläche öffnet das Dashboard.
+Jedes Widget hat eine Vorschau und eigene System-, App- oder selbst gewählte Farben. Hintergrund- und Kurvendeckkraft sowie seitliche und vertikale Innenabstände sind getrennt einstellbar. Du wählst eine oder zwei Stunden; ein oder zwei Punkte in der Kurvenfläche zeigen den Zeitraum. Die höhere Kurve erhält die bisherige Wert-/Pfeilgröße und lässt Abstand zum Delta darunter. Die ursprüngliche Empfangszeit folgt der App-Sprache. Wert/Pfeil öffnen CamAPS, die Kurvenfläche öffnet GVA; ohne verfügbare CamAPS-App führt auch der linke Bereich zu GVA. Die optionale Schalterzeile steuert Ton, Alarm-Sprache, Wertansagen, Vibration und Ausgabe. Fehlt eine Voraussetzung, öffnet der betreffende Schalter die Einrichtung.
 
 ## Ausgabe und Einstellungen
 
-Mehrere Alarmstufen, individuelle Ton-/Sprach-/Vibrationswege sowie Wiederholung und Snooze, soweit für die Alarmart vorgesehen. Normale Wertansagen haben ein eigenes Intervall und können nach Alarmen pausieren. Sprachvorlagen und alle sieben gesprochenen Trendwörter sind anpassbar; abgewählte Wörter bleiben stumm. Unter Darstellung → Trendtexte lassen sich die Dashboard-/AOD-Begriffe getrennt ändern. Leere Felder folgen der Oberflächensprache. Doppelpfeil-Standards sind „Sehr schnell steigend“ und „Sehr schnell fallend“; gespeicherte Sprachtexte bleiben erhalten. Fünf lokale Profile speichern beide Textarten getrennt. Details im [Telefonhandbuch](../docs/PHONE_REFERENCE.de.md).
+Mehrere Alarmstufen behalten ihre eigenen Ton-, Sprach- und Vibrationswege sowie Wiederholung und Snooze, soweit für die Alarmart vorgesehen. Normale Wertansagen haben ein eigenes Intervall und können nach Alarmen pausieren. Fünf lokale Profile speichern Ausgabe und Anzeigetexte. Details im [Telefonhandbuch](../docs/PHONE_REFERENCE.de.md).
 
-CamAPS-Pfeil und eigene numerische Änderungsrate sind getrennt. Ein kritischer Ratenalarm kann ohne erkannten Pfeil auslösen, wenn genügend frische Werte vorliegen. Die optionale Lückenwarnung beschreibt die letzte bekannte Situation und schätzt keinen aktuellen Wert.
+
+Die Hauptnavigation trennt Alarmstufen, Ausgabe, Trendbezeichnungen, Android-Freigaben, Profile, Verlauf & Diagnose und allgemeine Einstellungen. Alarmstufen erscheinen zunächst kompakt, nach Art und Grenze sortiert. Ein gemeinsamer Hinzufügen-Button öffnet die Alarmartauswahl. Löschen steht im jeweiligen Stufeneditor und verlangt eine Bestätigung. Die Sechs-Stunden-Kurve hat eine kräftigere Linie mit derselben Grenzwertfärbung wie das Widget.
+
+Unter Trendbezeichnungen wählst Du Display- oder Sprachtext und eine Richtung. Die Reihenfolge ist überall ⇈, ↑, ↗, →, ↘, ↓, ⇊. Rot und Gelb übernehmen zunächst den normalen Text und können eigene Texte erhalten. Display und Sprache werden getrennt gespeichert. In gesprochenen Trendtexten sind {wert}/{value} und {einheit}/{unit} erlaubt. Enthält der gewählte Trendtext die Wertvariable, verschiebt sich der Wert dorthin; der bisherige Wertteil wird entfernt. Ohne Wertvariable bleibt die bestehende Wertansage erhalten. Die Vorschau zeigt und spricht synthetische Daten.
+
+Die Anzeige unterscheidet „Trend offen“ ohne Pfeil von „Pfeil zuordnen“ bei einer vorhandenen, noch nicht zugeordneten Grafik. Im Dashboard lautet die Zeile „Trend: offen“ beziehungsweise „Trend: Pfeil zuordnen“. Unbekannte Trends bleiben beim Sprechen ausgelassen. Bei veralteten Daten zeigt die AOD-Anzeige weiterhin das Alter.
+
+Android-Freigaben stehen einzeln mit grünem Häkchen, rotem Ausrufezeichen oder neutralem Status für nicht verfügbare beziehungsweise nicht prüfbare Funktionen. Unter Verlauf & Diagnose lassen sich Empfang und Ausgaben prüfen sowie ein technischer Kurzbericht bei Bedarf kopieren. Ausgabevorschauen haben dieselben Play-/Stop-Elemente. Die Einstellungen und Profile bleiben beim Update erhalten; die Ausgabe schaltest Du anschließend selbst wieder ein.
 
 ## Farbige Pfeile und eigene Trendtexte
 
 Die Pfeilzuordnung zeigt sieben Richtungen mit je drei Farben in einem kompakten Raster. Das aktuelle Quellbild bleibt darüber sichtbar; die Auswahl scrollt getrennt von den Aktionen. Rot und Gelb müssen ausdrücklich für die konkrete Grafik zugeordnet werden. Eine ähnliche Form allein bestätigt keine Farbe. Vorhandene Zuordnungen bleiben normal, bis Du die betreffende Grafik neu zuordnest.
 
-CamAPS verwendet einen farbigen Hintergrund um den weißen Pfeil. GVA färbt stattdessen den Pfeil selbst. Frische Pfeile können normal, rot oder gelb sein; veraltete Daten bleiben grau. Die Trendzeile verwendet „Pfeil:“ statt eines festen Quellnamens.
+CamAPS verwendet einen farbigen Hintergrund um den weißen Pfeil. GVA färbt stattdessen den Pfeil selbst. Frische Pfeile können normal, rot oder gelb sein; veraltete Daten bleiben grau. Die Trendzeile verwendet „Trend:“ statt eines festen Quellnamens.
 
-Unter Darstellung → Trendtexte bearbeitest Du die sichtbaren Wörter, unter Ausgabe → Trendwörter getrennt davon die gesprochenen Wörter. Für jede der sieben Richtungen übernehmen Rot und Gelb zunächst den normalen/grauen Text. Mit der jeweiligen Farb-Checkbox aktivierst Du einen eigenen Text. Beim ersten Einschalten wird ein leeres Feld mit dem aktuellen Basistext vorbelegt. Ausschalten bewahrt den eigenen Text und folgt wieder dem Basistext; ein aktives leeres Feld folgt ebenfalls der Basis. Anzeigetexte erlauben bis zu 40, Sprachtexte bis zu 80 Zeichen, jeweils einzeilig und ohne Platzhalter. Die Sprach-Schalter für eine Richtung gelten für alle ihre Farben. Profile speichern beide Textgruppen samt Farbaktivierung.
+Unter Trendbezeichnungen → Displaytext bearbeitest Du die sichtbaren Wörter, unter Trendbezeichnungen → Sprachtext getrennt davon die gesprochenen Wörter. Für jede der sieben Richtungen übernehmen Rot und Gelb zunächst den normalen/grauen Text. Mit der jeweiligen Farb-Checkbox aktivierst Du einen eigenen Text. Beim ersten Einschalten wird ein leeres Feld mit dem aktuellen Basistext vorbelegt. Ausschalten bewahrt den eigenen Text und folgt wieder dem Basistext; ein aktives leeres Feld folgt ebenfalls der Basis. Anzeigetexte erlauben bis zu 40, Sprachtexte bis zu 80 Zeichen, jeweils einzeilig. Displaytexte sind wörtlich; Sprachtexte erlauben `{wert}`/`{value}` und `{einheit}`/`{unit}`. Ein gesetzter Wertplatzhalter verschiebt die Wertansage an diese Stelle; ohne ihn bleibt der Wertteil der bestehenden Ansage erhalten. Die Sprach-Schalter für eine Richtung gelten für alle ihre Farben. Profile speichern beide Textgruppen samt Farbaktivierung.
 
 Der optionale Platzhalter `{farbe}` (auch `{color}`) ergänzt in unterstützten Ansagetexten „rot“ oder „gelb“; bei normalen oder unbekannten Pfeilen bleibt er leer. Beispiel: `{wert} {trend} {farbe}`. Die Farbe wird nicht automatisch an das Trendwort angehängt; vorhandene Ansagetexte bleiben erhalten. Eigene Farbtexte und dieser Platzhalter sind unabhängig voneinander.
 
 ## Bald niedrig
 
-Unter Alarmstufen → Bald niedrig → Stufe hinzufügen legst Du eine eigene Warnstufe an. Neue Stufen sind ausgeschaltet. Der Grundtext lautet „Laut Datenquelle bald niedrig“ und lässt sich ändern. Du wählst Zeitfenster, Ton, Sprache und Vibration; es gibt keine eigene Zahlengrenze, Wiederholung oder Snooze-Einstellung.
+Unter Alarmstufen → Alarm hinzufügen → Bald niedrig legst Du eine eigene Warnstufe an. Neue Stufen sind ausgeschaltet. Der Grundtext lautet „Laut Datenquelle bald niedrig“ und lässt sich ändern. Du wählst Zeitfenster, Ton, Sprache und Vibration; es gibt keine eigene Zahlengrenze, Wiederholung oder Snooze-Einstellung.
 
 Diese Warnung verwendet ausschließlich einen frisch empfangenen, erkannten roten Pfeil beliebiger Richtung als Quellhinweis. Zusätzlich muss der Wert strikt oberhalb der höchsten eingeschalteten Niedrig-Grenze liegen, deren Zeitfenster gerade gilt. Ohne aktive Niedrig-Stufe gibt es keine Ersatzgrenze. An oder unter dieser Grenze ist der vorhandene Niedrig-Alarm zuständig. GVA berechnet dafür keine eigene Vorhersage aus Änderungsrate oder Pumpendaten.
 
@@ -64,9 +71,7 @@ Bestehende Fristen werden beim Update nicht rückwirkend gelöscht. Die neue Reg
 
 ## Verarbeitungsdiagnose
 
-Unter „Hintergrund & AOD → Details und Systemfreigaben“ stehen der letzte neue Eingang, der letzte Alarmversuch und der letzte Ausgabeversuch getrennt. Die Eingangsangaben unterscheiden einen neuen Alarmstart von einer stillen Kartenaktualisierung. Bei einer noch nicht fälligen Grenzalarm-Ausgabe nennen sie Wiederholungsfrist, Snooze oder die Frist einer anderen Stufe, soweit lesbar. Der letzte Ausgabeversuch unterscheidet normale Wertansage, Alarm und Lückenwarnung und zeigt die angeforderten Kanäle sowie die Annahme oder Ablehnung.
-
-Der separate letzte Alarmstatus listet Sprache, Ton und Vibration. Dienstlokale Eingangs- und Versuchsnummern verbinden ihn mit den Verarbeitungsangaben. Prüfticks überschreiben die letzte Eingangsaufnahme nicht; normale Wertansagen ersetzen den letzten Alarmversuch nicht. Die begrenzten privaten Caches enthalten nur feste technische Zustände und Zähler, keine Messwerte, Ansagetexte, Alarmstufenkennungen oder Zeitstempel. Sie werden beim Dienststart zurückgesetzt und bilden keine Ereignishistorie. Eine Annahme oder ein „abgeschlossen“-Rückruf beweist keine Hör- oder Spürbarkeit.
+Verlauf & Diagnose bündelt die Empfangs- und Ausgabeprüfungen. Die Funktionsprüfung trennt den letzten neuen Eingang, Alarmversuch und Ausgabeversuch und unterscheidet einen neuen Alarm von einer stillen Benachrichtigungsaktualisierung. Sprache, Ton und Vibration haben getrennte Statusangaben. Bei Bedarf lässt sich dort ein technischer Kurzbericht mit festen Zustandsangaben kopieren; Messwerte und Ansagetexte gehören nicht hinein. Ein erfolgreicher API-Aufruf belegt keine Hör- oder Spürbarkeit. Die begrenzten Momentaufnahmen bilden keine Ereignishistorie.
 
 ## Alarmansage nach Stimmenstart
 

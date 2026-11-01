@@ -15,9 +15,7 @@ import java.util.function.IntConsumer;
 
 /** One bounded dialog panel: pinned source preview and a separately scrolling seven-row choice grid. */
 final class ArrowChoicePanel extends LinearLayout {
-    static final NotificationParser.Trend[] DIRECTIONS={NotificationParser.Trend.DOUBLE_UP,NotificationParser.Trend.UP,
-        NotificationParser.Trend.UP_RIGHT,NotificationParser.Trend.FLAT,NotificationParser.Trend.DOWN_RIGHT,
-        NotificationParser.Trend.DOWN,NotificationParser.Trend.DOUBLE_DOWN};
+    static final NotificationParser.Trend[] DIRECTIONS=TrendOrder.ALL.toArray(new NotificationParser.Trend[0]);
     private final Button[] choices=new Button[DIRECTIONS.length*ArrowColor.values().length];
     private final ImageView preview;
     private final ScrollView scroll;

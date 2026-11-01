@@ -91,6 +91,8 @@ public final class SpeechTemplate {
     }
     public static String render(String text,AlarmLevel level,Values values,boolean valueOnly,boolean synthetic) {
         validate(text,level==null?null:level.rule.kind,valueOnly);
+        String phrase=values.words.word(values.trend,values.arrowColor);
+        if(text.contains("{trend}") && TrendPhrase.hasValue(phrase))text=TrendPhrase.relocate(text);
         if (values.words.word(values.trend,values.arrowColor).isEmpty()) {
             text=text.replaceAll("(?i)(?:[,;]\\s*)?\\b(?:der\\s+)?(?:CamAPS-)?(?:Trend|Trendrichtung|Richtung|Entwicklung)\\s*(?::|ist|=)?\\s*\\{trend\\}\\s*[.,;!?]?","");
             text=text.replaceAll("(?:(?<=[.!?])\\s*|^)\\{trend\\}\\s*[.,;!?]?","");
@@ -98,7 +100,7 @@ public final class SpeechTemplate {
         Map<String,String> replacements=new HashMap<>();
         replacements.put("wert",values.unit.number(values.mgdl,"en".equals(values.language)?Locale.ENGLISH:Locale.GERMAN)); replacements.put("einheit",values.unit.spokenUnit(values.language));
         replacements.put("farbe",values.arrowColor==ArrowColor.NORMAL?"":values.arrowColor==ArrowColor.RED?("en".equals(values.language)?"red":"rot"):("en".equals(values.language)?"yellow":"gelb"));
-        replacements.put("trend",values.words.word(values.trend,values.arrowColor)); replacements.put("alter_sekunden",Long.toString(values.ageSeconds));
+        replacements.put("trend",TrendPhrase.render(phrase,replacements.get("wert"),replacements.get("einheit"))); replacements.put("alter_sekunden",Long.toString(values.ageSeconds));
         replacements.put("dauer_minuten",Long.toString(values.durationMinutes));
         if (level!=null) { replacements.put("stufe",level.name); replacements.put("grenze",values.unit.threshold(level.rule.threshold,LevelForm.isRate(level.rule.kind),"en".equals(values.language)?Locale.ENGLISH:Locale.GERMAN)); }
         Matcher matcher=TOKEN.matcher(text); StringBuffer result=new StringBuffer();

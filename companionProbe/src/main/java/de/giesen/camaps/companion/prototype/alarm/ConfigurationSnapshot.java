@@ -26,7 +26,7 @@ public final class ConfigurationSnapshot {
     public byte[] encode() throws IOException {
         ByteArrayOutputStream buffer=new ByteArrayOutputStream();
         try(DataOutputStream out=new DataOutputStream(buffer)) {
-            out.writeUTF("XCAM_CONFIGURATION"); out.writeInt(3); out.writeUTF(appearance); out.writeUTF(soundSet); out.writeBoolean(nativeDisplay); out.writeBoolean(publicValue);
+            out.writeUTF("XCAM_CONFIGURATION"); out.writeInt(4); out.writeUTF(appearance); out.writeUTF(soundSet); out.writeBoolean(nativeDisplay); out.writeBoolean(publicValue);
             // Revision zero denotes defaults in memory; archives always have a decodable positive revision.
             bytes(out,LevelStore.encode(new LevelStore.Snapshot(Math.max(1,levels.revision),levels.levels)));
             bytes(out,OutputPreferenceStore.encode(new OutputPreferenceStore.Snapshot(Math.max(1,output.revision),output.preferences)));
@@ -38,7 +38,7 @@ public final class ConfigurationSnapshot {
     public static ConfigurationSnapshot decode(byte[] encoded) throws IOException {
         try(DataInputStream in=new DataInputStream(new ByteArrayInputStream(ConfigurationFiles.open(encoded,MAX_BYTES)))) {
             if(!"XCAM_CONFIGURATION".equals(in.readUTF())) throw new IOException(AppText.tr("Unbekanntes Profilformat"));
-            int schema=in.readInt();if(schema<1 || schema>3)throw new IOException(AppText.tr("Unbekanntes Profilformat"));
+            int schema=in.readInt();if(schema<1 || schema>4)throw new IOException(AppText.tr("Unbekanntes Profilformat"));
             String appearance=in.readUTF(),set=in.readUTF(); boolean display=in.readBoolean(),value=in.readBoolean();
             LevelStore.Snapshot levels=LevelStore.decode(bytes(in,LevelStore.MAX_ARCHIVE_BYTES));
             OutputPreferenceStore.Snapshot output=OutputPreferenceStore.decode(bytes(in,8192));

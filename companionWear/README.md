@@ -37,7 +37,7 @@ GVA Dots uses the composite image and age sources. Other faces may use any compa
 Build both phone and watch from the same source checkout with the same signing key. See [Build from source](../docs/BUILDING.md). Watch build target: `:companionWear:assembleDebug` in `watch-build/` (JDK 21/SDK 35). The declared minimum is API 30; the tested watch is a Watch5 Pro on Wear OS 6. Newer dynamic-age features depend on platform support.
 
 1. Open GVA Watch and personally acknowledge both notices.
-2. On the phone, enable Appearance → Watch → Send readings to watch. This starts off and is separate from the alarm master.
+2. On the phone, enable Output → Watch → Send readings to watch. This starts off and is separate from the alarm master.
 3. Add the GVA tile or select complication sources yourself. Tap the app display for its menu and one-/two-hour choice.
 4. For alerts, separately enable phone alert forwarding and watch alarm reception; grant watch notification permission. Use the labeled test first.
 

@@ -130,7 +130,7 @@ public class RetainedDisplayPlatformTest {
         } finally {diagnostic.pause().stop().destroy();}
     }
     private boolean click(View v,String label){
-        if(v instanceof TextView&&label.contentEquals(((TextView)v).getText()))return v.performClick();
+        if(v instanceof Button && (label.contentEquals(((TextView)v).getText()) || label.equals(v.getContentDescription())))return v.performClick();
         if(v instanceof ViewGroup)for(int i=0;i<((ViewGroup)v).getChildCount();i++)if(click(((ViewGroup)v).getChildAt(i),label))return true;
         return false;
     }

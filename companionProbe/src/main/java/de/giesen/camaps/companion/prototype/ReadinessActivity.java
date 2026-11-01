@@ -1,132 +1,48 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package de.giesen.camaps.companion.prototype;
-
 import android.Manifest;
 import android.app.*;
 import android.content.*;
 import android.net.Uri;
 import android.os.*;
 import android.provider.Settings;
-import android.view.View;
-import android.service.notification.NotificationListenerService;
 import android.widget.*;
-import de.giesen.camaps.companion.prototype.alarm.*;
 
+/** Each row represents a checked Android permission, never inferred physical delivery. */
 public final class ReadinessActivity extends UiActivity {
-    private TextView status,result,details,nativeStatus;
-    private Button enable,pauseButton,resume,stop;
+    private LinearLayout rows;private TextView summary;private String lastState;
     private final Handler handler=new Handler(Looper.getMainLooper());
-    private final Runnable refresh=new Runnable() { @Override public void run() { render(); handler.postDelayed(this,2000); } };
-    @Override public void onCreate(Bundle state) {
-        super.onCreate(state); if(!SafetyConsent.ready(this))return; LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück"),v -> finish()); LevelUi.text(body,AppText.tr("Betrieb"),28);
-        status=LevelUi.text(body,"",21);
-        LevelUi.button(body,AppText.tr("Empfang neu verbinden"),v -> {
-            result.setText(CamApsConnection.reconnect(this)?AppText.tr("Verbindung angefordert · Warte auf neues CamAPS-Update"):AppText.tr("Empfang und Benachrichtigungszugriff prüfen"));render();
-        });
-        enable=LevelUi.button(body,AppText.tr("Live-Alarme einschalten"),v -> next());
-        result=LevelUi.text(body,"",15);
-        pauseButton=LevelUi.button(body,AppText.tr("Alle eigenen Ausgaben pausieren …"),v -> pause());
-        resume=LevelUi.button(body,AppText.tr("Pause beenden"),v -> { LivePreferences.pauseUntil(this,0); LiveAlarmService.pauseChanged(); render(); });
-        stop=LevelUi.button(body,AppText.tr("Hintergrundbetrieb beenden"),v -> {
-            LivePreferences.set(this,false,false); stopService(new Intent(this,LiveAlarmService.class)); render();
-        });
-        LevelUi.text(body,AppText.tr("Sperrbildschirm und Statusleiste"),21);
-        CheckBox nativeDisplay=LevelUi.check(body,AppText.tr("Große Live-Anzeige verwenden"),LivePreferences.nativeDisplay(this));
-        nativeDisplay.setOnCheckedChangeListener((button,value) -> { LivePreferences.nativeDisplay(this,value); LiveAlarmService.displayChanged(); render(); });
-        CheckBox publicValue=LevelUi.check(body,AppText.tr("Wert auf dem gesperrten Telefon sichtbar"),LivePreferences.publicValue(this));
-        publicValue.setOnCheckedChangeListener((button,value) -> { LivePreferences.setPublicValue(this,value); LiveAlarmService.displayChanged(); });
-        nativeStatus=LevelUi.text(body,"",15);
-        LevelUi.button(body,AppText.tr("Live-Anzeige in Android öffnen"),v -> DisplayDiagnostics.openSettings(this));
-        LevelUi.button(body,AppText.tr("Anzeige ohne Alarme starten"),v -> start(false));
-        final LinearLayout advanced=new LinearLayout(this); advanced.setOrientation(LinearLayout.VERTICAL); advanced.setVisibility(View.GONE);
-        DisclosureRow.add(body,AppText.tr("Details und Systemfreigaben"),advanced); body=advanced;
-        details=LevelUi.text(body,"",14);
-        LevelUi.button(body,AppText.tr("Benachrichtigungszugriff öffnen"),v -> startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)));
-        LevelUi.button(body,AppText.tr("Eigene Benachrichtigungen erlauben"),v -> {
-            if (Build.VERSION.SDK_INT>=33) requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},17);
-            else openDetails();
-        });
-        LevelUi.button(body,AppText.tr("Ausnahme von Akku-Optimierung anfordern"),v -> {
-            try { startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,Uri.parse("package:"+getPackageName()))); }
-            catch (ActivityNotFoundException e) { openDetails(); }
-        });
-        LevelUi.button(body,AppText.tr("Android-App-Einstellungen / Hintergrundnutzung"),v -> openDetails());
-        LevelUi.text(body,AppText.tr("Android bestimmt Größe und Sichtbarkeit der Live-Anzeige. Die Darstellung kann sich je nach Gerät unterscheiden."),14);
-        LevelUi.button(body,AppText.tr("Live-Alarme ausschalten, Anzeige behalten"),v -> {
-            LivePreferences.set(this,LivePreferences.monitor(this),false); LiveAlarmService.settingsChanged(); render();
-        });
-        LevelUi.text(body,AppText.tr("Bei Erholung lassen sich Wiederholungen je Hoch-/Niedrigstufe aussetzen. Die optionale eigene Untergrenze ist noch nicht umgesetzt. Eine Akku-Ausnahme garantiert keinen ununterbrochenen Betrieb."),14);
-        LevelUi.text(body,AppText.tr("Nach einem App-Update sind Live-Alarme erneut einzuschalten. Stufen, Töne und gespeicherte Pausen bleiben erhalten. Zeitbasis ist der Empfang."),14);
-        if (savedRequest(state) && !LiveAlarmService.live()) next();
+    private final Runnable refresh=new Runnable(){public void run(){render();handler.postDelayed(this,2000);}};
+    @Override public void onCreate(Bundle state){super.onCreate(state);if(!SafetyConsent.ready(this))return;
+        LinearLayout body=LevelUi.screen(this);LevelUi.back(body,AppText.tr("Zurück"),v->finish());
+        LevelUi.text(body,AppText.tr("Android-Freigaben"),28);summary=LevelUi.text(body,"",16);
+        rows=new LinearLayout(this);rows.setOrientation(LinearLayout.VERTICAL);body.addView(rows);
+        LevelUi.help(body,AppText.tr("Was wird geprüft?"),AppText.tr("Die Häkchen bestätigen die Android-Freigaben. Ob Du eine Ausgabe hörst oder die Anzeige auf Deinem Sperrbildschirm siehst, prüfst Du mit einem Test am Gerät."));render();
     }
-    private boolean savedRequest(Bundle state) { return state==null && getIntent().getBooleanExtra("request_live",false); }
-    private void next() {
-        try {
-            switch (SystemReadiness.read(this).nextStep()) {
-                case RECEIVER:
-                    getSharedPreferences(CamApsListener.PREFS,MODE_PRIVATE).edit().putBoolean(CamApsListener.ENABLED,true).commit();
-                    ComponentName component=new ComponentName(this,CamApsListener.class);
-                    getPackageManager().setComponentEnabledSetting(component,android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                            android.content.pm.PackageManager.DONT_KILL_APP);
-                    ProbeState.clear(); ProbeState.vectorCandidate=null; ProbeState.status=AppText.tr("Warte auf ein neues CamAPS-Update");
-                    if(WatchPublisher.enabled(this))WatchPublisher.clear(this);
-                    CamApsConnection.ensure(this); render(); return;
-                case ACCESS: startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)); return;
-                case NOTIFICATIONS:
-                    if (Build.VERSION.SDK_INT>=33) requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},17); else openDetails();
-                    return;
-                case BATTERY:
-                    try { startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,Uri.parse("package:"+getPackageName()))); }
-                    catch (ActivityNotFoundException e) { openDetails(); }
-                    return;
-                case BACKGROUND: openDetails(); return;
-                default: break;
-            }
-            if (LiveAlarmService.live()) { LivePreferences.set(this,true,false); LiveAlarmService.settingsChanged(); render(); }
-            else start(true);
-        } catch (RuntimeException e) { result.setText(AppText.tr("Android konnte den nächsten Schritt nicht öffnen. Weitere Wege stehen unter Details und Systemfreigaben.")); }
+    private void row(String id,String title,Boolean ok,String text,Runnable open){
+        LinearLayout card=DashboardUi.card(this,rows);card.setTag("permission_"+id);
+        TextView state=LevelUi.text(card,(ok==null?"— ":ok?"✓ ":"! ")+title,18);state.setTag("permission_state_"+id);
+        state.setTextColor(ok==null?AppAppearance.colors(this).muted:ok?(AppAppearance.dark(this)?0xff8edbb0:0xff1a7043):AppAppearance.colors(this).error);
+        LevelUi.text(card,text,14);
+        Button action=LevelUi.navigation(card,AppText.tr("Android-Einstellung öffnen"),v->{try{open.run();}catch(RuntimeException e){openDetails();}});action.setContentDescription(title+" · "+AppText.tr("Android-Einstellung öffnen"));
     }
-    private void openDetails() { startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getPackageName()))); }
-    private void start(boolean alarms) {
-        if (!SystemReadiness.read(this).ready()) { result.setText(AppText.tr("Bitte zuerst die oben fehlenden Freigaben und den CamAPS-Empfang einschalten.")); return; }
-        try {
-            if(alarms) {
-                LiveActivation.Problem problem=LiveActivation.start(this);
-                result.setText(problem==null?AppText.tr("Start angefordert. Der Betriebsstatus oben zeigt, ob der Dienst läuft."):problem.text);
-                render(); return;
-            }
-            LivePreferences.set(this,true,alarms);
-            startForegroundService(new Intent(this,LiveAlarmService.class));
-            result.setText(AppText.tr("Start angefordert. Der Betriebsstatus oben zeigt, ob der Dienst läuft."));
-        } catch (RuntimeException e) { LivePreferences.set(this,false,false); result.setText(AppText.tr("Hintergrundstart fehlgeschlagen. Einstellungen bleiben erhalten.")); }
-        render();
+    private void render(){if(rows==null)return;SystemReadiness s=SystemReadiness.read(this);
+        String key=s.access+":"+s.notifications+":"+s.batteryExempt+":"+s.restricted+":"+DisplayDiagnostics.promotionAllowed(this)+":"+LivePreferences.nativeDisplay(this);
+        if(key.equals(lastState))return;lastState=key;rows.removeAllViews();
+        summary.setText(s.access && s.notifications && s.batteryExempt && !s.restricted?AppText.tr("Benötigte Android-Freigaben erteilt"):AppText.tr("Bitte die markierten Freigaben prüfen"));
+        row("access",AppText.tr("Benachrichtigungszugriff"),s.access,AppText.tr(s.access?"Erlaubt":"Freigabe fehlt"),()->startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)));
+        row("notifications",AppText.tr("Eigene Benachrichtigungen"),s.notifications,AppText.tr(s.notifications?"Erlaubt":"Von Android gesperrt"),()->{
+            if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED)
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},17);
+            else startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,getPackageName()));
+        });
+        row("battery",AppText.tr("Akku-Optimierung"),s.batteryExempt,AppText.tr(s.batteryExempt?"Ausnahme erteilt":"Ausnahme fehlt"),()->startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,Uri.parse("package:"+getPackageName()))));
+        row("background",AppText.tr("Hintergrundnutzung"),!s.restricted,AppText.tr(s.restricted?"Eingeschränkt":"Nicht eingeschränkt"),this::openDetails);
+        Boolean promoted=null;if(Build.VERSION.SDK_INT>=37 && LivePreferences.nativeDisplay(this))try{promoted=(Boolean)NotificationManager.class.getMethod("canPostPromotedNotifications").invoke(getSystemService(NotificationManager.class));}catch(ReflectiveOperationException | RuntimeException | LinkageError e){/* Explicit unknown. */}
+        row("live",AppText.tr("Große Live-Anzeige"),promoted,AppText.tr(!LivePreferences.nativeDisplay(this)?"Nicht verwendet":Build.VERSION.SDK_INT<37?"Auf dieser Android-Version nicht verfügbar":promoted==null?"Nicht prüfbar":promoted?"Von Android erlaubt":"Freigabe fehlt"),()->DisplayDiagnostics.openSettings(this));
     }
-    private void pause() {
-        EditText minutes=new EditText(this); minutes.setInputType(android.text.InputType.TYPE_CLASS_NUMBER); minutes.setHint(AppText.tr("Minuten"));
-        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(AppText.tr("Alle eigenen Alarme pausieren")).setView(minutes)
-                .setNegativeButton(AppText.tr("Abbrechen"),null).setPositiveButton(AppText.tr("Pausieren"),null).create();
-        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            try {
-                long value=Long.parseLong(minutes.getText().toString().trim()); if (value<1 || value>Integer.MAX_VALUE/60000) throw new NumberFormatException();
-                LivePreferences.pauseUntil(this,Math.addExact(System.currentTimeMillis(),value*60000)); LiveAlarmService.pauseChanged(); dialog.dismiss(); render();
-            } catch (ArithmeticException | NumberFormatException e) { minutes.setError(AppText.tr("Bitte eine positive ganze Minutenzahl eingeben")); }
-        })); dialog.show();
-    }
-    private void render() {
-        if (status==null) return;
-        SystemReadiness ready=SystemReadiness.read(this); boolean live=LiveAlarmService.live();
-        boolean paused=LivePreferences.pauseUntil(this)>System.currentTimeMillis();
-        status.setText(SystemReadiness.operatingTitle(this)+"\n"+(ready.ready()?LiveAlarmService.running()
-                ?LiveAlarmService.status:AppText.tr("Alle Systemfreigaben sind erteilt."):ready.blockingReason()));
-        enable.setText(ready.ready()?live?AppText.tr("Live-Alarme ausschalten"):AppText.tr("Live-Alarme einschalten"):ready.nextAction());
-        enable.setEnabled(true);
-        pauseButton.setVisibility(live && !paused?View.VISIBLE:View.GONE); resume.setVisibility(paused?View.VISIBLE:View.GONE);
-        stop.setVisibility(LiveAlarmService.running() || LivePreferences.monitor(this)?View.VISIBLE:View.GONE);
-        details.setText(CamApsConnection.summary()+"\n\n"+ready.summary()+"\n\n"+MetricNotification.capability(this)+"\n\n"+LiveAlarmService.audioState()+"\n\n"+ProcessingDiagnostics.summary(this)+"\n\n"+AlarmOutputDiagnostics.summary(this));
-        nativeStatus.setText(DisplayDiagnostics.status(this)); DisplayDiagnostics.write(this);
-    }
-    @Override public void onResume() { super.onResume(); if(!SafetyConsent.ready(this))return; handler.post(refresh); }
-    @Override public void onPause() { handler.removeCallbacks(refresh); super.onPause(); }
-    @Override public void onDestroy() { handler.removeCallbacksAndMessages(null); super.onDestroy(); }
+    private void openDetails(){startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getPackageName())));}
+    @Override public void onResume(){super.onResume();if(SafetyConsent.ready(this)){lastState=null;render();handler.postDelayed(refresh,2000);}}
+    @Override public void onPause(){handler.removeCallbacks(refresh);super.onPause();}
+    @Override public void onDestroy(){handler.removeCallbacksAndMessages(null);super.onDestroy();}
 }

@@ -15,7 +15,7 @@ final class LiveActivation {
     static Problem check(Context activity) {
         if(!SafetyConsent.ready(activity))return new Problem("de".equals(AppText.language())?"Sicherheitshinweise bestätigen":"Acknowledge safety notices",SafetyActivity.class);
         SystemReadiness ready=SystemReadiness.read(activity);
-        if(!ready.ready()) return new Problem(ready.nextAction()+AppText.tr(" · Prüfen"),ReadinessActivity.class);
+        if(!ready.ready()) return new Problem(ready.nextAction()+AppText.tr(" · Prüfen"),!ready.receiver?SettingsActivity.class:ReadinessActivity.class);
         try {
             LevelStore.Snapshot levels=new LevelStore(activity.getFilesDir()).load();
             OutputPreferences p=new OutputPreferenceStore(activity.getFilesDir()).load().preferences;
@@ -28,7 +28,7 @@ final class LiveActivation {
             for(AlarmLevel level:levels.levels) output|=p.alarmToneAllowed(level) || p.alarmSpeechAllowed(level) || p.alarmVibrationAllowed(level);
             if(!output) return new Problem(AppText.tr("Keine Alarmstufe aktiv · Stufen prüfen"),AlarmLevelsActivity.class);
             return null;
-        } catch(IOException | IllegalArgumentException e) { return new Problem(AppText.tr("Einstellungen nicht lesbar · Prüfen"),ReadinessActivity.class); }
+        } catch(IOException | IllegalArgumentException e) { return new Problem(AppText.tr("Einstellungen nicht lesbar · Prüfen"),ProbeDiagnosticsActivity.class); }
     }
     static Problem start(Context activity) {
         Problem problem=check(activity); if(problem!=null) return problem;
@@ -39,7 +39,7 @@ final class LiveActivation {
             activity.startForegroundService(new Intent(activity,LiveAlarmService.class)); return null;
         } catch(RuntimeException e) {
             LivePreferences.set(activity,monitor,false);
-            return new Problem(AppText.tr("Start fehlgeschlagen · Betrieb prüfen"),ReadinessActivity.class);
+            return new Problem(AppText.tr("Start fehlgeschlagen · Betrieb prüfen"),ProbeDiagnosticsActivity.class);
         }
     }
     private LiveActivation() {}

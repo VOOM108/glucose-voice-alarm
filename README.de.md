@@ -10,7 +10,7 @@ Glucose Voice Alarm (GVA) liest Glukosewerte und Trendpfeile aus **CamAPS-Benach
 
 | Komponente | Aktueller Quellstand | Aufgabe |
 |---|---|---|
-| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.27.0 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
+| [Glucose Voice Alarm — Telefon](companionProbe/README.de.md) | 0.30.0 Beta | CamAPS-Empfang, konfigurierbare Alarme und Sprache, Dashboard, AOD/Sperrbildschirm und Widget |
 | [GVA Watch](companionWear/README.de.md) | 0.20.0 Beta | Uhrenanzeige, Kachel, sechs Komplikationsquellen und optionale Telefonalarme mit Uhrenvibration |
 | [GVA Dots](companionWatchFace/README.de.md) | 0.1.5 Beta | Rundes Zifferblatt mit Uhrzeitpunkten, Wert/Pfeil, kurzem Verlauf, Alter und Delta |
 
@@ -23,7 +23,7 @@ Kachel und Komplikationen sind in **GVA Watch** enthalten. Sie sind keine eigene
 | Telefon-App | Wert, CamAPS-Pfeil, Delta und Sechs-Stunden-Diagnosekurve | Alarmstufen und Ausgabeeinstellungen |
 | Telefon-Audio und Haptik | Optionale normale Wert-/Trendansagen | Kurze Töne, gesprochene Alarmtexte und Vibration, getrennt einstellbar |
 | Telefon-AOD / Sperrbildschirm / Statusleiste | Wert und Trend; kompakte Statusleistenzahl, soweit unterstützt | Android-Benachrichtigungen; die Sichtbarkeit bestimmt Android |
-| Startbildschirm-Widget | Wert, Pfeil, adaptive Kurve, Delta und ursprüngliche Empfangszeit | Optionale Kanal-/Ausgabeschalter; keine eigene Alarmberechnung |
+| Startbildschirm-Widget | Wert, Pfeil, Ein-/Zwei-Stunden-Kurve, Delta und ursprüngliche Empfangszeit | Optionale Kanal-/Ausgabeschalter; keine eigene Alarmberechnung |
 | Uhren-App und GVA Dots | Wert, Pfeil, Ein-/Zwei-Stunden-Verlauf, Alter und Delta; gedimmte Ansicht | Optionale Weiterleitung der Telefonalarme/Lückenwarnungen mit Uhrenvibration |
 | Uhrenkachel und andere Zifferblätter | Kachel sowie Sammelfeld und einzelne Komplikationsquellen | Nur Anzeige; weitergeleitete Benachrichtigungen verarbeitet GVA Watch |
 
@@ -52,6 +52,9 @@ Ein frischer gültiger Wert zurück innerhalb einer Hoch-/Niedriggrenze beendet 
 Die Dauerhoch-Zeit zählt ab dem ersten hohen Empfang über Lücken hinweg weiter; die Kurvenlücken bleiben sichtbar. Für den Alarm gelten weiterhin frische steigende Werte und die übernommenen Qualitätsprüfungen. [Dauer und Grenzen](docs/PHONE_REFERENCE.de.md#dauerhoch-zeit). Die [Verarbeitungsdiagnose](docs/PHONE_REFERENCE.de.md#verarbeitungsdiagnose) unterscheidet Alarmstart, stille Aktualisierung und Wertansage, ohne Messwerte oder gesprochene Texte zu speichern.
 
 Alle sieben Pfeilrichtungen lassen sich normal, rot oder gelb zuordnen. Anzeige- und Sprachtexte übernehmen zunächst das normale Wort; je Farbe kannst Du eigene Texte aktivieren. Die optionale Sprachvariable `{farbe}` nennt die Farbe. Eine eigene einstellbare Warnung [Bald niedrig](docs/PHONE_REFERENCE.de.md#bald-niedrig) verwendet einen frischen roten Pfeil nur oberhalb der aktiven Niedrig-Grenze, einmal pro roter Phase. [Pfeilfarben und Trendtexte](docs/PHONE_REFERENCE.de.md#farbige-pfeile-und-eigene-trendtexte).
+
+
+Das Hauptmenü trennt Alarmstufen, Ausgabe, Trendbezeichnungen, Android-Freigaben, Profile, Verlauf/Diagnose und Einstellungen. Unter Trendbezeichnungen stehen Display- und Sprachtexte mit optionalen roten/gelben Varianten zusammen. Eine Wertvariable im gesprochenen Trend verschiebt den Wert an diese Stelle; ohne sie bleibt die bisherige Werteinleitung erhalten. Optik und Innenabstände werden je Widget eingestellt.
 
 ## Bauen und einrichten
 

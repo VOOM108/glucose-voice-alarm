@@ -192,7 +192,7 @@ public final class CamApsListener extends NotificationListenerService {
             LiveAlarmService.receive(sbn.getKey(),sbn.getPostTime(),result.mgdl,result.trend,result.arrowColor);
             coreReport();
             ProbeState.observed(new ProbeState.Observation(result.mgdl, result.trend,
-                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey(),rate,result.arrowColor));
+                    SystemClock.elapsedRealtime(), sbn.getPostTime(), sbn.getKey(),rate,result.arrowColor,result.trend==NotificationParser.Trend.UNKNOWN && ProbeState.vectorCandidate!=null));
             ProbeState.status = result.reason + "; Zeitbasis: Empfang";
             HomeWidget.changed(this);
             if(WatchPublisher.enabled(this))WatchPublisher.changed(this);

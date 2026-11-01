@@ -66,7 +66,17 @@ final class HistoryChartView extends View {
             Path path=new Path(); DiagnosticSeries.Sample first=segment.get(0);
             path.moveTo(x(first.time,series.from,span,left,right),y(first.value,low,high,top,bottom));
             for(double[] c:ChartCurve.controls(segment)) path.cubicTo(x(c[0],series.from,span,left,right),y(c[1],low,high,top,bottom),x(c[2],series.from,span,left,right),y(c[3],low,high,top,bottom),x(c[4],series.from,span,left,right),y(c[5],low,high,top,bottom));
-            paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(dp(2.2f)); paint.setColor(colors.accent); canvas.drawPath(path,paint);
+            paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(dp(4.4f)); paint.setColor(AppAppearance.dark(getContext())?0xffd4f6e7:0xff156747); canvas.drawPath(path,paint);
+            if(!bands.highs.isEmpty()) {
+                canvas.save(); canvas.clipRect(left,top,right,Math.max(top,Math.min(bottom,y(bands.highs.get(0),low,high,top,bottom))));
+                paint.setColor(AppAppearance.dark(getContext())?0xffffd28c:0xff936000);canvas.drawPath(path,paint);canvas.restore();
+            }
+            if(!bands.lows.isEmpty()) {
+                canvas.save(); canvas.clipRect(left,Math.max(top,Math.min(bottom,y(bands.lows.get(bands.lows.size()-1),low,high,top,bottom))),right,bottom);
+                paint.setColor(AppAppearance.dark(getContext())?0xffff5c5c:0xffc02737);canvas.drawPath(path,paint);canvas.restore();
+            }
+            paint.setColor(!bands.lows.isEmpty() && first.value<bands.lows.get(bands.lows.size()-1)?(AppAppearance.dark(getContext())?0xffff5c5c:0xffc02737):
+                    !bands.highs.isEmpty() && first.value>bands.highs.get(0)?(AppAppearance.dark(getContext())?0xffffd28c:0xff936000):(AppAppearance.dark(getContext())?0xffd4f6e7:0xff156747));
             paint.setStyle(Paint.Style.FILL);
             if(segment.size()==1) canvas.drawCircle(x(first.time,series.from,span,left,right),y(first.value,low,high,top,bottom),dp(2.4f),paint);
         }

@@ -31,12 +31,12 @@ public final class SafetyActivity extends Activity {
         SafetyConsent.Stage stage=SafetyConsent.stage(this); boolean reading=stage==SafetyConsent.Stage.COMPLETE;
         try {
             if(license) {
-                LevelUi.text(body,"GNU GPLv3",26); LevelUi.button(body,AppText.tr("Zurück"),v -> finish());
+                LevelUi.text(body,"GNU GPLv3",26); LevelUi.back(body,AppText.tr("Zurück"),v -> finish());
                 LevelUi.text(body,text("gpl-3.0.txt"),14).setTextIsSelectable(true); return;
             }
             if(reading) {
                 LevelUi.text(body,t("Sicherheit und Bedingungen","Safety and terms"),26);
-                LevelUi.button(body,AppText.tr("Zurück"),v -> finish());
+                LevelUi.back(body,AppText.tr("Zurück"),v -> finish());
                 LevelUi.text(body,text("warning-"+AppText.language()+".txt"),17).setTextIsSelectable(true);
                 LevelUi.text(body,text("terms-"+AppText.language()+".txt"),17).setTextIsSelectable(true);
                 licenseButton(body);return;
@@ -65,7 +65,7 @@ public final class SafetyActivity extends Activity {
         }
     }
     private void licenseButton(LinearLayout body) {
-        LevelUi.button(body,t("GPLv3-Lizenz lesen","Read GPLv3 license"),v -> startActivity(new Intent(this,SafetyActivity.class).putExtra("license",true)));
+        LevelUi.navigation(body,t("GPLv3-Lizenz lesen","Read GPLv3 license"),v -> startActivity(new Intent(this,SafetyActivity.class).putExtra("license",true)));
     }
     @Override public void onBackPressed() {if(license || SafetyConsent.ready(this))super.onBackPressed();else finishAndRemoveTask();}
 }

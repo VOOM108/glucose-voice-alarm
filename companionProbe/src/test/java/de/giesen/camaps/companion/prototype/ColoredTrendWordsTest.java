@@ -52,7 +52,7 @@ public class ColoredTrendWordsTest {
         assertEquals("r",c.red.get(0));assertTrue(c.redEnabled.get(0));try{c.yellow.set(0,"x");fail();}catch(UnsupportedOperationException expected){}
     }
     @Test public void allStoredColorTextIsValidatedEvenWhenItsCheckboxIsOff(){
-        for(String bad:Arrays.asList("bad\ntext","bad\ttext","{wert}",String.join("",Collections.nCopies(81,"x")))){
+        for(String bad:Arrays.asList("bad\ntext","bad\ttext","{trend}",String.join("",Collections.nCopies(81,"x")))){
             try{new TrendColorOverrides(Collections.nCopies(7,bad),Collections.nCopies(7,false),Collections.nCopies(7,""),Collections.nCopies(7,false));fail(bad);}catch(IllegalArgumentException expected){}
         }
         TrendColorOverrides longWord=new TrendColorOverrides(Collections.nCopies(7,String.join("",Collections.nCopies(41,"x"))),Collections.nCopies(7,true),Collections.nCopies(7,""),Collections.nCopies(7,false));

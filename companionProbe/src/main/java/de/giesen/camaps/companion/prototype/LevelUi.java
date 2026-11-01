@@ -24,9 +24,17 @@ final class LevelUi {
         body.addView(text,params); return text;
     }
     static Button button(LinearLayout body,String title,View.OnClickListener listener) {
+        return button(body,title,UiActions.Role.ACTION,listener);
+    }
+    static Button navigation(LinearLayout body,String title,View.OnClickListener listener) {return button(body,title,UiActions.Role.NAVIGATION,listener);}
+    static Button back(LinearLayout body,String title,View.OnClickListener listener) {return button(body,title,UiActions.Role.BACK,listener);}
+    static Button play(LinearLayout body,String title,View.OnClickListener listener) {return button(body,title,UiActions.Role.PLAY,listener);}
+    static Button stop(LinearLayout body,String title,View.OnClickListener listener) {return button(body,title,UiActions.Role.STOP,listener);}
+    static Button primary(LinearLayout body,String title,View.OnClickListener listener) {return button(body,title,UiActions.Role.PRIMARY,listener);}
+    static Button button(LinearLayout body,String title,UiActions.Role role,View.OnClickListener listener) {
         if(body.getOrientation()==LinearLayout.HORIZONTAL) { body.setGravity(android.view.Gravity.CENTER_VERTICAL); body.setBaselineAligned(false); }
         Button button=new UiActions.ActionButton(body.getContext()); button.setText(title); button.setAllCaps(false);
-        UiActions.style(button,title);
+        UiActions.style(button,title,role);
         button.setOnClickListener(listener); body.addView(button); return button;
     }
     static CheckBox check(LinearLayout body,String title,boolean checked) {

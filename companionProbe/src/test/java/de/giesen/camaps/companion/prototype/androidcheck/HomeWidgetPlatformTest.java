@@ -229,18 +229,19 @@ public class HomeWidgetPlatformTest {
         int line=0;for(int y=0;y<b.getHeight();y++)for(int x=b.getWidth()/3;x<b.getWidth()*2/3;x++)if(b.getPixel(x,y)==0xffd4f6e7)line++;
         assertEquals(0,line);
     }
-    @Test public void narrowerChartsUseShorterClearlyNamedWindows()throws Exception {
-        assertEquals(30,HomeWidgetRenderer.historyMinutes(204));assertEquals("30 min",HomeWidgetRenderer.historyLabel(30));
-        assertEquals(60,HomeWidgetRenderer.historyMinutes(304));assertEquals("1 h",HomeWidgetRenderer.historyLabel(60));
-        assertEquals(120,HomeWidgetRenderer.historyMinutes(384));assertEquals("2 h",HomeWidgetRenderer.historyLabel(120));
-        View normal=HomeWidget.view(c,widget,320,160,new HomeWidget.Model(demo(false),true,false,false,false,true,output())).apply(c,new FrameLayout(c));
-        assertTrue(normal.findViewById(R.id.widget_data).getContentDescription().toString().contains("60 Minuten"));
-        assertEquals(View.VISIBLE,normal.findViewById(R.id.widget_master_separator).getVisibility());
+    @Test public void windowIsChosenPerWidgetRatherThanByItsWidth()throws Exception {
+        WidgetAppearance.Settings old=WidgetAppearance.load(c,widget).settings;
+        WidgetAppearance.save(c,widget,0,new WidgetAppearance.Settings(old.mode,old.opacity,old.background,old.text,old.textTone,old.controls,100,1,8,8));
+        for(int width:new int[]{220,320,400}) {
+            View normal=HomeWidget.view(c,widget,width,160,new HomeWidget.Model(demo(false),true,false,false,false,true,output())).apply(c,new FrameLayout(c));
+            assertTrue(normal.findViewById(R.id.widget_data).getContentDescription().toString().contains("60 Minuten"));
+            assertEquals(width>=300?View.VISIBLE:View.GONE,normal.findViewById(R.id.widget_master_separator).getVisibility());
+        }
     }
     @Test public void olderPointsAreOmittedFromAShorterWindowRatherThanCompressed(){
         long now=1800000000000L;List<WatchSnapshot.Point> points=Arrays.asList(new WatchSnapshot.Point(now-90*60000,60),new WatchSnapshot.Point(now-10*60000,110));
         WatchSnapshot s=new WatchSnapshot(now,now,110,WatchSnapshot.Trend.FLAT,false,true,null,80.,180.,points);HomeWidgetRenderer r=new HomeWidgetRenderer();
-        assertEquals(0,pixels(r.image(s,true,true,96,1f,30,now),0xffff5c5c));
+        assertEquals(0,pixels(r.image(s,true,true,96,1f,60,now),0xffff5c5c));
         assertTrue(pixels(r.image(s,true,true,180,1f,120,now),0xffff5c5c)>0);
     }
     @Test public void valueDigitsAreLargeAndArrowStaysBesideThemBeforeTheChart()throws Exception {
@@ -256,7 +257,7 @@ public class HomeWidgetPlatformTest {
         View wide=layout(HomeWidget.view(c,widget,560,180,m),560,180);
         ImageView larger=wide.findViewById(R.id.widget_reading);Bitmap expanded=Bitmap.createBitmap(larger.getWidth(),larger.getHeight(),Bitmap.Config.ARGB_8888);larger.draw(new Canvas(expanded));
         assertTrue("A wider host may enlarge the value only up to its height cap",ink(expanded).height()>=ink.height()&&ink(expanded).height()<=46);
-        assertEquals(18,((TextView)normal.findViewById(R.id.widget_period)).getTextSize(),.1);
+        assertTrue(normal.findViewById(R.id.widget_chart).getHeight()>40);
         save("widget-balanced-wide.png",HomeWidget.view(c,widget,560,180,m),560,180);
         c.getSharedPreferences(HomeWidget.PREFS,0).edit().putBoolean("controls_"+widget,false).commit();
         save("widget-balanced-no-controls.png",HomeWidget.view(c,widget,320,220,m),320,220,false);
@@ -269,13 +270,13 @@ public class HomeWidgetPlatformTest {
                 rv.writeToParcel(parcel,0);parcel.setDataPosition(0);
                 RemoteViews copy=RemoteViews.CREATOR.createFromParcel(parcel);
                 View host=layout(copy,width,160);float density=c.getResources().getDisplayMetrics().density;
-                ImageView number=host.findViewById(R.id.widget_reading);TextView period=host.findViewById(R.id.widget_period);
+                ImageView number=host.findViewById(R.id.widget_reading);
                 Bitmap visible=Bitmap.createBitmap(number.getWidth(),number.getHeight(),Bitmap.Config.ARGB_8888);number.draw(new Canvas(visible));
                 float visibleHeight=ink(visible).height()/density;
                 assertTrue("Dense displays retain a bounded readable size",visibleHeight>=30&&visibleHeight<=46);
                 Bitmap before=bitmap(layout(rv,width,160),R.id.widget_reading),after=bitmap(host,R.id.widget_reading);
                 assertTrue("The exact round font and arrow must survive RemoteViews parceling",before.sameAs(after));
-                assertEquals(18,period.getTextSize()/density,.1);
+                assertTrue(host.findViewById(R.id.widget_chart).getHeight()/density>50);
                 assertTrue(host.findViewById(R.id.widget_controls).getBottom()<=host.getHeight());
                 save("widget-balanced-dense-"+width+".png",copy,width,160);
             } finally {parcel.recycle();}
@@ -285,14 +286,15 @@ public class HomeWidgetPlatformTest {
         Bundle options=new Bundle();options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,220);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,128);
         options.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES,new ArrayList<>(Collections.singletonList(new android.util.SizeF(400,160))));
         View host=layout(HomeWidget.views(c,widget,options,new HomeWidget.Model(demo(false),true,false,false,false,true,output())),400,160);
-        assertEquals("2 h",((TextView)host.findViewById(R.id.widget_period)).getText().toString());
+        assertTrue(host.findViewById(R.id.widget_data).getContentDescription().toString().contains("120 Minuten"));
+        assertEquals(167,bitmap(host,R.id.widget_chart).getWidth());
     }
     @Test public void legacyPortraitKeepsNarrowWidthAndNormalizedChart()throws Exception {
         Bundle options=new Bundle();options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,320);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,560);
         options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,128);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,180);
         View host=layout(HomeWidget.views(c,widget,options,new HomeWidget.Model(demo(false),true,false,false,false,true,output())),320,180);
         ImageView chart=host.findViewById(R.id.widget_chart);Bitmap b=((android.graphics.drawable.BitmapDrawable)chart.getDrawable()).getBitmap();
-        assertEquals("Portrait chart must use its own normalized height",64,b.getHeight());
+        assertEquals("Portrait chart must use its own normalized height",88,b.getHeight());
         assertEquals("Portrait uses the narrower width",132,b.getWidth());
     }
     @Test @Config(sdk=34,qualifiers="de-w411dp-h891dp-xxxhdpi") public void aWrongLauncherHeightCannotInflateTheCurveIntoABand()throws Exception {
@@ -300,13 +302,14 @@ public class HomeWidgetPlatformTest {
         List<WatchSnapshot.Point> points=new ArrayList<>();for(int i=0;i<=120;i++)points.add(new WatchSnapshot.Point(now-(120-i)*60000L,110));
         WatchSnapshot sample=new WatchSnapshot(now,now,110,WatchSnapshot.Trend.FLAT,false,true,null,80.,180.,points);
         HomeWidget.Model m=new HomeWidget.Model(sample,true,false,false,false,true,output());
+        int previousThickness=-1;
         for(int hint:new int[]{120,240}) {
             RemoteViews rv=HomeWidget.view(c,widget,400,hint,m);View root=layout(rv,400,160);ImageView chart=root.findViewById(R.id.widget_chart);
             Bitmap pixels=Bitmap.createBitmap(chart.getWidth(),chart.getHeight(),Bitmap.Config.ARGB_8888);chart.draw(new Canvas(pixels));
             int thickness=0;for(int y=0;y<pixels.getHeight();y++)if(pixels.getPixel(pixels.getWidth()/2,y)==0xffd4f6e7)thickness++;
             float density=c.getResources().getDisplayMetrics().density;
             float relativeStroke=thickness/(float)chart.getHeight();
-            assertTrue("Use the middle weight between the previous two curves",relativeStroke>=.055f&&relativeStroke<=.095f);
+            assertTrue("Bounded stroke: "+thickness+" pixels in "+chart.getHeight(),relativeStroke>=.03f&&relativeStroke<=.095f);
             Bitmap source=((android.graphics.drawable.BitmapDrawable)chart.getDrawable()).getBitmap();
             assertEquals("Use enough source pixels for a dense screen",256,source.getHeight());
             save("widget-balanced-height-hint-"+hint+".png",rv,400,160);

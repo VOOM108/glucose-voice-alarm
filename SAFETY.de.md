@@ -24,4 +24,4 @@ Die Hinweise übertragen die xDrip+-Forschungswarnung und den Gewährleistungshi
 
 Vor der ersten Nutzung verlangt die App zwei getrennte Bestätigungen: zuerst den wichtigen Warnhinweis, danach die Nutzungsbedingungen mit „Ich verstehe“. Beide Checkboxen beginnen leer. Bis beide Schritte bestätigt sind, bleiben App-Funktionen, Benachrichtigungsempfang und eigene Ausgabe gesperrt. Das gilt auch für bestehende Installationen nach Einführung dieser Abfrage. Danach musst Du die aktive Ausgabe selbst einschalten.
 
-Die Bestätigungen bleiben auf dem Gerät und gehören nicht zu Einstellungsprofilen. Normale Updates fragen nicht erneut; inhaltlich geänderte Hinweise benötigen eine neue Bestätigung. Unter Darstellung → Sicherheit und Bedingungen kannst Du die Texte jederzeit erneut lesen, einschließlich der vollständigen GPLv3-Lizenz.
+Die Bestätigungen bleiben auf dem Gerät und gehören nicht zu Einstellungsprofilen. Normale Updates fragen nicht erneut; inhaltlich geänderte Hinweise benötigen eine neue Bestätigung. Unter Einstellungen → Sicherheit und Bedingungen kannst Du die Texte jederzeit erneut lesen, einschließlich der vollständigen GPLv3-Lizenz.

@@ -45,7 +45,7 @@ The conversion factor `18.0182` matches [`utilitymodels/Constants.java` at the p
 
 The original research warning and warranty text are the `importanttext` and `pref_I_understand_summery` resources in [upstream internal.xml](https://github.com/NightscoutFoundation/xDrip/blob/805ba0447cb7288c421cc898640183f8abb042fb/app/src/main/res/values/internal.xml). A complete, human-readable extraction is included in [upstream/xdrip-safety-notices.txt](upstream/xdrip-safety-notices.txt). The project-specific [safety notice](../SAFETY.md) adapts their substance to this companion. The original xDrip README remains available at the pinned upstream revision.
 
-GVA also requires two explicit first-start acknowledgements: the research warning, then the terms of use. Its own versioned local acknowledgement store gates reception, UI and output; it does not reuse xDrip preferences. Ordinary app updates retain acknowledgements of unchanged text. The notices and complete GPLv3 remain available offline under Appearance → Safety and terms.
+GVA also requires two explicit first-start acknowledgements: the research warning, then the terms of use. Its own versioned local acknowledgement store gates reception, UI and output; it does not reuse xDrip preferences. Ordinary app updates retain acknowledgements of unchanged text. The notices and complete GPLv3 remain available offline under Settings → Safety and terms.
 
 ## Listener reconnection
 

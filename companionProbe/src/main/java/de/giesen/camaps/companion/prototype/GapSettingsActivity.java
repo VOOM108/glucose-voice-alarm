@@ -25,7 +25,7 @@ public final class GapSettingsActivity extends UiActivity {
     private ArrayList<String> initial;
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved); if(!SafetyConsent.ready(this))return; LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück"),v -> onBackPressed()); LevelUi.text(body,AppText.tr("Datenlücken"),28);
+        LevelUi.back(body,AppText.tr("Zurück"),v -> onBackPressed()); LevelUi.text(body,AppText.tr("Datenlücken"),28);
         LevelUi.text(body,AppText.tr("Warnt bei fehlenden Werten und nennt den zuletzt bekannten Verlauf. Keine Schätzung des aktuellen Werts."),16);
         status=LevelUi.text(body,"",15); audio=new PreviewAudio(this,text -> status.setText(text));
         try {
@@ -41,29 +41,31 @@ public final class GapSettingsActivity extends UiActivity {
             LinearLayout outputs=DashboardUi.card(this,body); LevelUi.text(outputs,AppText.tr("Wie warnen?"),21);
             tone=LevelUi.check(outputs,AppText.tr("Ton"),p.tone); toneLabel=LevelUi.text(outputs,"",14);
             LinearLayout sounds=new LinearLayout(this); outputs.addView(sounds);
-            Button choose=LevelUi.button(sounds,AppText.tr("Ton auswählen"),v -> chooseTone()); choose.setLayoutParams(new LinearLayout.LayoutParams(0,-2,1));
-            LevelUi.button(sounds,AppText.tr("Ton anhören"),v -> audio.tone(toneUri));
+            Button choose=LevelUi.navigation(sounds,AppText.tr("Ton auswählen"),v -> chooseTone()); choose.setLayoutParams(new LinearLayout.LayoutParams(0,-2,1));
+            LevelUi.play(sounds,AppText.tr("Ton anhören"),v -> audio.tone(toneUri));LevelUi.stop(sounds,AppText.tr("Vorschau stoppen"),v->audio.stop());
             speech=LevelUi.check(outputs,AppText.tr("Sprechen"),p.speech);
             speechTemplate=LevelUi.field(outputs,AppText.tr("Text der Lückenwarnung"),p.speechTemplate,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
             speechTemplate.setId(R.id.gap_speech_template); speechTemplate.setHint(GapSpeechTemplate.defaults(speechLanguage)); speechTemplate.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(500)});
             speechTemplate.setSingleLine(false); speechTemplate.setMinLines(2); speechTemplate.setMaxLines(5); speechTemplate.setHorizontallyScrolling(false); speechTemplate.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
             TokenButtons.add(outputs,speechTemplate,"{dauer_minuten}","{trend}","{status}");
             LevelUi.help(outputs,AppText.tr("Zu den Variablen"),AppText.tr("Leer verwendet den Standard. Dauer ist die Länge der Lücke. Trend und Status beschreiben den letzten bekannten Verlauf als vollständige Sätze; sie bleiben ohne sichere Angabe leer. Ein aktueller Wert ist nicht einsetzbar."));
-            LevelUi.button(outputs,AppText.tr("Sprachtext mit Testdaten anhören"),v -> {
+            LinearLayout spokenPreview=new LinearLayout(this);outputs.addView(spokenPreview);TextView spokenLabel=LevelUi.text(spokenPreview,AppText.tr("Sprachtext testen"),16);spokenLabel.setLayoutParams(new LinearLayout.LayoutParams(0,-2,1));
+            LevelUi.play(spokenPreview,AppText.tr("Sprachtext mit Testdaten anhören"),v -> {
                 try {
                     boolean en="en".equals(speechLanguage);
                     String text=GapSpeechTemplate.render(speechTemplate.getText().toString(),speechLanguage,4,en?"Last trend: falling fast.":"Zuletzt schnell fallend.","");
                     audio.speak((en?"This is a gap warning test. ":"Dies ist ein Test der Lückenwarnung. ")+text);
                 } catch(IllegalArgumentException e) { status.setText(AppText.tr(e.getMessage())); }
             });
+            LevelUi.stop(spokenPreview,AppText.tr("Vorschau stoppen"),v->audio.stop());
             LevelUi.text(outputs,AppText.tr("Vibration"),16); vibration=new Spinner(this); vibration.setContentDescription(AppText.tr("Vibrationsmuster der Lückenwarnung"));
             List<String> patterns=new ArrayList<>(); patterns.add(AppText.tr("Aus")); for(VibrationCatalog pattern:VibrationCatalog.values()) patterns.add(AppText.tr(pattern.label));
             vibration.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,patterns)); outputs.addView(vibration);
             vibration.setSelection(p.vibrationPattern==null?0:VibrationCatalog.valueOf(p.vibrationPattern).ordinal()+1);
             LinearLayout previews=new LinearLayout(this); outputs.addView(previews);
-            LevelUi.button(previews,AppText.tr("Vibration testen"),v -> { if(pattern()!=null) audio.vibrate(pattern()); }); LevelUi.button(previews,AppText.tr("Vorschau stoppen"),v -> audio.stop());
+            LevelUi.play(previews,AppText.tr("Vibration testen"),v -> { if(pattern()!=null) audio.vibrate(pattern()); }); LevelUi.stop(previews,AppText.tr("Vorschau stoppen"),v -> audio.stop());
             LevelUi.help(body,AppText.tr("Schalter auf dem Dashboard"),AppText.tr("Ton, Alarme sprechen und Vibration müssen auch auf dem Dashboard eingeschaltet sein. Ausgabe aktiv und eine globale Pause gelten ebenfalls für die Lückenwarnung."));
-            LevelUi.button(body,AppText.tr("Speichern"),v -> save()); initial=fields();
+            LevelUi.primary(body,AppText.tr("Speichern"),v -> save()); initial=fields();
             if(saved!=null) { ArrayList<String> values=saved.getStringArrayList("fields"); if(values!=null && (values.size()==8 || values.size()==9)) restore(values); initial=saved.getStringArrayList("initial"); }
             toneName(); ready=true; audio.prepareSpeech();
         } catch(IOException | IllegalArgumentException e) { status.setText(AppText.tr("Einstellungen nicht lesbar. Vorhandene Daten bleiben erhalten.")); }

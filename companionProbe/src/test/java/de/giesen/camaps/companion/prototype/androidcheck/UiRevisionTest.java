@@ -51,18 +51,18 @@ public class UiRevisionTest {
         field.setEnabled(false); assertFalse(TokenButtons.insert(field,"{wert}"));
     }
     @Test public void trendWordDraftAndExpandedEditorSurviveRotationAndSaveWithOutputRoutes() throws Exception {
-        ActivityController<OutputSettingsActivity> first=open(OutputSettingsActivity.class,null); action(first.get(),"Trendwörter").performClick();
+        ActivityController<TrendNamesActivity> first=open(TrendNamesActivity.class,null); action(first.get(),"Sprachtext").performClick(); action(first.get(),"→").performClick();
         EditText stable=(EditText)action(first.get(),"stabil"); stable.setText("ruhig");
         Bundle state=new Bundle(); first.saveInstanceState(state).pause().stop().destroy(); opened.remove(first);
-        OutputSettingsActivity restored=open(OutputSettingsActivity.class,state).get(); assertTrue(action(restored,"ruhig").isShown());
-        action(restored,"Ausgabe-Einstellungen speichern").performClick();
+        TrendNamesActivity restored=open(TrendNamesActivity.class,state).get(); assertTrue(action(restored,"ruhig").isShown());
+        action(restored,"Sprachtexte speichern").performClick();
         OutputPreferences saved=new OutputPreferenceStore(app.getFilesDir()).load().preferences; assertEquals("ruhig",saved.trendSpeech.word(NotificationParser.Trend.FLAT)); assertTrue(saved.tonesEnabled); assertTrue(saved.alarmSpeechEnabled);
         OutputModeUi.channel(restored,1,false,() -> {}); assertEquals("ruhig",new OutputPreferenceStore(app.getFilesDir()).load().preferences.trendSpeech.word(NotificationParser.Trend.FLAT));
     }
     @Test public void refreshedCandidateInvalidatesTheFrozenDialogEvenWithIdenticalPixelsAndShape() {
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
         VectorReference.Candidate captured=candidate(); ProbeState.vectorCandidate=captured;
-        ProbeDiagnosticsActivity activity=open(ProbeDiagnosticsActivity.class,null).get(); action(activity,"Pfeile prüfen").performClick();
+        ProbeActivity activity=open(ProbeActivity.class,null).get(); action(activity,"Pfeilzuordnung prüfen").performClick();
         AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog(); dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_2").performClick(); assertTrue(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled());
         ProbeState.vectorCandidate=candidate(); assertFalse(VectorReference.canConfirm(captured,ProbeState.vectorCandidate));
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(600)); assertFalse(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled());
@@ -73,7 +73,7 @@ public class UiRevisionTest {
         VectorReference.Candidate current=candidate(); ProbeState.vectorCandidate=current;
         app.getSharedPreferences(VectorReference.PREFS,0).edit().putString(current.key,NotificationParser.Trend.UP.name()).commit();
         app.getSharedPreferences(VectorReference.SHAPE_PREFS,0).edit().putString(current.shapeKey,NotificationParser.Trend.UP.name()).commit();
-        ProbeDiagnosticsActivity activity=open(ProbeDiagnosticsActivity.class,null).get(); action(activity,"Pfeile prüfen").performClick(); AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog();
+        ProbeActivity activity=open(ProbeActivity.class,null).get(); action(activity,"Pfeilzuordnung prüfen").performClick(); AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog();
         dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_2").performClick(); dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); shadowOf(Looper.getMainLooper()).idle();
         assertEquals(NotificationParser.Trend.UP_RIGHT,TrendReference.lookup(app.getSharedPreferences(VectorReference.PREFS,0).getAll(),current.key));
         assertEquals(ShapeReference.CONFLICT,app.getSharedPreferences(VectorReference.SHAPE_PREFS,0).getString(current.shapeKey,""));
@@ -88,7 +88,7 @@ public class UiRevisionTest {
     }
     @Test public void theTwentyOneChoiceDialogCanExplicitlyConfirmADoubleUpArrow() {
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit();
-        VectorReference.Candidate captured=candidate(); ProbeState.vectorCandidate=captured; ProbeDiagnosticsActivity activity=open(ProbeDiagnosticsActivity.class,null).get(); action(activity,"Pfeile prüfen").performClick();
+        VectorReference.Candidate captured=candidate(); ProbeState.vectorCandidate=captured; ProbeActivity activity=open(ProbeActivity.class,null).get(); action(activity,"Pfeilzuordnung prüfen").performClick();
         AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog(); assertEquals(21,views(dialog.getWindow().getDecorView()).stream().filter(v -> v instanceof Button && v.getTag()!=null && v.getTag().toString().matches("arrow_choice_[0-9]+" )).count()); dialog.findViewById(android.R.id.custom).findViewWithTag("arrow_choice_0").performClick(); assertTrue(dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled()); dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); shadowOf(Looper.getMainLooper()).idle();
         assertEquals(NotificationParser.Trend.DOUBLE_UP,TrendReference.lookup(app.getSharedPreferences(VectorReference.PREFS,0).getAll(),captured.key));
     }
@@ -114,7 +114,7 @@ public class UiRevisionTest {
     }
     @Test public void leavingTheArrowDialogDismissesItsFrozenPreviewAndStopsItsRefreshGuard() {
         app.getSharedPreferences(CamApsListener.PREFS,0).edit().putBoolean(CamApsListener.ENABLED,true).commit(); ProbeState.vectorCandidate=candidate();
-        ActivityController<ProbeDiagnosticsActivity> controller=open(ProbeDiagnosticsActivity.class,null); action(controller.get(),"Pfeile prüfen").performClick();
+        ActivityController<ProbeActivity> controller=open(ProbeActivity.class,null); action(controller.get(),"Pfeilzuordnung prüfen").performClick();
         AlertDialog dialog=ShadowAlertDialog.getLatestAlertDialog(); assertTrue(dialog.isShowing()); controller.pause(); assertFalse(dialog.isShowing());
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2)); assertFalse(dialog.isShowing());
     }

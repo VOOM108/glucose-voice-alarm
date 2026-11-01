@@ -10,9 +10,9 @@ import java.util.function.*;
 /** Shared colour controls for the separate display and speech editors. */
 final class TrendColorEditor {
     private final TrendColorOverrides initial;private final int maximum;private final String prefix;
-    private final List<EditText> red=new ArrayList<>(),yellow=new ArrayList<>();
-    private final List<CheckBox> redEnabled=new ArrayList<>(),yellowEnabled=new ArrayList<>();
-    private final List<Runnable> refreshers=new ArrayList<>();
+    private final List<EditText> red=new ArrayList<>(Collections.nCopies(7,null)),yellow=new ArrayList<>(Collections.nCopies(7,null));
+    private final List<CheckBox> redEnabled=new ArrayList<>(Collections.nCopies(7,null)),yellowEnabled=new ArrayList<>(Collections.nCopies(7,null));
+    private final List<Runnable> refreshers=new ArrayList<>(Collections.nCopies(7,null));
     TrendColorEditor(TrendColorOverrides initial,int maximum,String prefix){this.initial=initial;this.maximum=maximum;this.prefix=prefix;}
     void add(LinearLayout parent,int index,NotificationParser.Trend trend,EditText normal,Supplier<String> inherited,Consumer<String> preview,BooleanSupplier previewAllowed,Runnable changed){
         List<Runnable> refresh=new ArrayList<>();
@@ -20,19 +20,19 @@ final class TrendColorEditor {
             boolean isRed=color==ArrowColor.RED;List<EditText> fields=isRed?red:yellow;List<CheckBox> flags=isRed?redEnabled:yellowEnabled;
             String name=AppText.tr(isRed?"Rot":"Gelb"),label=trend.symbol+" "+MetricNotification.trendTitle(trend)+" · "+name;
             CheckBox box=LevelUi.check(parent,AppText.tr(isRed?"Eigener Text für Rot":"Eigener Text für Gelb"),(isRed?initial.redEnabled:initial.yellowEnabled).get(index));
-            box.setTag(prefix+"_"+color.name()+"_"+trend.name()+"_enabled");box.setContentDescription(label+" · "+AppText.tr("eigenen Text verwenden"));box.setMinHeight(Math.round(48*parent.getResources().getDisplayMetrics().density));flags.add(box);
+            box.setTag(prefix+"_"+color.name()+"_"+trend.name()+"_enabled");box.setContentDescription(label+" · "+AppText.tr("eigenen Text verwenden"));box.setMinHeight(Math.round(48*parent.getResources().getDisplayMetrics().density));flags.set(index,box);
             LinearLayout row=new LinearLayout(parent.getContext());row.setGravity(android.view.Gravity.CENTER_VERTICAL);parent.addView(row);
             EditText field=new EditText(parent.getContext());field.setInputType(InputType.TYPE_CLASS_TEXT);field.setSingleLine(true);field.setText((isRed?initial.red:initial.yellow).get(index));
             field.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maximum)});field.setTag(prefix+"_"+color.name()+"_"+trend.name());field.setContentDescription(label);
-            row.addView(field,new LinearLayout.LayoutParams(0,-2,1));fields.add(field);
-            Button sample=preview==null?null:LevelUi.button(row,AppText.tr("Trend anhören"),v->preview.accept(field.getText().toString().trim().isEmpty()?inherited.get():field.getText().toString()));
+            row.addView(field,new LinearLayout.LayoutParams(0,-2,1));fields.set(index,field);
+            Button sample=preview==null?null:LevelUi.play(row,AppText.tr("Trend anhören"),v->preview.accept(field.getText().toString().trim().isEmpty()?inherited.get():field.getText().toString()));
             if(sample!=null)sample.setContentDescription(label+AppText.tr(" anhören"));
             Runnable update=()->{row.setVisibility(box.isChecked()?View.VISIBLE:View.GONE);field.setHint(inherited.get());if(sample!=null)sample.setEnabled(box.isChecked() && previewAllowed.getAsBoolean());};
             refresh.add(update);update.run();
             box.setOnCheckedChangeListener((v,checked)->{if(checked && field.getText().toString().trim().isEmpty())field.setText(inherited.get());update.run();changed.run();});
             field.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int a,int c,int n){}public void onTextChanged(CharSequence s,int a,int b,int c){changed.run();}public void afterTextChanged(Editable e){}});
         }
-        Runnable update=()->{for(Runnable action:refresh)action.run();};refreshers.add(update);
+        Runnable update=()->{for(Runnable action:refresh)action.run();};refreshers.set(index,update);
         normal.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int a,int c,int n){}public void onTextChanged(CharSequence s,int a,int b,int c){update.run();}public void afterTextChanged(Editable e){}});
     }
     void refresh(int index){refreshers.get(index).run();}

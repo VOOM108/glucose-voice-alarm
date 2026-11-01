@@ -34,13 +34,16 @@
                 <action android:name="android.intent.action.TIME_SET"/>
                 <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
                 <action android:name="android.intent.action.LOCALE_CHANGED"/>
-                <action android:name="android.intent.action.CONFIGURATION_CHANGED"/>
+                <action android:name="android.intent.action.WALLPAPER_CHANGED"/><action android:name="android.intent.action.CONFIGURATION_CHANGED"/>
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/home_widget_info"/>
         </receiver>
         <activity android:name=".GapSettingsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ProfilesActivity" android:exported="false" />
         <activity android:name=".DeveloperOptionsActivity" android:exported="false" />
+        <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".DisplaySettingsActivity" android:exported="false" />
+        <activity android:name=".TrendNamesActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AppearanceActivity" android:exported="false" />
         <activity android:name=".TrendDisplayActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".WatchSettingsActivity" android:exported="false" />
@@ -56,6 +59,7 @@
         <activity android:name=".ProbeDiagnosticsActivity" android:exported="false" />
         <activity android:name=".OutputSettingsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ToneSetsActivity" android:exported="false" />
+        <activity android:name=".OutputTestActivity" android:exported="false" />
         <activity android:name=".SyntheticAlarmActivity" android:exported="false" />
         <activity android:name=".AlarmLevelActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ProbeActivity" android:exported="true">

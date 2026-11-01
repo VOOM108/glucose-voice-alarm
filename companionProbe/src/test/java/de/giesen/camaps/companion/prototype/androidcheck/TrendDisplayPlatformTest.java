@@ -68,7 +68,7 @@ public class TrendDisplayPlatformTest {
         for(int i=0;i<7;i++) {
             ProbeState.latest=new ProbeState.Observation(123,TrendDisplayWords.TRENDS.get(i),SystemClock.elapsedRealtime(),System.currentTimeMillis(),"synthetic");
             ActivityController<ProbeActivity> controller=open(ProbeActivity.class,null);
-            boolean found=false;for(View view:views(controller.get().getWindow().getDecorView()))if(view instanceof TextView && ("Pfeil: "+custom.get(i)).contentEquals(((TextView)view).getText()))found=true;
+            boolean found=false;for(View view:views(controller.get().getWindow().getDecorView()))if(view instanceof TextView && ("Trend: "+custom.get(i)).contentEquals(((TextView)view).getText()))found=true;
             assertTrue(custom.get(i),found);controller.pause().stop().destroy();controllers.remove(controller);
         }
     }

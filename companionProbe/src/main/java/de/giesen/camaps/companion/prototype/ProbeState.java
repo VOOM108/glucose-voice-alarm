@@ -14,6 +14,7 @@ final class ProbeState {
         final double value;
         final NotificationParser.Trend trend;
         final ArrowColor arrowColor;
+        final boolean assignmentNeeded;
         final ReceiptRate.Result receiptRate;
         final long receivedElapsed, postedWall,receivedWall;
         final String notificationKey;
@@ -24,6 +25,10 @@ final class ProbeState {
             this(value,trend,receivedElapsed,postedWall,key,receiptRate,ArrowColor.NORMAL);
         }
         Observation(double value, NotificationParser.Trend trend, long receivedElapsed, long postedWall, String key,ReceiptRate.Result receiptRate,ArrowColor color) {
+            this(value,trend,receivedElapsed,postedWall,key,receiptRate,color,false);
+        }
+        Observation(double value, NotificationParser.Trend trend, long receivedElapsed, long postedWall, String key,ReceiptRate.Result receiptRate,ArrowColor color,boolean assignmentNeeded) {
+            this.assignmentNeeded=trend==NotificationParser.Trend.UNKNOWN && assignmentNeeded;
             this.arrowColor=trend==NotificationParser.Trend.UNKNOWN?ArrowColor.NORMAL:java.util.Objects.requireNonNull(color);
             this.receiptRate=receiptRate;
             this.value = value; this.trend = trend; this.receivedElapsed = receivedElapsed;
@@ -32,6 +37,7 @@ final class ProbeState {
             this.postedWall = postedWall;
         }
         private Observation(Observation original) {
+            assignmentNeeded=false;
             value=original.value; trend=NotificationParser.Trend.UNKNOWN; arrowColor=ArrowColor.NORMAL; receiptRate=original.receiptRate;
             receivedElapsed=original.receivedElapsed; receivedWall=original.receivedWall;
             postedWall=original.postedWall; notificationKey=original.notificationKey;

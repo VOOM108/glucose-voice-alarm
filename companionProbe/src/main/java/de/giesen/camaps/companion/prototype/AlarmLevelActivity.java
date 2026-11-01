@@ -40,7 +40,7 @@ public final class AlarmLevelActivity extends UiActivity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved); if(!SafetyConsent.ready(this))return; store=new LevelStore(getFilesDir());
         LinearLayout body=LevelUi.screen(this);
-        LevelUi.button(body,AppText.tr("Zurück zur Liste"),v -> onBackPressed());
+        LevelUi.back(body,AppText.tr("Zurück zur Liste"),v -> onBackPressed());
         try {
             snapshot=store.load(); existing=getIntent().hasExtra("id");
             id=existing?getIntent().getStringExtra("id"):saved!=null?saved.getString("draftId"):UUID.randomUUID().toString();
@@ -73,21 +73,23 @@ public final class AlarmLevelActivity extends UiActivity {
                 LevelUi.text(body,AppText.tr("Die Zeit zählt ab dem ersten empfangenen Wert über der Grenze, auch über Datenlücken hinweg. Neue Alarme brauchen einen frischen steigenden Wert. Ein Wert an oder unter der Grenze beendet die Phase. Für Lücken wird kein Wert angenommen."),14);
             }
             allDay=LevelUi.check(body,AppText.tr("Ganztägig"),r==null || r.allDay);
-            start=LevelUi.button(body,"",v -> chooseTime(true)); end=LevelUi.button(body,"",v -> chooseTime(false));
+            start=LevelUi.navigation(body,"",v -> chooseTime(true)); end=LevelUi.navigation(body,"",v -> chooseTime(false));
             if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) LevelUi.text(body,AppText.tr("Das Zeitfenster begrenzt die Ausgabe, nicht die gezählte Dauer."),14);
             LevelUi.text(body,AppText.tr("Ausgabe dieser Stufe"),21);
             tone=LevelUi.check(body,AppText.tr("Ton für diese Stufe"),r!=null && r.outputs.tone);
             toneName=LevelUi.text(body,"",14);
             LinearLayout soundRow=new LinearLayout(this); soundRow.setGravity(android.view.Gravity.CENTER_VERTICAL); soundRow.setBaselineAligned(false); body.addView(soundRow);
-            chooseTone=LevelUi.button(soundRow,AppText.tr("Ton auswählen"),v -> chooseTone()); chooseTone.setLayoutParams(new LinearLayout.LayoutParams(0,-2,1));
-            previewTone=LevelUi.button(soundRow,AppText.tr("Ton anhören"),v -> playTone());
+            chooseTone=LevelUi.navigation(soundRow,AppText.tr("Ton auswählen"),v -> chooseTone()); chooseTone.setLayoutParams(new LinearLayout.LayoutParams(0,-2,1));
+            previewTone=LevelUi.play(soundRow,AppText.tr("Ton anhören"),v -> playTone());
+            LevelUi.stop(soundRow,AppText.tr("Vorschau stoppen"),v->stopTone());
             vibration=LevelUi.check(body,AppText.tr("Vibration für diese Stufe"),original!=null && original.vibrationPattern!=null);
             LinearLayout vibrationRow=new LinearLayout(this); vibrationRow.setGravity(android.view.Gravity.CENTER_VERTICAL); body.addView(vibrationRow);
             vibrationPattern=new Spinner(this); vibrationPattern.setContentDescription(AppText.tr("Vibrationsmuster"));
             String[] patterns=new String[VibrationCatalog.values().length]; for(int i=0;i<patterns.length;i++) patterns[i]=AppText.tr(VibrationCatalog.values()[i].label);
             vibrationPattern.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,patterns)); vibrationRow.addView(vibrationPattern,new LinearLayout.LayoutParams(0,-2,1));
             if(original!=null && original.vibrationPattern!=null) vibrationPattern.setSelection(VibrationCatalog.valueOf(original.vibrationPattern).ordinal());
-            previewVibration=LevelUi.button(vibrationRow,AppText.tr("Vibration testen"),v -> audio.vibrate(selectedVibration()));
+            previewVibration=LevelUi.play(vibrationRow,AppText.tr("Vibration testen"),v -> audio.vibrate(selectedVibration()));
+            LevelUi.stop(vibrationRow,AppText.tr("Vorschau stoppen"),v->stopTone());
             speech=LevelUi.check(body,AppText.tr("Gesprochener Alarm für diese Stufe"),r!=null && r.outputs.speech);
             speechTexts=LevelUi.field(body,AppText.tr("Eigene Formulierungen (leer für Standardtext)"),original==null?"":android.text.TextUtils.join("\n",original.speechVariants),
                     InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
@@ -99,11 +101,11 @@ public final class AlarmLevelActivity extends UiActivity {
             LevelUi.help(body,AppText.tr("Textregeln"),AppText.tr("Bis zu vier Formulierungen, eine je Zeile, höchstens 500 Zeichen. Leer verwendet den Standard: ")+SpeechTemplate.defaultAlarm(kind,new OutputPreferenceStore(getFilesDir()).load().preferences.speechLanguage));
             LevelUi.text(body,AppText.tr("Anhören mit Testwert"),14);
             LinearLayout samples=new LinearLayout(this); samples.setGravity(android.view.Gravity.CENTER_VERTICAL); body.addView(samples);
-            previewSpeech=LevelUi.button(samples,AppText.tr("Sprachtext mit Testdaten anhören"),v -> {
+            previewSpeech=LevelUi.play(samples,AppText.tr("Sprachtext mit Testdaten anhören"),v -> {
                 try { OutputPreferences p=new OutputPreferenceStore(getFilesDir()).load().preferences; if (speech.isChecked() && audio.speak(SyntheticSpeech.alarm(kind,name.getText().toString(),speechTexts.getText().toString(),speechVariant,p.trendSpeech,p.speechLanguage,editingUnit))) speechVariant++; }
                 catch (IllegalArgumentException | IOException e) { error.setText(e.getMessage()); }
             });
-            LevelUi.button(samples,AppText.tr("Vorschau stoppen"),v -> stopTone());
+            LevelUi.stop(samples,AppText.tr("Vorschau stoppen"),v -> stopTone());
             if (LevelForm.hasRepeat(kind)) LevelUi.text(body,AppText.tr("Wiederholungen"),21);
             if(LevelForm.hasSnooze(kind)) { recovery=LevelUi.check(body,AppText.tr("Bei Erholung aussetzen"),original!=null && original.suppressRecoveryRepeats); LevelUi.text(body,kind==AlarmEngine.Kind.LOW?AppText.tr("Nur Wiederholungen bei steigendem Verlauf aussetzen. Der erste Alarm bleibt."):AppText.tr("Nur Wiederholungen bei fallendem Verlauf aussetzen. Der erste Alarm bleibt."),14); LevelUi.help(body,AppText.tr("Wann gilt Erholung?"),AppText.tr("Ein frischer eindeutiger CamAPS-Pfeil und die berechnete xDrip-Erholungsprüfung müssen übereinstimmen. Bei stabilem, fehlendem oder widersprüchlichem Trend wird nicht ausgesetzt. Snooze bleibt unverändert.")); }
             if (LevelForm.hasRepeat(kind)) repeat=LevelUi.field(body,AppText.tr("Wiederholung in Minuten"),r==null?"":Integer.toString(r.outputs.repeatMinutes),InputType.TYPE_CLASS_NUMBER);
@@ -116,8 +118,9 @@ public final class AlarmLevelActivity extends UiActivity {
             else if (kind==AlarmEngine.Kind.PERSISTENT_HIGH) LevelUi.text(body,AppText.tr("Eigener Wiederholungsabstand nach xDrip; kein Stufen-Snooze in diesem Alarmweg."),14);
             error=LevelUi.text(body,"",15); error.setTextColor(AppAppearance.colors(this).error); error.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
             audio=new PreviewAudio(this,message -> error.setText(message));
-            save=LevelUi.button(body,AppText.tr("Stufe speichern"),v -> save());
+            save=LevelUi.primary(body,AppText.tr("Stufe speichern"),v -> save());
             LevelUi.button(body,AppText.tr("Abbrechen"),v -> onBackPressed());
+            if(original!=null)LevelUi.button(body,AppText.tr("Stufe löschen"),v->deleteLevel());
             initial=values();
             if (saved!=null) restore(saved);
             vibration.setOnCheckedChangeListener((v,checked) -> { stopTone(); updateControls(); });
@@ -168,12 +171,19 @@ public final class AlarmLevelActivity extends UiActivity {
         }
         toneName.setText(title);
     }
+    private void deleteLevel(){final AlarmLevel original=snapshot==null?null:snapshot.find(id);if(original==null)return;new AlertDialog.Builder(this).setTitle(AppText.tr("Stufe löschen?"))
+            .setMessage("„"+original.name+AppText.tr("“ aus Deinen gespeicherten Alarmstufen entfernen?"))
+            .setNegativeButton(AppText.tr("Behalten"),null).setPositiveButton(AppText.tr("Löschen"),(d,w)->{
+                try{java.util.List<AlarmLevel> desired=new java.util.ArrayList<>();for(AlarmLevel level:snapshot.levels)if(!level.rule.id.equals(original.rule.id))desired.add(level);
+                    store.save(expectedRevision,desired);RuntimeStateBridge.refresh(getFilesDir(),RuntimeClock.read(this));LiveAlarmService.settingsChanged();finish();
+                }catch(IOException e){error.setText(AppText.tr("Speichern fehlgeschlagen; bitte neu öffnen."));}
+            }).show();}
     private void chooseTone() {
         stopTone();
         String[] choices={AppText.tr("Samt · ")+LevelForm.kindLabel(kind==AlarmEngine.Kind.SOURCE_LOW?AlarmEngine.Kind.LOW:kind),AppText.tr("Klar · ")+LevelForm.kindLabel(kind==AlarmEngine.Kind.SOURCE_LOW?AlarmEngine.Kind.LOW:kind),AppText.tr("Rund · ")+LevelForm.kindLabel(kind==AlarmEngine.Kind.SOURCE_LOW?AlarmEngine.Kind.LOW:kind),AppText.tr("Eigener Android-Ton …")};
         new AlertDialog.Builder(this).setTitle(AppText.tr("Ton für diese Alarmart")).setItems(choices,(dialog,index) -> {
             if (index==3) { chooseAndroidTone(); return; }
-            toneUri=ToneCatalog.uri(ToneCatalog.SETS.get(index),kind); updateControls(); playTone();
+            toneUri=ToneCatalog.uri(ToneCatalog.SETS.get(index),kind); updateControls();
         }).setNegativeButton(AppText.tr("Abbrechen"),null).show();
     }
     private void chooseAndroidTone() {

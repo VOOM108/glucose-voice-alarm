@@ -36,14 +36,14 @@ final class LiveNotifications {
         boolean known=value!=null&&received>0;
         Notification.Builder builder=new Notification.Builder(context,STATUS_CHANNEL).setSmallIcon(R.drawable.ic_xcam_status)
                 .setContentTitle(known?MetricNotification.reading(value.doubleValue(),trend,UnitPreferences.display(context),fresh,color):AppText.tr("Kein aktueller Wert"))
-                .setContentText(known&&!fresh?clock+" · "+MetricNotification.ageTitle(received):!fresh && detail.startsWith(AppText.tr("Datenlücke"))?clock+AppText.tr(" · Datenlücke"):clock).setOngoing(true).setLocalOnly(true).setOnlyAlertOnce(true).setCategory(Notification.CATEGORY_STATUS)
+                .setContentText(known&&!fresh?clock+" · "+MetricNotification.ageTitle(received):!fresh && detail.startsWith(AppText.tr("Datenlücke"))?clock+AppText.tr(" · Datenlücke"):(known && fresh && trend==NotificationParser.Trend.UNKNOWN?clock+" · "+TrendNotice.title(context,trend,color,received):clock)).setOngoing(true).setLocalOnly(true).setOnlyAlertOnce(true).setCategory(Notification.CATEGORY_STATUS)
                 .setContentIntent(open(ProbeActivity.class,1)).setVisibility(LivePreferences.publicValue(context)?Notification.VISIBILITY_PUBLIC:Notification.VISIBILITY_PRIVATE)
-                .addAction(new Notification.Action.Builder(0,AppText.tr("Einstellungen"),open(ReadinessActivity.class,2)).build())
+                .addAction(new Notification.Action.Builder(0,AppText.tr("Einstellungen"),open(SettingsActivity.class,2)).build())
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Beenden"),action(LiveAlarmService.STOP,null,3)).build());
         if (Build.VERSION.SDK_INT>=31) builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE);
         if (known) {
             builder.setWhen(received).setShowWhen(false).setUsesChronometer(false);
-            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value.doubleValue(),trend,received,UnitPreferences.display(context),fresh,fresh?DisplayTrendPreferences.title(context,trend,color):MetricNotification.ageTitle(received),color);
+            if (LivePreferences.nativeDisplay(context)) MetricNotification.apply(builder,value.doubleValue(),trend,received,UnitPreferences.display(context),fresh,fresh?TrendNotice.title(context,trend,color,received):MetricNotification.ageTitle(received),color);
         } else builder.setShowWhen(false);
         return builder.build();
     }
@@ -63,7 +63,7 @@ final class LiveNotifications {
         String text=AppText.tr("Aktuell: ")+UnitPreferences.display(context).number(value,java.util.Locale.getDefault())+" "+UnitPreferences.display(context).label+(trend==NotificationParser.Trend.UNKNOWN?"":" "+trend.symbol);
         Notification.Builder builder=new Notification.Builder(context,ALARM_CHANNEL).setSmallIcon(R.drawable.ic_xcam_status)
                 .setContentTitle(title).setContentText(color.colored()?coloredAlarmText(text,trend,color):text)
-                .setContentIntent(open(ReadinessActivity.class,4)).setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setLocalOnly(true).setOnlyAlertOnce(refresh)
+                .setContentIntent(open(ProbeActivity.class,4)).setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setLocalOnly(true).setOnlyAlertOnce(refresh)
                 .setVisibility(LivePreferences.publicValue(context)?Notification.VISIBILITY_PUBLIC:Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(0,AppText.tr("Quittieren"),action(LiveAlarmService.ACK,level.rule.id,5)).build());
         if (LevelForm.hasSnooze(level.rule.kind)) builder.addAction(new Notification.Action.Builder(0,"Snooze "+level.rule.outputs.snoozeMinutes+" Min.",action(LiveAlarmService.SNOOZE,level.rule.id,6)).build());
